@@ -385,10 +385,15 @@ public class SliceController {
                     log.info("Original slice content: {}", originalSliceContent);
                     testResult.put("originalSliceContent", originalSliceContent);
 
-                    // 对控制流变换文件执行切片（使用相同的变量名和行号）
+                    // 对控制流变换文件重新查找变量最新行号
+                    VariableInfo controlFlowVariableInfo = javaCodeGenerator.findVariableLastAssignment(controlFlowFile, originalVariableInfo.getVariableName());
+                    if (controlFlowVariableInfo == null) {
+                        throw new RuntimeException("No suitable variable found for slicing in control flow file: " + controlFlowFile);
+                    }
+
                     log.info("Executing slice for control flow file: {} with variable: {} at line {}",
-                            controlFlowFile, originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
-                    String controlFlowSliceContent = sliceExecutor.executeSliceWithVariable(controlFlowFile, originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                            controlFlowFile, controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
+                    String controlFlowSliceContent = sliceExecutor.executeSliceWithVariable(controlFlowFile, controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
                     log.info("Control flow slice content: {}", controlFlowSliceContent);
                     testResult.put("controlFlowSliceContent", controlFlowSliceContent);
 

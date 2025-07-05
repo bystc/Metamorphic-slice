@@ -1,12 +1,12 @@
 /*
 	This file was automatically generated as part of a slice with criterion
-	file: mutated\Example_original_15.java, line: 25, variable: val1
+	file: mutated\Example_original_15.java, line: 24, variable: val1
 	Original file: D:\software\Metamorphic-slice\mutated\Example_original_15.java
 */
-public class Example766 {
+public class Example959 {
 
     public static void main(String[] args) {
-        int choice = 3;
+        int choice = 0;
         int val1 = 0, val2 = 0, val3 = 0;
         int temp1 = 10, temp2 = 20, temp3 = 30;
         switch(choice) {

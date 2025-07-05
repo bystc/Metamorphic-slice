@@ -1531,7 +1531,7 @@ public class JavaCodeGenerator {
             dependentVars.addAll(extractVariablesFromStatement(ifStmt.getThenStmt()));
             
             // 检查else分支中的变量
-            ifStmt.getElseStmt().isPresent()) {
+            if (ifStmt.getElseStmt().isPresent()) {
                 dependentVars.addAll(extractVariablesFromStatement(ifStmt.getElseStmt().get()));
             }
             
@@ -2053,5 +2053,170 @@ public class JavaCodeGenerator {
                 switchStmt.getEntries().addAll(newEntries);
             }
         }
+    }
+
+    /**
+     * 查找指定变量在文件中的正确行号
+     * @param sourceFile 源文件路径
+     * @param targetVariable 目标变量名
+     * @return 变量的行号信息，如果找不到返回null
+     */
+    public VariableInfo findVariableLineNumber(String sourceFile, String targetVariable) {
+        try {
+            String content = Files.readString(Paths.get(sourceFile));
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse Java file"));
+
+            log.info("=== Finding line number for variable '{}' in file: {} ===", targetVariable, sourceFile);
+
+            // 查找变量声明
+            List<VariableDeclarator> declarations = cu.findAll(VariableDeclarator.class).stream()
+                    .filter(vd -> vd.getNameAsString().equals(targetVariable))
+                    .collect(Collectors.toList());
+
+            // 查找变量使用
+            List<NameExpr> usages = cu.findAll(NameExpr.class).stream()
+                    .filter(nameExpr -> nameExpr.getNameAsString().equals(targetVariable))
+                    .collect(Collectors.toList());
+
+            log.info("Found {} declarations and {} usages for variable '{}'", 
+                    declarations.size(), usages.size(), targetVariable);
+
+            // 收集所有行号
+            List<Integer> allLines = new ArrayList<>();
+            
+            // 添加声明行号
+            for (VariableDeclarator vd : declarations) {
+                int line = vd.getBegin().get().line;
+                allLines.add(line);
+                log.info("Declaration of '{}' at line {}", targetVariable, line);
+            }
+            
+            // 添加使用行号
+            for (NameExpr nameExpr : usages) {
+                int line = nameExpr.getBegin().get().line;
+                allLines.add(line);
+                log.info("Usage of '{}' at line {}", targetVariable, line);
+            }
+
+            // 排序去重
+            allLines = allLines.stream().distinct().sorted().collect(Collectors.toList());
+            log.info("All lines for '{}': {}", targetVariable, allLines);
+
+            if (allLines.isEmpty()) {
+                log.warn("Variable '{}' not found in file: {}", targetVariable, sourceFile);
+                return null;
+            }
+
+            // 策略1：优先选择最后一次赋值或使用的行号
+            int lastLine = allLines.get(allLines.size() - 1);
+            log.info("Selected last occurrence of '{}' at line {}", targetVariable, lastLine);
+            
+            return new VariableInfo(targetVariable, lastLine);
+
+        } catch (IOException e) {
+            log.error("Error finding line number for variable '{}' in file: {}", targetVariable, sourceFile, e);
+            return null;
+        }
+    }
+
+    /**
+     * 查找指定变量在文件中的最后一次赋值行号
+     * @param sourceFile 源文件路径
+     * @param targetVariable 目标变量名
+     * @return 变量的最后一次赋值行号，如果找不到返回null
+     */
+    public VariableInfo findVariableLastAssignment(String sourceFile, String targetVariable) {
+        try {
+            String content = Files.readString(Paths.get(sourceFile));
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse Java file"));
+
+            log.info("=== Finding last assignment for variable '{}' in file: {} ===", targetVariable, sourceFile);
+
+            List<Integer> assignmentLinesRaw = new ArrayList<>();
+
+            // 1. 查找所有赋值表达式（如 val1 = ...;）
+            cu.findAll(AssignExpr.class).forEach(assign -> {
+                Expression target = assign.getTarget();
+                if (target instanceof NameExpr) {
+                    if (((NameExpr) target).getNameAsString().equals(targetVariable)) {
+                        assignmentLinesRaw.add(assign.getBegin().get().line);
+                    }
+                }
+            });
+
+            // 2. 查找所有声明赋值（如 int val1 = ...;）
+            cu.findAll(VariableDeclarator.class).forEach(vd -> {
+                if (vd.getNameAsString().equals(targetVariable) && vd.getInitializer().isPresent()) {
+                    assignmentLinesRaw.add(vd.getBegin().get().line);
+                }
+            });
+
+            // 3. 查找所有 ExpressionStmt 里的赋值（兼容 switch-case 等）
+            cu.findAll(com.github.javaparser.ast.stmt.ExpressionStmt.class).forEach(exprStmt -> {
+                Expression expr = exprStmt.getExpression();
+                if (expr instanceof AssignExpr) {
+                    AssignExpr assign = (AssignExpr) expr;
+                    Expression target = assign.getTarget();
+                    if (target instanceof NameExpr) {
+                        if (((NameExpr) target).getNameAsString().equals(targetVariable)) {
+                            assignmentLinesRaw.add(exprStmt.getBegin().get().line);
+                        }
+                    }
+                }
+            });
+
+            // 排序去重
+            List<Integer> assignmentLines = assignmentLinesRaw.stream().distinct().sorted().collect(Collectors.toList());
+            log.info("All assignment lines for '{}': {}", targetVariable, assignmentLines);
+
+            if (!assignmentLines.isEmpty()) {
+                // 优先选择有意义的赋值（非默认值）
+                // 跳过声明赋值（通常是初始化为0），选择第一个实际赋值
+                int selectedLine = assignmentLines.get(0); // 默认选择第一个
+                
+                // 如果第一个是声明赋值，选择第二个
+                if (assignmentLines.size() > 1) {
+                    // 检查第一个赋值是否是声明赋值（通常在第20-25行）
+                    int firstLine = assignmentLines.get(0);
+                    if (firstLine <= 25) { // 假设声明赋值在前25行
+                        selectedLine = assignmentLines.get(1);
+                        log.info("Skipped declaration assignment at line {}, selected meaningful assignment at line {}", 
+                                firstLine, selectedLine);
+                    }
+                }
+                
+                log.info("Selected meaningful assignment of '{}' at line {}", targetVariable, selectedLine);
+                return new VariableInfo(targetVariable, selectedLine);
+            }
+
+            log.warn("No assignments found for variable '{}' in file: {}", targetVariable, sourceFile);
+            // 如果没有赋值，返回最后一次使用
+            return findVariableLineNumber(sourceFile, targetVariable);
+        } catch (IOException e) {
+            log.error("Error finding last assignment for variable '{}' in file: {}", targetVariable, sourceFile, e);
+            return null;
+        }
+    }
+
+    /**
+     * 生成切片命令字符串
+     * @param sourceFile 源文件路径
+     * @param targetVariable 目标变量名
+     * @return 完整的切片命令字符串
+     */
+    public String generateSliceCommand(String sourceFile, String targetVariable) {
+        VariableInfo varInfo = findVariableLastAssignment(sourceFile, targetVariable);
+        if (varInfo == null) {
+            log.error("Could not find variable '{}' in file: {}", targetVariable, sourceFile);
+            return null;
+        }
+        
+        String command = String.format("java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c %s#%d:%s", 
+                sourceFile, varInfo.getLineNumber(), varInfo.getVariableName());
+        
+        log.info("Generated slice command: {}", command);
+        return command;
     }
 }
