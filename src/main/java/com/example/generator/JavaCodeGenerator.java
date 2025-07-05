@@ -1,0 +1,2057 @@
+package com.example.generator;
+
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.visitor.ModifierVisitor;
+import com.github.javaparser.ast.visitor.Visitable;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
+import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.WhileStmt;
+import com.github.javaparser.ast.stmt.ForEachStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.SwitchStmt;
+import com.github.javaparser.ast.stmt.SwitchEntry;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.UnaryExpr;
+import com.github.javaparser.ast.Node;
+
+@Slf4j
+@Component
+public class JavaCodeGenerator {
+    private static final String MUTATED_DIR = "mutated";
+    private static final String RENAMED_DIR = "renamed";
+    private static final Random random = new Random();
+    private final JavaParser javaParser;
+
+    // 保存变量映射关系：文件名 -> 变量映射
+    private final Map<String, Map<String, String>> variableMappings = new HashMap<>();
+
+    // 预定义的变量名池
+    private static final String[] VARIABLE_NAMES = {
+            "sum", "prod", "count", "total", "result", "value", "temp", "index", "size", "length",
+            "max", "min", "avg", "diff", "ratio", "factor", "base", "offset", "limit", "threshold",
+            "score", "weight", "price", "amount", "quantity", "rate", "percent", "ratio", "scale", "level"
+    };
+
+    // 预定义的操作符
+    private static final String[] OPERATORS = {"+", "-", "*", "/", "%", "&", "|", "^", "<<", ">>"};
+
+    public JavaCodeGenerator() {
+        createDirectories();
+        ParserConfiguration configuration = new ParserConfiguration();
+        this.javaParser = new JavaParser(configuration);
+    }
+
+    private void createDirectories() {
+        try {
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get(RENAMED_DIR));
+            log.info("Created directories: {}, {}", MUTATED_DIR, RENAMED_DIR);
+        } catch (IOException e) {
+            log.error("Failed to create directories", e);
+        }
+    }
+
+    public List<String> generateMutatedFiles(String sourceFile, int numMutations) {
+        List<String> mutatedFiles = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < numMutations; i++) {
+            try {
+                log.info("Generating Java class {} at {}", i, new Date());
+
+                // 1. Generate a random Java class
+                String originalContent = generateRandomJavaClass();
+
+                // 2. Save the original file
+                String mutatedFileName = String.format("Example_mutated_%d.java", i);
+                String mutatedFilePath = Paths.get(MUTATED_DIR, mutatedFileName).toString();
+                try (FileWriter writer = new FileWriter(mutatedFilePath)) {
+                    writer.write(originalContent);
+                }
+                mutatedFiles.add(mutatedFilePath);
+                log.info("Generated original file: {}", mutatedFilePath);
+
+                // 3. Create renamed version for metamorphic testing
+                CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                        new RuntimeException("Failed to parse generated file: " + mutatedFilePath));
+
+                Map<String, String> variableMap = new HashMap<>();
+                cu.findAll(VariableDeclarator.class).forEach(vd -> {
+                    String oldName = vd.getNameAsString();
+                    if (!variableMap.containsKey(oldName)) {
+                        String newName = generateNewVariableName(oldName);
+                        variableMap.put(oldName, newName);
+                    }
+                });
+
+                if (variableMap.isEmpty()) {
+                    log.warn("No variables found in generated file: {}, skipping rename.", mutatedFilePath);
+                    continue;
+                }
+
+                // 保存变量映射关系
+                variableMappings.put(mutatedFilePath, new HashMap<>(variableMap));
+                log.info("Saved variable mapping for {}: {}", mutatedFilePath, variableMap);
+
+                ModifierVisitor<Void> visitor = new ModifierVisitor<Void>() {
+                    @Override
+                    public Visitable visit(VariableDeclarator vd, Void arg) {
+                        String oldName = vd.getNameAsString();
+                        if (variableMap.containsKey(oldName)) {
+                            vd.setName(variableMap.get(oldName));
+                        }
+                        return super.visit(vd, arg);
+                    }
+
+                    @Override
+                    public Visitable visit(NameExpr nameExpr, Void arg) {
+                        String oldName = nameExpr.getNameAsString();
+                        if (variableMap.containsKey(oldName)) {
+                            nameExpr.setName(variableMap.get(oldName));
+                        }
+                        return super.visit(nameExpr, arg);
+                    }
+                };
+                cu.accept(visitor, null);
+
+                // 保持原始格式，只替换变量名
+                String renamedContent = originalContent;
+                for (Map.Entry<String, String> entry : variableMap.entrySet()) {
+                    String oldName = entry.getKey();
+                    String newName = entry.getValue();
+                    // 使用正则表达式确保只替换完整的变量名，避免部分匹配
+                    renamedContent = renamedContent.replaceAll("\\b" + oldName + "\\b", newName);
+                }
+
+                String renamedFileName = String.format("Example_renamed_%d.java", i);
+                String renamedFilePath = Paths.get(RENAMED_DIR, renamedFileName).toString();
+
+                try (FileWriter writer = new FileWriter(renamedFilePath)) {
+                    writer.write(renamedContent);
+                }
+                log.info("Generated renamed file: {}", renamedFilePath);
+
+            } catch (Exception e) {
+                log.error("Error during code generation or renaming: {}", e.getMessage(), e);
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        log.info("Total time for generating {} file pairs: {} ms", mutatedFiles.size(), totalTime);
+
+        log.info("Generated {} mutated files:", mutatedFiles.size());
+        for (String file : mutatedFiles) {
+            log.info("- {}", file);
+        }
+
+        return mutatedFiles;
+    }
+
+    /**
+     * 生成结构和内容都不同的Java类
+     */
+    public String generateRandomJavaClass() {
+        // 强制使用switch模板，确保包含无关语句
+        return generateClassWithSwitchStatements();
+    }
+
+    // 模板1：复杂的main方法，包含多个变量、条件语句和循环
+    private String generateComplexMainClass() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    public static void main(String[] args) {\n");
+
+        // 生成多个不同类型的变量声明
+        int numVars = 6 + random.nextInt(6); // 6-11个变量
+        List<String> vars = new ArrayList<>();
+
+        // 添加一些临时变量和计算变量
+        for (int i = 0; i < numVars - 2; i++) {
+            String var = VARIABLE_NAMES[random.nextInt(VARIABLE_NAMES.length)] + i;
+            vars.add(var);
+            code.append("        int ").append(var).append(" = ").append(random.nextInt(100)).append(";\n");
+        }
+
+        // 添加一些条件判断和计算
+        code.append("        int temp = 0;\n");
+        code.append("        for (int i = 0; i < 5; i++) {\n");
+        code.append("            if (i % 2 == 0) {\n");
+        code.append("                temp += i * 2;\n");
+        code.append("            } else {\n");
+        code.append("                temp -= i;\n");
+        code.append("            }\n");
+        code.append("        }\n");
+
+        // 添加更多变量声明
+        for (int i = 0; i < 3; i++) {
+            String var = "calc" + i;
+            vars.add(var);
+            code.append("        int ").append(var).append(" = temp + ").append(random.nextInt(50)).append(";\n");
+        }
+
+        // 添加嵌套循环
+        code.append("        for (int i = 0; i < 10; i++) {\n");
+        code.append("            for (int j = 0; j < 3; j++) {\n");
+        for (String var : vars) {
+            code.append("                ").append(var).append(" += i * j;\n");
+        }
+        code.append("            }\n");
+        code.append("        }\n");
+
+        // 添加条件语句
+        code.append("        if (temp > 10) {\n");
+        for (String var : vars) {
+            code.append("            ").append(var).append(" *= 2;\n");
+        }
+        code.append("        } else {\n");
+        for (String var : vars) {
+            code.append("            ").append(var).append(" /= 2;\n");
+        }
+        code.append("        }\n");
+
+        // 最终输出
+        for (String var : vars) {
+            code.append("        System.out.println(").append(var).append(");\n");
+        }
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板2：有多个方法的复杂类
+    private String generateClassWithMultipleMethods() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+
+        // 静态方法
+        code.append("    public static int add(int a, int b) { return a + b; }\n");
+        code.append("    public static int mul(int a, int b) { return a * b; }\n");
+        code.append("    public static int sub(int a, int b) { return a - b; }\n");
+        code.append("    public static int div(int a, int b) { return b != 0 ? a / b : 0; }\n");
+
+        // main方法
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        int x = 1, y = 2, z = 3;\n");
+        code.append("        int temp1 = add(x, y);\n");
+        code.append("        int temp2 = mul(temp1, z);\n");
+        code.append("        int temp3 = sub(temp2, x);\n");
+        code.append("        int temp4 = div(temp3, y);\n");
+        code.append("        int temp5 = add(temp4, z);\n");
+        code.append("        int temp6 = mul(temp5, temp1);\n");
+        code.append("        System.out.println(temp1);\n");
+        code.append("        System.out.println(temp2);\n");
+        code.append("        System.out.println(temp3);\n");
+        code.append("        System.out.println(temp4);\n");
+        code.append("        System.out.println(temp5);\n");
+        code.append("        System.out.println(temp6);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板3：有数组和复杂逻辑的类
+    private String generateClassWithArraysAndComplexLogic() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        int[] arr1 = new int[10];\n");
+        code.append("        int[] arr2 = new int[8];\n");
+        code.append("        int[] arr3 = new int[12];\n");
+
+        // 初始化数组
+        code.append("        for (int i = 0; i < arr1.length; i++) { arr1[i] = i * 2; }\n");
+        code.append("        for (int i = 0; i < arr2.length; i++) { arr2[i] = i * 3; }\n");
+        code.append("        for (int i = 0; i < arr3.length; i++) { arr3[i] = i * 4; }\n");
+
+        // 复杂计算
+        code.append("        int sum1 = 0, sum2 = 0, sum3 = 0;\n");
+        code.append("        for (int v : arr1) {\n");
+        code.append("            if (v % 3 == 0) sum1 += v; else sum1 -= v;\n");
+        code.append("        }\n");
+        code.append("        for (int v : arr2) {\n");
+        code.append("            if (v % 2 == 0) sum2 += v * 2; else sum2 += v;\n");
+        code.append("        }\n");
+        code.append("        for (int v : arr3) {\n");
+        code.append("            if (v % 5 == 0) sum3 += v / 2; else sum3 += v;\n");
+        code.append("        }\n");
+
+        // 最终计算
+        code.append("        int result1 = sum1 + sum2;\n");
+        code.append("        int result2 = sum2 + sum3;\n");
+        code.append("        int result3 = sum1 + sum3;\n");
+        code.append("        int finalResult = result1 + result2 + result3;\n");
+
+        code.append("        System.out.println(sum1);\n");
+        code.append("        System.out.println(sum2);\n");
+        code.append("        System.out.println(sum3);\n");
+        code.append("        System.out.println(result1);\n");
+        code.append("        System.out.println(result2);\n");
+        code.append("        System.out.println(result3);\n");
+        code.append("        System.out.println(finalResult);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板4：有静态成员和嵌套循环的复杂类
+    private String generateClassWithStaticMembersAndNestedLoops() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    static int factor = ").append(2 + random.nextInt(8)).append(";\n");
+        code.append("    static int multiplier = ").append(3 + random.nextInt(5)).append(";\n");
+        code.append("    static int divisor = ").append(2 + random.nextInt(3)).append(";\n");
+
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        int res1 = 1, res2 = 1, res3 = 1;\n");
+        code.append("        int temp1 = 0, temp2 = 0, temp3 = 0;\n");
+
+        // 复杂的嵌套循环
+        code.append("        for (int i = 1; i <= 5; i++) {\n");
+        code.append("            for (int j = 1; j <= 3; j++) {\n");
+        code.append("                for (int k = 1; k <= 2; k++) {\n");
+        code.append("                    res1 *= factor * i * j * k;\n");
+        code.append("                    res2 += multiplier * i + j - k;\n");
+        code.append("                    res3 = res3 / divisor + i * j * k;\n");
+        code.append("                    temp1 += i * j;\n");
+        code.append("                    temp2 += j * k;\n");
+        code.append("                    temp3 += i * k;\n");
+        code.append("                }\n");
+        code.append("            }\n");
+        code.append("        }\n");
+
+        // 条件判断
+        code.append("        if (res1 > 1000) {\n");
+        code.append("            res1 = res1 / 10;\n");
+        code.append("            res2 = res2 * 2;\n");
+        code.append("        }\n");
+        code.append("        if (res2 > 500) {\n");
+        code.append("            res2 = res2 / 5;\n");
+        code.append("            res3 = res3 * 3;\n");
+        code.append("        }\n");
+
+        code.append("        System.out.println(res1);\n");
+        code.append("        System.out.println(res2);\n");
+        code.append("        System.out.println(res3);\n");
+        code.append("        System.out.println(temp1);\n");
+        code.append("        System.out.println(temp2);\n");
+        code.append("        System.out.println(temp3);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板5：有内部类和方法的复杂类
+    private String generateClassWithInnerClassAndMethods() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    static class Helper {\n");
+        code.append("        int square(int x) { return x * x; }\n");
+        code.append("        int cube(int x) { return x * x * x; }\n");
+        code.append("        int factorial(int x) { return x <= 1 ? 1 : x * factorial(x - 1); }\n");
+        code.append("    }\n");
+
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        Helper h = new Helper();\n");
+        code.append("        int val1 = 0, val2 = 0, val3 = 0;\n");
+        code.append("        int temp1 = 0, temp2 = 0, temp3 = 0;\n");
+
+        code.append("        for (int i = 0; i < 5; i++) { \n");
+        code.append("            val1 += h.square(i); \n");
+        code.append("            val2 += h.cube(i); \n");
+        code.append("            val3 += h.factorial(i); \n");
+        code.append("            temp1 += i * 2; \n");
+        code.append("            temp2 += i * 3; \n");
+        code.append("            temp3 += i * 4; \n");
+        code.append("        }\n");
+
+        code.append("        int result1 = val1 + temp1;\n");
+        code.append("        int result2 = val2 + temp2;\n");
+        code.append("        int result3 = val3 + temp3;\n");
+
+        code.append("        System.out.println(val1);\n");
+        code.append("        System.out.println(val2);\n");
+        code.append("        System.out.println(val3);\n");
+        code.append("        System.out.println(result1);\n");
+        code.append("        System.out.println(result2);\n");
+        code.append("        System.out.println(result3);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板6：有异常处理的复杂类
+    private String generateClassWithExceptionHandling() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        int[] arr = new int[10];\n");
+        code.append("        int sum = 0, count = 0, avg = 0;\n");
+        code.append("        int temp1 = 0, temp2 = 0, temp3 = 0;\n");
+
+        // 初始化数组
+        code.append("        for (int i = 0; i < arr.length; i++) {\n");
+        code.append("            arr[i] = i * 2 + 1;\n");
+        code.append("        }\n");
+
+        // 异常处理
+        code.append("        try {\n");
+        code.append("            for (int i = 0; i < arr.length; i++) {\n");
+        code.append("                sum += arr[i];\n");
+        code.append("                count++;\n");
+        code.append("                temp1 += i * 2;\n");
+        code.append("                temp2 += i * 3;\n");
+        code.append("                temp3 += i * 4;\n");
+        code.append("            }\n");
+        code.append("            avg = sum / count;\n");
+        code.append("        } catch (Exception e) {\n");
+        code.append("            avg = 0;\n");
+        code.append("            temp1 = 0;\n");
+        code.append("            temp2 = 0;\n");
+        code.append("            temp3 = 0;\n");
+        code.append("        }\n");
+
+        code.append("        int result1 = sum + temp1;\n");
+        code.append("        int result2 = avg + temp2;\n");
+        code.append("        int result3 = count + temp3;\n");
+
+        code.append("        System.out.println(sum);\n");
+        code.append("        System.out.println(avg);\n");
+        code.append("        System.out.println(count);\n");
+        code.append("        System.out.println(result1);\n");
+        code.append("        System.out.println(result2);\n");
+        code.append("        System.out.println(result3);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板7：有switch语句的复杂类
+    private String generateClassWithSwitchStatements() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        int choice = ").append(random.nextInt(4)).append(";\n");
+
+        // 插入3-5条互不依赖的无关变量声明
+        int unrelatedCount = 3 + random.nextInt(3); // 3-5条
+        for (int i = 0; i < unrelatedCount; i++) {
+            int type = random.nextInt(4);
+            switch (type) {
+                case 0:
+                    code.append("        int unrelatedInt").append(i).append(" = ").append(100 + random.nextInt(100)).append(";\n");
+                    break;
+                case 1:
+                    code.append("        double unrelatedDouble").append(i).append(" = ").append(String.format("%.2f", random.nextDouble() * 100)).append(";\n");
+                    break;
+                case 2:
+                    code.append("        String unrelatedStr").append(i).append(" = \"str").append(random.nextInt(100)).append("\";\n");
+                    break;
+                case 3:
+                    code.append("        int[] unrelatedArr").append(i).append(" = { ").append(random.nextInt(10)).append(", ").append(random.nextInt(10)).append(", ").append(random.nextInt(10)).append(" };\n");
+                    break;
+            }
+        }
+
+        // 添加与切片变量无关的循环结构（用于控制流变换）
+        code.append("        int loopCounter = 0;\n");
+        code.append("        for (int i = 0; i < 3; i++) {\n");
+        code.append("            loopCounter += i * 2;\n");
+        code.append("            if (i % 2 == 0) {\n");
+        code.append("                loopCounter -= 1;\n");
+        code.append("            }\n");
+        code.append("        }\n");
+        
+        // 添加另一个循环结构
+        code.append("        int whileCounter = 0;\n");
+        code.append("        int j = 0;\n");
+        code.append("        while (j < 2) {\n");
+        code.append("            whileCounter += j * 3;\n");
+        code.append("            j++;\n");
+        code.append("        }\n");
+
+        code.append("        int val1 = 0, val2 = 0, val3 = 0;\n");
+        code.append("        int temp1 = 10, temp2 = 20, temp3 = 30;\n");
+
+        code.append("        switch (choice) {\n");
+        code.append("            case 0:\n");
+        code.append("                val1 = temp1 * 2;\n");
+        code.append("                val2 = temp2 + 5;\n");
+        code.append("                val3 = temp3 - 3;\n");
+        code.append("                break;\n");
+        code.append("            case 1:\n");
+        code.append("                val1 = temp1 + temp2;\n");
+        code.append("                val2 = temp2 * temp3;\n");
+        code.append("                val3 = temp3 / temp1;\n");
+        code.append("                break;\n");
+        code.append("            case 2:\n");
+        code.append("                val1 = temp1 - temp2;\n");
+        code.append("                val2 = temp2 / temp3;\n");
+        code.append("                val3 = temp3 * temp1;\n");
+        code.append("                break;\n");
+        code.append("            default:\n");
+        code.append("                val1 = temp1;\n");
+        code.append("                val2 = temp2;\n");
+        code.append("                val3 = temp3;\n");
+        code.append("                break;\n");
+        code.append("        }\n");
+
+        code.append("        int result1 = val1 + val2;\n");
+        code.append("        int result2 = val2 + val3;\n");
+        code.append("        int result3 = val1 + val3;\n");
+
+        code.append("        System.out.println(val1);\n");
+        code.append("        System.out.println(val2);\n");
+        code.append("        System.out.println(val3);\n");
+        code.append("        System.out.println(result1);\n");
+        code.append("        System.out.println(result2);\n");
+        code.append("        System.out.println(result3);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    // 模板8：有复杂计算的类
+    private String generateClassWithComplexCalculations() {
+        StringBuilder code = new StringBuilder();
+        String className = "Example" + random.nextInt(1000);
+        code.append("public class ").append(className).append(" {\n");
+        code.append("    public static void main(String[] args) {\n");
+        code.append("        int a = ").append(random.nextInt(20) + 1).append(";\n");
+        code.append("        int b = ").append(random.nextInt(20) + 1).append(";\n");
+        code.append("        int c = ").append(random.nextInt(20) + 1).append(";\n");
+        code.append("        int d = ").append(random.nextInt(20) + 1).append(";\n");
+        code.append("        int e = ").append(random.nextInt(20) + 1).append(";\n");
+        code.append("        int f = ").append(random.nextInt(20) + 1).append(";\n");
+
+        // 复杂计算
+        code.append("        int temp1 = a * b + c;\n");
+        code.append("        int temp2 = d * e - f;\n");
+        code.append("        int temp3 = (a + b) * (c + d);\n");
+        code.append("        int temp4 = (e + f) / (a + 1);\n");
+        code.append("        int temp5 = a * b * c / d;\n");
+        code.append("        int temp6 = e * f + a * b;\n");
+
+        // 更多计算
+        code.append("        int result1 = temp1 + temp2;\n");
+        code.append("        int result2 = temp3 - temp4;\n");
+        code.append("        int result3 = temp5 * temp6;\n");
+        code.append("        int result4 = result1 + result2;\n");
+        code.append("        int result5 = result2 + result3;\n");
+        code.append("        int result6 = result1 + result3;\n");
+
+        code.append("        System.out.println(temp1);\n");
+        code.append("        System.out.println(temp2);\n");
+        code.append("        System.out.println(temp3);\n");
+        code.append("        System.out.println(result1);\n");
+        code.append("        System.out.println(result2);\n");
+        code.append("        System.out.println(result3);\n");
+        code.append("        System.out.println(result4);\n");
+        code.append("        System.out.println(result5);\n");
+        code.append("        System.out.println(result6);\n");
+        code.append("    }\n}");
+        return code.toString();
+    }
+
+    /**
+     * 获取随机数据类型
+     */
+    private String getRandomType() {
+        String[] types = {"int", "long", "double", "float"};
+        return types[random.nextInt(types.length)];
+    }
+
+    /**
+     * 根据类型获取随机初始值
+     */
+    private String getRandomInitialValue(String type) {
+        switch (type) {
+            case "int":
+                return String.valueOf(random.nextInt(100));
+            case "long":
+                return String.valueOf(random.nextLong() % 1000);
+            case "double":
+                return String.valueOf(random.nextDouble() * 100);
+            case "float":
+                return String.valueOf(random.nextFloat() * 100) + "f";
+            default:
+                return "0";
+        }
+    }
+
+    public String renameVariables(String sourceFile) {
+        try {
+            String content = Files.readString(Paths.get(sourceFile));
+            String baseName = getBaseName(sourceFile);
+            String renamedFileName = baseName + "_renamed.java";
+            String renamedFilePath = Paths.get(RENAMED_DIR, renamedFileName).toString();
+
+            // 首先验证源文件是否可以被解析
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse source file: " + sourceFile));
+
+            // 创建变量名映射
+            Map<String, String> variableMap = new HashMap<>();
+
+            // 访问所有变量声明
+            cu.findAll(VariableDeclarator.class).forEach(vd -> {
+                String oldName = vd.getNameAsString();
+                if (!variableMap.containsKey(oldName)) {
+                    String newName = generateNewVariableName(oldName);
+                    variableMap.put(oldName, newName);
+                    log.info("Mapping variable: {} -> {}", oldName, newName);
+                }
+            });
+
+            // 如果没有找到任何变量，直接复制文件
+            if (variableMap.isEmpty()) {
+                log.warn("No variables found in file: {}, copying file as is", sourceFile);
+                Files.copy(Paths.get(sourceFile), Paths.get(renamedFilePath));
+                return renamedFilePath;
+            }
+
+            // 创建访问者来重命名变量
+            ModifierVisitor<Void> visitor = new ModifierVisitor<Void>() {
+                @Override
+                public Visitable visit(VariableDeclarator vd, Void arg) {
+                    String oldName = vd.getNameAsString();
+                    if (variableMap.containsKey(oldName)) {
+                        String newName = variableMap.get(oldName);
+                        vd.setName(newName);
+                        log.info("Renamed variable declaration: {} -> {}", oldName, newName);
+                    }
+                    return super.visit(vd, arg);
+                }
+
+                @Override
+                public Visitable visit(NameExpr nameExpr, Void arg) {
+                    String oldName = nameExpr.getNameAsString();
+                    if (variableMap.containsKey(oldName)) {
+                        String newName = variableMap.get(oldName);
+                        nameExpr.setName(newName);
+                        log.info("Renamed variable usage: {} -> {}", oldName, newName);
+                    }
+                    return super.visit(nameExpr, arg);
+                }
+            };
+
+            // 应用访问者
+            cu.accept(visitor, null);
+
+            // 验证重命名后的代码是否可以被解析
+            String renamedContent = cu.toString();
+            try {
+                // 尝试解析重命名后的代码
+                CompilationUnit parsedCu = javaParser.parse(renamedContent).getResult().orElseThrow(() ->
+                        new RuntimeException("Failed to parse renamed code"));
+
+                // 验证重命名后的代码是否包含所有必要的元素
+                if (parsedCu.getTypes().isEmpty()) {
+                    log.error("Renamed code is missing class declarations");
+                    Files.copy(Paths.get(sourceFile), Paths.get(renamedFilePath));
+                    return renamedFilePath;
+                }
+
+                // 验证重命名后的代码是否包含所有变量
+                List<VariableDeclarator> variables = parsedCu.findAll(VariableDeclarator.class);
+                if (variables.isEmpty()) {
+                    log.error("Renamed code is missing variable declarations");
+                    Files.copy(Paths.get(sourceFile), Paths.get(renamedFilePath));
+                    return renamedFilePath;
+                }
+
+                // 验证变量是否被正确重命名
+                boolean allVariablesRenamed = true;
+                for (VariableDeclarator vd : variables) {
+                    String name = vd.getNameAsString();
+                    if (!name.contains("_")) {
+                        allVariablesRenamed = false;
+                        log.error("Variable not renamed: {}", name);
+                        break;
+                    }
+                }
+
+                if (!allVariablesRenamed) {
+                    log.error("Not all variables were renamed");
+                    Files.copy(Paths.get(sourceFile), Paths.get(renamedFilePath));
+                    return renamedFilePath;
+                }
+
+                // 写入重命名后的文件
+                try (FileWriter writer = new FileWriter(renamedFilePath)) {
+                    writer.write(renamedContent);
+                }
+
+                log.info("Generated renamed file: {}", renamedFilePath);
+                return renamedFilePath;
+
+            } catch (Exception e) {
+                log.error("Renamed code is invalid: {}", e.getMessage());
+                Files.copy(Paths.get(sourceFile), Paths.get(renamedFilePath));
+                return renamedFilePath;
+            }
+
+        } catch (IOException e) {
+            log.error("Error renaming variables: {}", e.getMessage());
+            throw new RuntimeException("Failed to rename variables: " + e.getMessage(), e);
+        }
+    }
+
+    private String generateNewVariableName(String oldName) {
+        // 生成新的变量名，保持类型前缀
+        String prefix = oldName.substring(0, Math.min(2, oldName.length()));
+        // 使用更简单的命名方式，避免特殊字符
+        return prefix + "_" + Math.abs(random.nextInt(1000));
+    }
+
+    private String getBaseName(String filePath) {
+        return Paths.get(filePath).getFileName().toString().replace(".java", "");
+    }
+
+    public VariableInfo findVariableForSlicing(String sourceFile) {
+        try {
+            String content = Files.readString(Paths.get(sourceFile));
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse Java file"));
+
+            // 获取所有变量声明
+            List<VariableDeclarator> variables = cu.findAll(VariableDeclarator.class);
+
+            // 统计每个变量出现的次数
+            Map<String, Integer> variableCounts = new HashMap<>();
+            Map<String, Integer> variableFirstLine = new HashMap<>();
+            Map<String, List<Integer>> variableLines = new HashMap<>();
+
+            log.info("=== Variable Analysis for file: {} ===", sourceFile);
+
+            // 首先统计变量声明
+            for (VariableDeclarator vd : variables) {
+                String name = vd.getNameAsString();
+                int line = vd.getBegin().get().line;
+
+                variableCounts.merge(name, 1, Integer::sum);
+                variableFirstLine.putIfAbsent(name, line);
+                variableLines.computeIfAbsent(name, k -> new ArrayList<>()).add(line);
+
+                log.info("Variable declaration: {} at line {}", name, line);
+            }
+
+            // 然后查找所有变量使用
+            cu.findAll(NameExpr.class).forEach(nameExpr -> {
+                String name = nameExpr.getNameAsString();
+                if (variableCounts.containsKey(name)) {
+                    int line = nameExpr.getBegin().get().line;
+                    
+                    // 检查这一行是否为死代码
+                    String lineContent = getLineContent(sourceFile, line);
+                    boolean isDeadCodeLine = isDeadCodeLine(lineContent.trim());
+                    
+                    // 只统计非死代码中的变量使用
+                    if (!isDeadCodeLine) {
+                    variableCounts.merge(name, 1, Integer::sum);
+                    variableLines.computeIfAbsent(name, k -> new ArrayList<>()).add(line);
+                        log.info("Variable usage (non-dead code): {} at line {}", name, line);
+                    } else {
+                        log.info("Variable usage (dead code): {} at line {} - SKIPPED", name, line);
+                    }
+                }
+            });
+
+            // 打印所有变量的行号信息
+            log.info("=== Variable line information ===");
+            for (Map.Entry<String, List<Integer>> entry : variableLines.entrySet()) {
+                String varName = entry.getKey();
+                List<Integer> lines = entry.getValue();
+                log.info("Variable '{}': lines = {}", varName, lines);
+            }
+
+            // 查找合适的变量（至少出现两次，且第二次出现不在声明行）
+            List<Map.Entry<String, List<Integer>>> suitableVariables = variableLines.entrySet().stream()
+                    .filter(e -> e.getValue().size() >= 2)
+                    .filter(e -> {
+                        List<Integer> lines = e.getValue();
+                        int firstLine = lines.get(0);
+                        int secondLine = lines.get(1);
+                        boolean valid = secondLine != firstLine; // 确保第二次出现不是声明行
+                        log.info("Variable '{}': first line = {}, second line = {}, valid = {}",
+                                e.getKey(), firstLine, secondLine, valid);
+                        return valid;
+                    })
+                    .collect(Collectors.toList());
+
+            log.info("Found {} suitable variables", suitableVariables.size());
+
+            if (!suitableVariables.isEmpty()) {
+                // 优先选择更有意义的变量名，并且选择第一次使用（第二次出现）
+                Optional<Map.Entry<String, List<Integer>>> preferredVariable = suitableVariables.stream()
+                        .filter(e -> {
+                            String varName = e.getKey();
+                            // 优先选择val、result、sum、total等有意义的变量名，包括res1、res2、res3
+                            boolean preferred = varName.matches(".*(val|result|sum|total|count|data|res).*") &&
+                                    !varName.matches(".*(temp|unusedVar).*");
+                            log.info("Variable '{}': preferred = {}", varName, preferred);
+                            return preferred;
+                        })
+                        .min(Comparator.comparingInt(e -> e.getValue().get(1))); // 选择第一次使用最早的行
+
+                if (preferredVariable.isPresent()) {
+                    String variableName = preferredVariable.get().getKey();
+                    int lineNumber = preferredVariable.get().getValue().get(1); // 第一次使用的行号
+                    List<Integer> allLines = preferredVariable.get().getValue();
+                    log.info("Selected preferred variable: {} at line {} (first usage)", variableName, lineNumber);
+                    log.info("All lines for {}: {}", variableName, allLines);
+                    return new VariableInfo(variableName, lineNumber);
+                }
+
+                // 如果没有找到优先变量，选择第一次使用最早的行，但避免无用代码中的变量
+                Map.Entry<String, List<Integer>> bestVariable = suitableVariables.stream()
+                        .filter(e -> {
+                            // 检查变量的第一次使用是否在无用代码中
+                            int firstUsageLine = e.getValue().get(1);
+                            String firstUsageLineContent = getLineContent(sourceFile, firstUsageLine);
+                            boolean isInDeadCode = isDeadCodeLine(firstUsageLineContent.trim());
+                            log.info("Variable '{}' first usage at line {}: '{}', isDeadCode: {}",
+                                    e.getKey(), firstUsageLine, firstUsageLineContent.trim(), isInDeadCode);
+                            return !isInDeadCode;
+                        })
+                        .min(Comparator.comparingInt(e -> e.getValue().get(1))) // 选择第一次使用最早的行
+                        .orElse(suitableVariables.stream()
+                                .min(Comparator.comparingInt(e -> e.getValue().get(1))) // 如果所有变量都在无用代码中，选择最早的行
+                                .orElse(suitableVariables.get(0)));
+
+                String variableName = bestVariable.getKey();
+                int lineNumber = bestVariable.getValue().get(1); // 第一次使用的行号
+                List<Integer> allLines = bestVariable.getValue();
+                log.info("Selected best variable: {} at line {} (first usage)", variableName, lineNumber);
+                log.info("All lines for {}: {}", variableName, allLines);
+                return new VariableInfo(variableName, lineNumber);
+            }
+
+            // 如果没有找到合适的变量，尝试使用第一个变量
+            if (!variables.isEmpty()) {
+                VariableDeclarator firstVar = variables.get(0);
+                String variableName = firstVar.getNameAsString();
+                int lineNumber = firstVar.getBegin().get().line;
+                log.info("Using first variable: {} at line {}", variableName, lineNumber);
+                return new VariableInfo(variableName, lineNumber);
+            }
+
+            log.warn("No variables found in file: {}", sourceFile);
+            return null;
+
+        } catch (IOException e) {
+            log.error("Error finding variable for slicing", e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取变量映射关系
+     */
+    public Map<String, String> getVariableMapping(String originalFile) {
+        return variableMappings.getOrDefault(originalFile, new HashMap<>());
+    }
+
+    public static class VariableInfo {
+        private final String variableName;
+        private final int lineNumber;
+
+        public VariableInfo(String variableName, int lineNumber) {
+            this.variableName = variableName;
+            this.lineNumber = lineNumber;
+        }
+
+        public String getVariableName() {
+            return variableName;
+        }
+
+        public int getLineNumber() {
+            return lineNumber;
+        }
+    }
+
+    private void cleanupDirectory(String directory) {
+        try {
+            Path dirPath = Paths.get(directory);
+            if (Files.exists(dirPath)) {
+                log.info("Cleaning up directory: {}", directory);
+                // 使用同步块保护清理操作
+                synchronized (this) {
+                    Files.walk(dirPath)
+                            .filter(Files::isRegularFile)
+                            .forEach(path -> {
+                                try {
+                                    Files.delete(path);
+                                    log.info("Deleted file: {}", path);
+                                } catch (IOException e) {
+                                    log.error("Error deleting file: {}", path, e);
+                                }
+                            });
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error cleaning up directory: {}", directory, e);
+        }
+    }
+
+    /**
+     * 生成添加无用代码的变异文件
+     * 在原始代码中添加不影响程序逻辑的无用代码
+     */
+    public List<String> generateDeadCodeFiles(String sourceFile, int numMutations) {
+        List<String> generatedFiles = new ArrayList<>();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get("deadcode"));
+
+            for (int i = 0; i < numMutations; i++) {
+                // 读取现有的mutated文件
+                String mutatedFileName = String.format("Example_mutated_%d.java", i);
+                String mutatedFilePath = Paths.get(MUTATED_DIR, mutatedFileName).toString();
+                
+                if (!Files.exists(Paths.get(mutatedFilePath))) {
+                    // 如果mutated文件不存在，先生成原始代码
+                    String originalContent = generateRandomJavaClass();
+                    Files.write(Paths.get(mutatedFilePath), originalContent.getBytes(StandardCharsets.UTF_8));
+                }
+                
+                // 读取mutated文件内容
+                String originalContent = Files.readString(Paths.get(mutatedFilePath));
+
+                // 先选择切片变量
+                VariableInfo variableInfo = findVariableForSlicing(mutatedFilePath);
+                if (variableInfo == null) {
+                    log.warn("No suitable variable found for slicing in file: {}", mutatedFilePath);
+                    continue;
+                }
+
+                String selectedVariable = variableInfo.getVariableName();
+                log.info("Selected variable for slicing: {} in file: {}", selectedVariable, mutatedFilePath);
+
+                // 添加无用代码，使用选定的切片变量
+                String deadCodeContent = addDeadCodeWithSelectedVariable(originalContent, selectedVariable);
+
+                // 保存添加无用代码的文件
+                String deadCodeFileName = String.format("Example_deadcode_%d.java", i);
+                String deadCodeFilePath = Paths.get("deadcode", deadCodeFileName).toString();
+                Files.write(Paths.get(deadCodeFilePath), deadCodeContent.getBytes(StandardCharsets.UTF_8));
+
+                generatedFiles.add(mutatedFilePath);
+                log.info("Generated dead code file: {} with selected variable: {}", deadCodeFilePath, selectedVariable);
+            }
+
+        } catch (IOException e) {
+            log.error("Error generating dead code files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 添加无用代码到原始内容中，使用选定的切片变量
+     */
+    private String addDeadCodeWithSelectedVariable(String originalContent, String selectedVariable) {
+        try {
+            log.info("Adding dead code with selected variable: {}", selectedVariable);
+            
+            // 生成无用代码语句列表，专门使用选定的变量
+            List<String> deadCodeStatements = generateDeadCodeStatementsWithSelectedVariable(selectedVariable);
+            
+            if (deadCodeStatements.isEmpty()) {
+                log.warn("No dead code statements generated");
+                return originalContent;
+            }
+
+            // 解析原始代码
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse original content"));
+
+            // 找到main方法
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(new BlockStmt());
+
+                // 在方法开始处添加无用代码
+                                for (String deadCode : deadCodeStatements) {
+                    try {
+                        Statement deadCodeStmt = javaParser.parseStatement(deadCode).getResult().orElse(null);
+                        if (deadCodeStmt != null) {
+                            body.addStatement(0, deadCodeStmt);
+                            log.info("Added dead code with selected variable: {}", deadCode);
+                                        }
+                    } catch (Exception e) {
+                        log.error("Failed to parse dead code statement: {}", deadCode, e);
+                            }
+                        }
+
+                return cu.toString();
+                    }
+
+            return originalContent;
+
+        } catch (Exception e) {
+            log.error("Error adding dead code with selected variable", e);
+            return originalContent;
+        }
+    }
+
+    /**
+     * 生成无用代码语句列表，使用选定的切片变量
+     */
+    private List<String> generateDeadCodeStatementsWithSelectedVariable(String selectedVariable) {
+        List<String> statements = new ArrayList<>();
+        Random random = new Random();
+        int deadCodeCount = random.nextInt(3) + 1; // 添加1-3个无用代码
+
+        for (int i = 0; i < deadCodeCount; i++) {
+            String deadCode = generateDeadCodeStatementWithSelectedVariable(selectedVariable);
+            if (deadCode != null) {
+                statements.add(deadCode);
+            }
+        }
+
+        return statements;
+    }
+
+    /**
+     * 生成无用代码语句字符串，使用选定的切片变量
+     */
+    private String generateDeadCodeStatementWithSelectedVariable(String selectedVariable) {
+        Random random = new Random();
+        
+        // 优先生成包含切片变量的死代码（类型4和5）
+        int type = random.nextInt(4) + 4; // 只选择类型4和5，确保使用切片变量
+
+        switch (type) {
+            case 4:
+                // 不可达循环，但包含选定的切片变量（永远不会执行）
+                return generateUnreachableLoopWithSelectedVariable(selectedVariable);
+
+            case 5:
+                // 不可达条件语句，但包含选定的切片变量（永远不会执行）
+                return generateUnreachableConditionWithSelectedVariable(selectedVariable);
+
+            default:
+                // 如果随机数超出范围，默认使用不可达循环
+                return generateUnreachableLoopWithSelectedVariable(selectedVariable);
+                                }
+    }
+
+    /**
+     * 生成包含选定切片变量的不可达循环
+     */
+    private String generateUnreachableLoopWithSelectedVariable(String selectedVariable) {
+        Random random = new Random();
+        StringBuilder loop = new StringBuilder();
+        
+        // 生成永远不会执行的循环条件
+        String condition = "i < 0"; // 永远不会为真
+        
+        // 生成循环体，包含选定的切片变量
+        String loopBody = generateSliceVariableOperationsWithSelectedVariable(selectedVariable);
+        
+        loop.append("for (int i = 0; ").append(condition).append("; i++) {");
+        loop.append("\n    ").append(loopBody);
+        loop.append("\n}");
+        
+        log.info("Generated unreachable loop with selected variable {}: {}", selectedVariable, loop.toString());
+        return loop.toString();
+                        }
+
+    /**
+     * 生成包含选定切片变量的不可达条件语句
+     */
+    private String generateUnreachableConditionWithSelectedVariable(String selectedVariable) {
+        Random random = new Random();
+        StringBuilder condition = new StringBuilder();
+        
+        // 生成永远不会为真的条件
+        String falseCondition = "false";
+        
+        // 生成条件体，包含选定的切片变量
+        String conditionBody = generateSliceVariableOperationsWithSelectedVariable(selectedVariable);
+        
+        condition.append("if (").append(falseCondition).append(") {");
+        condition.append("\n    ").append(conditionBody);
+        condition.append("\n}");
+        
+        log.info("Generated unreachable condition with selected variable {}: {}", selectedVariable, condition.toString());
+        return condition.toString();
+    }
+
+    /**
+     * 生成选定切片变量的操作语句
+     */
+    private String generateSliceVariableOperationsWithSelectedVariable(String selectedVariable) {
+        Random random = new Random();
+        List<String> operations = new ArrayList<>();
+        
+        // 生成1-3个切片变量操作
+        int operationCount = random.nextInt(3) + 1;
+
+        for (int i = 0; i < operationCount; i++) {
+            String operation = generateSingleSliceVariableOperationWithSelectedVariable(selectedVariable);
+            if (operation != null) {
+                operations.add(operation);
+            }
+        }
+
+        return String.join("\n    ", operations);
+    }
+
+    /**
+     * 生成单个选定切片变量操作
+     */
+    private String generateSingleSliceVariableOperationWithSelectedVariable(String selectedVariable) {
+        Random random = new Random();
+        int type = random.nextInt(4);
+
+        switch (type) {
+            case 0:
+                // 切片变量赋值操作
+                return selectedVariable + " = " + selectedVariable + " + " + random.nextInt(100) + ";";
+
+            case 1:
+                // 切片变量计算操作
+                return selectedVariable + " = " + selectedVariable + " * " + random.nextInt(10) + " + " + random.nextInt(50) + ";";
+
+            case 2:
+                // 切片变量条件操作
+                return "if (" + selectedVariable + " > 0) { " + selectedVariable + " = " + selectedVariable + " - " + random.nextInt(20) + "; }";
+
+            case 3:
+                // 切片变量循环操作
+                return "for (int j = 0; j < 5; j++) { " + selectedVariable + " = " + selectedVariable + " + j; }";
+
+            default:
+                return selectedVariable + " = " + selectedVariable + " + 1;";
+        }
+    }
+
+    /**
+     * 重排序语句，调整不影响切片变量的语句顺序
+     */
+    private String reorderStatements(String originalContent) {
+        try {
+            // 使用AST解析来重排序，更准确地识别语句
+            return reorderStatementsWithAST(originalContent);
+        } catch (Exception e) {
+            log.error("Error reordering statements", e);
+            return originalContent;
+        }
+    }
+
+    /**
+     * 使用AST解析重排序main方法内的语句（分组shuffle：连续可重排序语句分组，组内shuffle，其他保持原位）
+     */
+    private String reorderStatementsWithAST(String originalContent) {
+        try {
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse content for reordering"));
+
+            // 找到main方法
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    List<Statement> statements = new ArrayList<>(body.getStatements());
+                    List<List<Statement>> groups = new ArrayList<>();
+                    List<Statement> currentGroup = new ArrayList<>();
+                    boolean lastReorderable = false;
+                    for (Statement stmt : statements) {
+                        boolean reorderable = isReorderableStatement(stmt);
+                        if (reorderable) {
+                            currentGroup.add(stmt);
+                            lastReorderable = true;
+                        } else {
+                            if (!currentGroup.isEmpty()) {
+                                groups.add(new ArrayList<>(currentGroup));
+                                currentGroup.clear();
+                            }
+                            // 非可重排序语句单独成组
+                            List<Statement> single = new ArrayList<>();
+                            single.add(stmt);
+                            groups.add(single);
+                            lastReorderable = false;
+                        }
+                    }
+                    if (!currentGroup.isEmpty()) {
+                        groups.add(new ArrayList<>(currentGroup));
+                    }
+                    // shuffle每个可重排序组
+                    List<Statement> newStatements = new ArrayList<>();
+                    for (List<Statement> group : groups) {
+                        if (group.size() > 1 && isReorderableStatement(group.get(0))) {
+                            Collections.shuffle(group);
+                        }
+                        newStatements.addAll(group);
+                    }
+                    // 重建方法体
+                    body.getStatements().clear();
+                    for (Statement stmt : newStatements) {
+                        body.addStatement(stmt);
+                    }
+                    return cu.toString();
+                }
+            }
+            return originalContent;
+        } catch (Exception e) {
+            log.error("Error in AST-based reordering", e);
+            return originalContent;
+        }
+    }
+
+    /**
+     * 判断语句是否可重排序（与切片变量无关的声明/赋值/输出/循环等）
+     */
+    private boolean isReorderableStatement(Statement stmt) {
+        // 1. 变量声明语句（不包含切片相关关键词）
+        if (stmt instanceof ExpressionStmt) {
+            ExpressionStmt exprStmt = (ExpressionStmt) stmt;
+            Expression expr = exprStmt.getExpression();
+            if (expr instanceof VariableDeclarationExpr) {
+                VariableDeclarationExpr vde = (VariableDeclarationExpr) expr;
+                for (VariableDeclarator vd : vde.getVariables()) {
+                    if (isSliceRelatedVariable(vd.getNameAsString())) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            // 2. 赋值语句（不涉及切片变量）
+            if (expr instanceof AssignExpr) {
+                AssignExpr assign = (AssignExpr) expr;
+                String target = assign.getTarget().toString();
+                if (!isSliceRelatedVariable(target)) {
+                    return true;
+                }
+            }
+            // 3. 输出语句（如System.out.println）
+            if (expr instanceof MethodCallExpr) {
+                MethodCallExpr mce = (MethodCallExpr) expr;
+                String methodName = mce.getNameAsString();
+                if ((methodName.equals("println") || methodName.equals("print")) &&
+                        mce.getScope().isPresent() && mce.getScope().get().toString().equals("System.out")) {
+                    return true;
+                }
+            }
+        }
+        // 4. 独立循环（不包含切片变量）
+        if (stmt instanceof ForStmt || stmt instanceof WhileStmt || stmt instanceof ForEachStmt) {
+            if (!containsSliceRelatedVariable(stmt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断语句是否包含切片相关变量
+     */
+    private boolean containsSliceRelatedVariable(Statement stmt) {
+        Set<String> names = new HashSet<>();
+        stmt.findAll(NameExpr.class).forEach(nameExpr -> names.add(nameExpr.getNameAsString()));
+        for (String name : names) {
+            if (isSliceRelatedVariable(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取指定行的内容
+     */
+    private String getLineContent(String sourceFile, int lineNumber) {
+        try {
+            String content = Files.readString(Paths.get(sourceFile));
+            String[] lines = content.split("\n");
+            if (lineNumber > 0 && lineNumber <= lines.length) {
+                return lines[lineNumber - 1];
+            }
+            return "";
+        } catch (IOException e) {
+            log.error("Error reading line content", e);
+            return "";
+        }
+    }
+
+    /**
+     * 判断是否为无用代码行
+     */
+    private boolean isDeadCodeLine(String line) {
+        // 无用代码的特征 - 覆盖所有生成的无用代码类型
+        return line.startsWith("if (false)") ||
+                line.startsWith("for (int i = 0; i < 0;") ||
+                line.matches("^int (unusedVar|temp)\\d+.*") ||
+                line.matches("^int x = \\d+;") ||
+                line.equals("for (int i = 0; i < 0; i++) { }") ||
+                line.matches("^int temp\\d+ = \\d+;") ||
+                line.matches("^int unusedVar\\d+ = \\d+;") ||
+                line.matches("^if \\(false\\) \\{ int x = \\d+; \\}");
+    }
+
+    /**
+     * 生成语句重排序的变异文件
+     * @param baseDir 基础目录
+     * @param numFiles 要生成的文件数量
+     * @return 生成的原始文件路径列表
+     */
+    public List<String> generateStatementReorderFiles(String baseDir, int numFiles) {
+        List<String> generatedFiles = new ArrayList<>();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get("reordered"));
+
+            for (int i = 0; i < numFiles; i++) {
+                try {
+                    // 生成原始代码
+                    String originalContent = generateRandomJavaClass();
+
+                    // 创建原始文件
+                    String originalFileName = String.format("Example_original_%d.java", i);
+                    String originalFilePath = Paths.get(MUTATED_DIR, originalFileName).toString();
+                    Files.write(Paths.get(originalFilePath), originalContent.getBytes(StandardCharsets.UTF_8));
+                    generatedFiles.add(originalFilePath);
+
+                    // 创建语句重排序文件
+                    String reorderedContent = reorderStatements(originalContent);
+                    
+                    // 检查重排序是否实际上改变了内容
+                    if (reorderedContent.equals(originalContent)) {
+                        log.warn("重排序后内容与原始内容相同，将尝试再次重排序");
+                        // 再次尝试重排序，但加入随机性以尝试产生不同结果
+                        reorderedContent = reorderStatements(originalContent);
+                    }
+                    
+                    String reorderedFileName = String.format("Example_reordered_%d.java", i);
+                    String reorderedFilePath = Paths.get("reordered", reorderedFileName).toString();
+                    Files.write(Paths.get(reorderedFilePath), reorderedContent.getBytes(StandardCharsets.UTF_8));
+
+                    log.info("Generated statement reorder file pair: {} -> {}", originalFilePath, reorderedFilePath);
+                    
+                    // 确认两个文件的差异
+                    if (!reorderedContent.equals(originalContent)) {
+                        log.info("成功重排序，两个文件内容不同");
+                    } else {
+                        log.warn("警告：重排序后的文件与原始文件相同!");
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error generating statement reorder file {}", i, e);
+                }
+            }
+
+        } catch (IOException e) {
+            log.error("Error creating directories for statement reorder files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 判断变量名是否为切片相关变量
+     */
+    private boolean isSliceRelatedVariable(String varName) {
+        // 明确排除无关变量
+        if (varName.startsWith("unrelated") || varName.equals("choice")) {
+            return false;
+        }
+        // 明确识别切片相关变量
+        return varName.matches("val\\d+") || varName.matches("temp\\d+") || 
+               varName.matches("result\\d+") || varName.equals("temp");
+    }
+
+    /**
+     * 生成控制流等价变换的变异文件
+     * @param baseDir 基础目录
+     * @param numFiles 要生成的文件数量
+     * @return 生成的原始文件路径列表
+     */
+    public List<String> generateControlFlowFiles(String baseDir, int numFiles) {
+        List<String> generatedFiles = new ArrayList<>();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get("controlflow"));
+
+            for (int i = 0; i < numFiles; i++) {
+                try {
+                    // 生成原始代码
+                    String originalContent = generateRandomJavaClass();
+
+                    // 创建原始文件
+                    String originalFileName = String.format("Example_original_%d.java", i);
+                    String originalFilePath = Paths.get(MUTATED_DIR, originalFileName).toString();
+                    Files.write(Paths.get(originalFilePath), originalContent.getBytes(StandardCharsets.UTF_8));
+                    generatedFiles.add(originalFilePath);
+
+                    // 创建控制流变换文件
+                    String controlFlowContent = transformControlFlow(originalContent);
+                    
+                    String controlFlowFileName = String.format("Example_controlflow_%d.java", i);
+                    String controlFlowFilePath = Paths.get("controlflow", controlFlowFileName).toString();
+                    Files.write(Paths.get(controlFlowFilePath), controlFlowContent.getBytes(StandardCharsets.UTF_8));
+
+                    log.info("Generated control flow file pair: {} -> {}", originalFilePath, controlFlowFilePath);
+                    
+                    // 确认两个文件的差异
+                    if (!controlFlowContent.equals(originalContent)) {
+                        log.info("成功进行控制流变换，两个文件内容不同");
+                    } else {
+                        log.warn("警告：控制流变换后的文件与原始文件相同!");
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error generating control flow file {}", i, e);
+                }
+            }
+
+        } catch (IOException e) {
+            log.error("Error creating directories for control flow files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 控制流等价变换 - 确保不影响切片点的控制流结构
+     */
+    public String transformControlFlow(String originalContent) {
+        try {
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse content for control flow transformation"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md -> 
+                    md.getNameAsString().equals("main"));
+
+            boolean changed = false;
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 分析切片相关变量和控制依赖关系
+                    Set<String> sliceVariables = findSliceRelatedVariables(body);
+                    Map<String, Set<String>> controlDependencies = analyzeControlDependencies(body, sliceVariables);
+                    
+                    log.info("Found slice variables: {}", sliceVariables);
+                    log.info("Control dependencies: {}", controlDependencies);
+                    
+                    // 应用各种控制流变换，但确保不影响切片点
+                    changed |= transformIfStatements(body, sliceVariables, controlDependencies);
+                    changed |= transformLoopStatements(body, sliceVariables, controlDependencies);
+                    changed |= transformSwitchStatements(body, sliceVariables);
+
+                    // 如果没有任何变换，尝试对无关的控制流结构进行变换
+                    if (!changed) {
+                        changed |= transformUnrelatedControlFlow(body, sliceVariables);
+                    }
+                    
+                    return cu.toString();
+                }
+            }
+            return originalContent;
+        } catch (Exception e) {
+            log.error("Error in control flow transformation", e);
+            return originalContent;
+        }
+    }
+
+    /**
+     * 查找切片相关变量
+     */
+    private Set<String> findSliceRelatedVariables(BlockStmt body) {
+        Set<String> sliceVariables = new HashSet<>();
+        
+        // 查找所有变量声明和使用
+        body.findAll(VariableDeclarator.class).forEach(vd -> {
+            String varName = vd.getNameAsString();
+            if (isSliceRelatedVariable(varName)) {
+                sliceVariables.add(varName);
+            }
+        });
+        
+        // 查找所有变量使用
+        body.findAll(NameExpr.class).forEach(nameExpr -> {
+            String varName = nameExpr.getNameAsString();
+            if (isSliceRelatedVariable(varName)) {
+                sliceVariables.add(varName);
+            }
+        });
+        
+        return sliceVariables;
+    }
+
+    /**
+     * 分析控制依赖关系
+     */
+    private Map<String, Set<String>> analyzeControlDependencies(BlockStmt body, Set<String> sliceVariables) {
+        Map<String, Set<String>> dependencies = new HashMap<>();
+        
+        // 分析if语句的控制依赖
+        body.findAll(IfStmt.class).forEach(ifStmt -> {
+            Set<String> conditionVars = extractVariablesFromExpression(ifStmt.getCondition());
+            Set<String> dependentVars = new HashSet<>();
+            
+            // 检查then分支中的变量
+            dependentVars.addAll(extractVariablesFromStatement(ifStmt.getThenStmt()));
+            
+            // 检查else分支中的变量
+            ifStmt.getElseStmt().isPresent()) {
+                dependentVars.addAll(extractVariablesFromStatement(ifStmt.getElseStmt().get()));
+            }
+            
+            // 如果条件变量或依赖变量包含切片变量，则建立依赖关系
+            for (String conditionVar : conditionVars) {
+                if (sliceVariables.contains(conditionVar)) {
+                    dependencies.computeIfAbsent(conditionVar, k -> new HashSet<>()).addAll(dependentVars);
+                }
+            }
+            
+            for (String dependentVar : dependentVars) {
+                if (sliceVariables.contains(dependentVar)) {
+                    dependencies.computeIfAbsent(dependentVar, k -> new HashSet<>()).addAll(conditionVars);
+                }
+            }
+        });
+        
+        // 分析循环的控制依赖
+        body.findAll(ForStmt.class).forEach(forStmt -> {
+            Set<String> loopVars = extractVariablesFromExpression(forStmt.getCompare().orElse(null));
+            Set<String> bodyVars = extractVariablesFromStatement(forStmt.getBody());
+            
+            for (String loopVar : loopVars) {
+                if (sliceVariables.contains(loopVar)) {
+                    dependencies.computeIfAbsent(loopVar, k -> new HashSet<>()).addAll(bodyVars);
+                }
+            }
+        });
+        
+        body.findAll(WhileStmt.class).forEach(whileStmt -> {
+            Set<String> conditionVars = extractVariablesFromExpression(whileStmt.getCondition());
+            Set<String> bodyVars = extractVariablesFromStatement(whileStmt.getBody());
+            
+            for (String conditionVar : conditionVars) {
+                if (sliceVariables.contains(conditionVar)) {
+                    dependencies.computeIfAbsent(conditionVar, k -> new HashSet<>()).addAll(bodyVars);
+                }
+            }
+        });
+        
+        return dependencies;
+    }
+
+    /**
+     * 从表达式中提取变量名
+     */
+    private Set<String> extractVariablesFromExpression(Expression expr) {
+        Set<String> variables = new HashSet<>();
+        if (expr != null) {
+            expr.findAll(NameExpr.class).forEach(nameExpr -> 
+                variables.add(nameExpr.getNameAsString()));
+        }
+        return variables;
+    }
+
+    /**
+     * 从语句中提取变量名
+     */
+    private Set<String> extractVariablesFromStatement(Statement stmt) {
+        Set<String> variables = new HashSet<>();
+        if (stmt != null) {
+            stmt.findAll(NameExpr.class).forEach(nameExpr -> 
+                variables.add(nameExpr.getNameAsString()));
+        }
+        return variables;
+    }
+
+    /**
+     * 变换if语句结构 - 确保不影响切片点
+     */
+    private boolean transformIfStatements(BlockStmt body, Set<String> sliceVariables, 
+                                        Map<String, Set<String>> controlDependencies) {
+        boolean changed = false;
+        List<IfStmt> ifStatements = body.findAll(IfStmt.class);
+        
+        for (IfStmt ifStmt : ifStatements) {
+            // 检查这个if语句是否影响切片点
+            if (affectsSlicePoint(ifStmt, sliceVariables, controlDependencies)) {
+                log.info("Skipping if statement transformation - affects slice point");
+                continue;
+            }
+            
+            // 安全变换：交换if-else分支
+            if (ifStmt.getElseStmt().isPresent()) {
+                Statement thenStmt = ifStmt.getThenStmt();
+                Statement elseStmt = ifStmt.getElseStmt().get();
+                
+                // 创建取反条件
+                Expression negatedCondition = createNegatedCondition(ifStmt.getCondition());
+                if (negatedCondition != null) {
+                    ifStmt.setCondition(negatedCondition);
+                    ifStmt.setThenStmt(elseStmt);
+                    ifStmt.setElseStmt(thenStmt);
+                    log.info("Transformed if statement: negated condition and swapped branches");
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * 变换循环语句结构 - 确保不影响切片点
+     */
+    private boolean transformLoopStatements(BlockStmt body, Set<String> sliceVariables,
+                                          Map<String, Set<String>> controlDependencies) {
+        boolean changed = false;
+        
+        // 变换for循环
+        List<ForStmt> forStatements = body.findAll(ForStmt.class);
+        for (ForStmt forStmt : forStatements) {
+            if (affectsSlicePoint(forStmt, sliceVariables, controlDependencies)) {
+                log.info("Skipping for loop transformation - affects slice point");
+                continue;
+            }
+            
+            if (canTransformForToWhile(forStmt)) {
+                transformForToWhile(forStmt);
+                log.info("Transformed for loop to while loop");
+                changed = true;
+            }
+        }
+        
+        // 变换while循环
+        List<WhileStmt> whileStatements = body.findAll(WhileStmt.class);
+        for (WhileStmt whileStmt : whileStatements) {
+            if (affectsSlicePoint(whileStmt, sliceVariables, controlDependencies)) {
+                log.info("Skipping while loop transformation - affects slice point");
+                continue;
+            }
+            
+            if (canTransformWhileToFor(whileStmt)) {
+                transformWhileToFor(whileStmt);
+                log.info("Transformed while loop to for loop");
+                changed = true;
+            }
+        }
+        
+        return changed;
+    }
+
+    /**
+     * 变换switch语句结构 - 确保不影响切片点
+     */
+    private boolean transformSwitchStatements(BlockStmt body, Set<String> sliceVariables) {
+        boolean changed = false;
+        List<SwitchStmt> switchStatements = body.findAll(SwitchStmt.class);
+        
+        for (SwitchStmt switchStmt : switchStatements) {
+            // 检查switch语句是否影响切片点
+            if (affectsSlicePoint(switchStmt, sliceVariables)) {
+                log.info("Skipping switch statement transformation - affects slice point");
+                continue;
+            }
+            
+            // 重新排列case顺序
+            reorderSwitchCases(switchStmt);
+            log.info("Reordered switch cases");
+            changed = true;
+        }
+        return changed;
+    }
+
+    /**
+     * 检查控制流结构是否影响切片点
+     */
+    private boolean affectsSlicePoint(Statement stmt, Set<String> sliceVariables) {
+        return affectsSlicePoint(stmt, sliceVariables, new HashMap<>());
+    }
+
+    /**
+     * 检查控制流结构是否影响切片点
+     */
+    private boolean affectsSlicePoint(Statement stmt, Set<String> sliceVariables, 
+                                    Map<String, Set<String>> controlDependencies) {
+        Set<String> stmtVariables = extractVariablesFromStatement(stmt);
+        
+        // 检查语句中是否包含切片变量
+        for (String var : stmtVariables) {
+            if (sliceVariables.contains(var)) {
+                return true;
+            }
+        }
+        
+        // 检查控制依赖关系
+        for (String sliceVar : sliceVariables) {
+            Set<String> dependencies = controlDependencies.get(sliceVar);
+            if (dependencies != null) {
+                for (String depVar : dependencies) {
+                    if (stmtVariables.contains(depVar)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 变换无关的控制流结构
+     */
+    private boolean transformUnrelatedControlFlow(BlockStmt body, Set<String> sliceVariables) {
+        boolean changed = false;
+        
+        // 查找不包含切片变量的控制流结构
+        List<IfStmt> unrelatedIfs = body.findAll(IfStmt.class).stream()
+            .filter(ifStmt -> !affectsSlicePoint(ifStmt, sliceVariables))
+            .collect(Collectors.toList());
+            
+        List<ForStmt> unrelatedFors = body.findAll(ForStmt.class).stream()
+            .filter(forStmt -> !affectsSlicePoint(forStmt, sliceVariables))
+            .collect(Collectors.toList());
+            
+        List<WhileStmt> unrelatedWhiles = body.findAll(WhileStmt.class).stream()
+            .filter(whileStmt -> !affectsSlicePoint(whileStmt, sliceVariables))
+            .collect(Collectors.toList());
+        
+        // 对无关的控制流结构进行变换
+        for (IfStmt ifStmt : unrelatedIfs) {
+            if (ifStmt.getElseStmt().isPresent()) {
+                Expression negatedCondition = createNegatedCondition(ifStmt.getCondition());
+                if (negatedCondition != null) {
+                    Statement thenStmt = ifStmt.getThenStmt();
+                    Statement elseStmt = ifStmt.getElseStmt().get();
+                    ifStmt.setCondition(negatedCondition);
+                    ifStmt.setThenStmt(elseStmt);
+                    ifStmt.setElseStmt(thenStmt);
+                    changed = true;
+                    log.info("Transformed unrelated if statement");
+                }
+            }
+        }
+        
+        for (ForStmt forStmt : unrelatedFors) {
+            if (canTransformForToWhile(forStmt)) {
+                transformForToWhile(forStmt);
+                changed = true;
+                log.info("Transformed unrelated for loop");
+            }
+        }
+        
+        for (WhileStmt whileStmt : unrelatedWhiles) {
+            if (canTransformWhileToFor(whileStmt)) {
+                transformWhileToFor(whileStmt);
+                changed = true;
+                log.info("Transformed unrelated while loop");
+            }
+        }
+        
+        return changed;
+    }
+
+    /**
+     * 检查for循环是否可以安全地转换为while循环
+     */
+    private boolean canTransformForToWhile(ForStmt forStmt) {
+        try {
+            // 检查是否有基本的for循环结构
+            Optional<Expression> condition = forStmt.getCompare();
+            List<Expression> initialization = forStmt.getInitialization();
+            List<Expression> update = forStmt.getUpdate();
+            
+            if (!condition.isPresent() || initialization.isEmpty() || update.isEmpty()) {
+                return false;
+            }
+            
+            // 检查初始化是否包含变量声明
+            boolean hasVariableDeclaration = initialization.stream()
+                .anyMatch(expr -> expr instanceof VariableDeclarationExpr);
+            
+            // 检查更新语句是否简单（如i++）
+            boolean hasSimpleUpdate = update.stream()
+                .anyMatch(expr -> expr.toString().contains("++") || expr.toString().contains("+="));
+            
+            return hasVariableDeclaration && hasSimpleUpdate;
+        } catch (Exception e) {
+            log.error("Error checking if for loop can be transformed", e);
+            return false;
+        }
+    }
+
+    /**
+     * 检查while循环是否可以转换为for循环
+     */
+    private boolean canTransformWhileToFor(WhileStmt whileStmt) {
+        try {
+            Statement body = whileStmt.getBody();
+            if (body instanceof BlockStmt) {
+                BlockStmt bodyBlock = (BlockStmt) body;
+                List<Statement> statements = bodyBlock.getStatements();
+                
+                // 检查是否有计数器变量更新
+                for (Statement stmt : statements) {
+                    if (stmt instanceof ExpressionStmt) {
+                        ExpressionStmt exprStmt = (ExpressionStmt) stmt;
+                        if (exprStmt.getExpression() instanceof AssignExpr) {
+                            AssignExpr assign = (AssignExpr) exprStmt.getExpression();
+                            if (assign.getTarget() instanceof NameExpr) {
+                                String varName = ((NameExpr) assign.getTarget()).getNameAsString();
+                                String value = assign.getValue().toString();
+                                // 检查是否是简单的计数器更新
+                                if (value.contains(varName + " + 1") || 
+                                    value.contains(varName + "++") ||
+                                    value.contains(varName + " += 1")) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            log.error("Error checking if while loop can be transformed", e);
+            return false;
+        }
+    }
+
+    /**
+     * 将for循环转换为while循环
+     */
+    private void transformForToWhile(ForStmt forStmt) {
+        try {
+            // 提取for循环的各个部分
+            List<Expression> initialization = forStmt.getInitialization();
+            Optional<Expression> condition = forStmt.getCompare();
+            List<Expression> update = forStmt.getUpdate();
+            Statement body = forStmt.getBody();
+            
+            if (condition.isPresent() && !initialization.isEmpty() && !update.isEmpty()) {
+                // 创建while循环
+                WhileStmt whileStmt = new WhileStmt();
+                whileStmt.setCondition(condition.get());
+                
+                // 创建新的语句块，包含初始化、循环体和更新
+                BlockStmt newBody = new BlockStmt();
+                
+                // 添加循环体
+                if (body instanceof BlockStmt) {
+                    newBody.getStatements().addAll(((BlockStmt) body).getStatements());
+                } else {
+                    newBody.addStatement(body);
+                }
+                
+                // 添加更新语句
+                for (Expression updateExpr : update) {
+                    newBody.addStatement(new ExpressionStmt(updateExpr));
+                }
+                
+                whileStmt.setBody(newBody);
+                
+                // 替换原for循环
+                Node parent = forStmt.getParentNode().orElse(null);
+                if (parent instanceof BlockStmt) {
+                    BlockStmt parentBlock = (BlockStmt) parent;
+                    int index = parentBlock.getStatements().indexOf(forStmt);
+                    if (index >= 0) {
+                        // 先添加初始化语句
+                        for (Expression initExpr : initialization) {
+                            parentBlock.addStatement(index, new ExpressionStmt(initExpr));
+                            index++;
+                        }
+                        // 替换for循环为while循环
+                        parentBlock.setStatement(index, whileStmt);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error transforming for to while loop", e);
+        }
+    }
+
+    /**
+     * 将while循环转换为for循环
+     */
+    private void transformWhileToFor(WhileStmt whileStmt) {
+        try {
+            // 简化实现：只处理简单的while循环
+            Statement body = whileStmt.getBody();
+            if (body instanceof BlockStmt) {
+                BlockStmt bodyBlock = (BlockStmt) body;
+                List<Statement> statements = bodyBlock.getStatements();
+                
+                // 查找可能的计数器变量
+                for (Statement stmt : statements) {
+                    if (stmt instanceof ExpressionStmt) {
+                        ExpressionStmt exprStmt = (ExpressionStmt) stmt;
+                        if (exprStmt.getExpression() instanceof AssignExpr) {
+                            AssignExpr assign = (AssignExpr) exprStmt.getExpression();
+                            if (assign.getTarget() instanceof NameExpr) {
+                                String varName = ((NameExpr) assign.getTarget()).getNameAsString();
+                                // 检查是否是简单的计数器更新（如 i++）
+                                if (assign.getValue().toString().contains(varName + " + 1") || 
+                                    assign.getValue().toString().contains(varName + "++")) {
+                                    // 这里可以实现while到for的转换
+                                    log.info("Found potential counter variable: " + varName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error transforming while to for loop", e);
+        }
+    }
+
+    /**
+     * 检查是否为简单的while循环
+     */
+    private boolean isSimpleWhileLoop(WhileStmt whileStmt) {
+        // 简化检查：只要循环体不为空就认为是简单的
+        return whileStmt.getBody() != null;
+    }
+
+    /**
+     * 创建条件的取反表达式
+     */
+    private Expression createNegatedCondition(Expression condition) {
+        try {
+            if (condition instanceof BinaryExpr) {
+                BinaryExpr binaryExpr = (BinaryExpr) condition;
+                BinaryExpr.Operator operator = binaryExpr.getOperator();
+                
+                // 简单的取反变换
+                switch (operator) {
+                    case EQUALS:
+                        return new BinaryExpr(binaryExpr.getLeft(), binaryExpr.getRight(), BinaryExpr.Operator.NOT_EQUALS);
+                    case NOT_EQUALS:
+                        return new BinaryExpr(binaryExpr.getLeft(), binaryExpr.getRight(), BinaryExpr.Operator.EQUALS);
+                    case LESS:
+                        return new BinaryExpr(binaryExpr.getLeft(), binaryExpr.getRight(), BinaryExpr.Operator.GREATER_EQUALS);
+                    case LESS_EQUALS:
+                        return new BinaryExpr(binaryExpr.getLeft(), binaryExpr.getRight(), BinaryExpr.Operator.GREATER);
+                    case GREATER:
+                        return new BinaryExpr(binaryExpr.getLeft(), binaryExpr.getRight(), BinaryExpr.Operator.LESS_EQUALS);
+                    case GREATER_EQUALS:
+                        return new BinaryExpr(binaryExpr.getLeft(), binaryExpr.getRight(), BinaryExpr.Operator.LESS);
+                    default:
+                        // 对于其他操作符，使用逻辑非
+                        return new UnaryExpr(condition, UnaryExpr.Operator.LOGICAL_COMPLEMENT);
+                }
+            } else {
+                // 对于非二元表达式，使用逻辑非
+                return new UnaryExpr(condition, UnaryExpr.Operator.LOGICAL_COMPLEMENT);
+            }
+        } catch (Exception e) {
+            log.error("Error creating negated condition", e);
+            return null;
+        }
+    }
+
+    /**
+     * 变换比较操作符
+     */
+    private BinaryExpr.Operator transformComparisonOperator(BinaryExpr.Operator operator) {
+        switch (operator) {
+            case LESS:
+                return BinaryExpr.Operator.GREATER_EQUALS;
+            case LESS_EQUALS:
+                return BinaryExpr.Operator.GREATER;
+            case GREATER:
+                return BinaryExpr.Operator.LESS_EQUALS;
+            case GREATER_EQUALS:
+                return BinaryExpr.Operator.LESS;
+            case EQUALS:
+                return BinaryExpr.Operator.NOT_EQUALS;
+            case NOT_EQUALS:
+                return BinaryExpr.Operator.EQUALS;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 检查循环体是否依赖循环变量
+     */
+    private boolean loopBodyDependsOnLoopVariable(ForStmt forStmt) {
+        // 简化实现：检查循环体中是否使用了循环变量
+        Set<String> loopVariables = new HashSet<>();
+        forStmt.getInitialization().forEach(expr -> {
+            if (expr instanceof VariableDeclarationExpr) {
+                ((VariableDeclarationExpr) expr).getVariables().forEach(vd -> 
+                    loopVariables.add(vd.getNameAsString()));
+            }
+        });
+        
+        Set<String> usedVariables = new HashSet<>();
+        forStmt.getBody().findAll(NameExpr.class).forEach(nameExpr -> 
+            usedVariables.add(nameExpr.getNameAsString()));
+        
+        // 如果循环体使用了循环变量，则认为有依赖
+        for (String loopVar : loopVariables) {
+            if (usedVariables.contains(loopVar)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 重新排列switch的case顺序
+     */
+    private void reorderSwitchCases(SwitchStmt switchStmt) {
+        List<SwitchEntry> entries = new ArrayList<>(switchStmt.getEntries());
+        if (entries.size() > 2) { // 至少要有3个case才重排序
+            // 保留第一个和最后一个case，重排序中间的case
+            if (entries.size() > 3) {
+                List<SwitchEntry> middleEntries = entries.subList(1, entries.size() - 1);
+                Collections.shuffle(middleEntries);
+                
+                List<SwitchEntry> newEntries = new ArrayList<>();
+                newEntries.add(entries.get(0));
+                newEntries.addAll(middleEntries);
+                newEntries.add(entries.get(entries.size() - 1));
+                
+                switchStmt.getEntries().clear();
+                switchStmt.getEntries().addAll(newEntries);
+            }
+        }
+    }
+}
