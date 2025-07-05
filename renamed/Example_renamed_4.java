@@ -1,55 +1,54 @@
-public class Example469 {
+public class Example691 {
     public static void main(String[] args) {
-        int ch_272 = 0;
-        double un_59 = 12.78;
-        String un_127 = "str86";
-        int[] un_296 = { 7, 5, 4 };
-        int[] un_935 = { 9, 0, 6 };
-        int lo_842 = 0;
-        for (int i_754 = 0; i_754 < 3; i_754++) {
-            lo_842 += i_754 * 2;
-            if (i_754 % 2 == 0) {
-                lo_842 -= 1;
+        int ch_926 = 2;
+        String un_246 = "str25";
+        double un_518 = 87.75;
+        double un_593 = 97.00;
+        int lo_421 = 0;
+        for (int i_139 = 0; i_139 < 3; i_139++) {
+            lo_421 += i_139 * 2;
+            if (i_139 % 2 == 0) {
+                lo_421 -= 1;
             }
         }
-        int wh_819 = 0;
-        int j_198 = 0;
-        while (j_198 < 2) {
-            wh_819 += j_198 * 3;
-            j_198++;
+        int wh_65 = 0;
+        int j_217 = 0;
+        while (j_217 < 2) {
+            wh_65 += j_217 * 3;
+            j_217++;
         }
-        int va_307 = 0, va_473 = 0, va_528 = 0;
-        int te_987 = 10, te_853 = 20, te_82 = 30;
-        switch (ch_272) {
+        int va_575 = 0, va_873 = 0, va_488 = 0;
+        int te_952 = 10, te_553 = 20, te_184 = 30;
+        switch (ch_926) {
             case 0:
-                va_307 = te_987 * 2;
-                va_473 = te_853 + 5;
-                va_528 = te_82 - 3;
+                va_575 = te_952 * 2;
+                va_873 = te_553 + 5;
+                va_488 = te_184 - 3;
                 break;
             case 1:
-                va_307 = te_987 + te_853;
-                va_473 = te_853 * te_82;
-                va_528 = te_82 / te_987;
+                va_575 = te_952 + te_553;
+                va_873 = te_553 * te_184;
+                va_488 = te_184 / te_952;
                 break;
             case 2:
-                va_307 = te_987 - te_853;
-                va_473 = te_853 / te_82;
-                va_528 = te_82 * te_987;
+                va_575 = te_952 - te_553;
+                va_873 = te_553 / te_184;
+                va_488 = te_184 * te_952;
                 break;
             default:
-                va_307 = te_987;
-                va_473 = te_853;
-                va_528 = te_82;
+                va_575 = te_952;
+                va_873 = te_553;
+                va_488 = te_184;
                 break;
         }
-        int re_969 = va_307 + va_473;
-        int re_588 = va_473 + va_528;
-        int re_509 = va_307 + va_528;
-        System.out.println(va_307);
-        System.out.println(va_473);
-        System.out.println(va_528);
-        System.out.println(re_969);
-        System.out.println(re_588);
-        System.out.println(re_509);
+        int re_12 = va_575 + va_873;
+        int re_299 = va_873 + va_488;
+        int re_276 = va_575 + va_488;
+        System.out.println(va_575);
+        System.out.println(va_873);
+        System.out.println(va_488);
+        System.out.println(re_12);
+        System.out.println(re_299);
+        System.out.println(re_276);
     }
 }

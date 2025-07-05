@@ -347,28 +347,40 @@ public class SliceController {
         try {
             log.info("Starting control flow metamorphic test with {} mutations", numMutations);
 
-            // 生成控制流等价变换的变异文件
-            List<String> originalFiles = javaCodeGenerator.generateControlFlowFiles("", numMutations);
-            log.info("Generated {} control flow files", originalFiles.size());
+            // 生成原始文件
+            List<String> originalFiles = javaCodeGenerator.generateMutatedFiles("", numMutations);
+            log.info("Generated {} original files", originalFiles.size());
 
-            // 对每个原始文件进行切片
-            for (String originalFile : originalFiles) {
-                log.info("Processing file: {}", originalFile);
+            // 对每个原始文件生成对应的控制流变换文件
+            for (int i = 0; i < originalFiles.size(); i++) {
+                String originalFile = originalFiles.get(i);
+                
+                // 读取原始文件内容
+                String originalFileContent = Files.readString(Paths.get(originalFile));
+                
+                // 对原始内容进行控制流变换
+                String transformedContent = javaCodeGenerator.transformControlFlow(originalFileContent);
+                
+                // 保存变换后的文件
+                String controlFlowFileName = String.format("Example_controlflow_%d.java", i);
+                String controlFlowFilePath = Paths.get("controlflow", controlFlowFileName).toString();
+                Files.write(Paths.get(controlFlowFilePath), transformedContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                
+                String controlFlowFile = controlFlowFilePath;
+                
+                log.info("Processing file pair: {} and {}", originalFile, controlFlowFile);
                 Map<String, Object> testResult = new HashMap<>();
                 testResult.put("originalFile", originalFile);
+                testResult.put("controlFlowFile", controlFlowFile);
 
                 try {
-                    // 获取对应的控制流变换文件
-                    String controlFlowFile = originalFile.replace("mutated", "controlflow").replace("_original_", "_controlflow_");
-                    testResult.put("controlFlowFile", controlFlowFile);
 
                     // 读取原始文件内容用于显示
-                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(originalFile)));
-                    testResult.put("originalFileContent", originalContent);
+                    testResult.put("originalFileContent", originalFileContent);
 
                     // 读取控制流变换文件内容用于显示
                     String controlFlowContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(controlFlowFile)));
-                    testResult.put("controlFlowFileContent", controlFlowContent);
+                    testResult.put("controlflowFileContent", controlFlowContent);
 
                     // 对原始文件选择切片变量
                     VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForSlicing(originalFile);
@@ -395,7 +407,7 @@ public class SliceController {
                             controlFlowFile, controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
                     String controlFlowSliceContent = sliceExecutor.executeSliceWithVariable(controlFlowFile, controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
                     log.info("Control flow slice content: {}", controlFlowSliceContent);
-                    testResult.put("controlFlowSliceContent", controlFlowSliceContent);
+                    testResult.put("controlflowSliceContent", controlFlowSliceContent);
 
                     // 比较切片是否等价
                     boolean isEquivalent = compareSlices(originalSliceContent, controlFlowSliceContent);

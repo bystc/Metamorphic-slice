@@ -42,6 +42,10 @@ import com.github.javaparser.ast.Node;
 public class JavaCodeGenerator {
     private static final String MUTATED_DIR = "mutated";
     private static final String RENAMED_DIR = "renamed";
+    private static final String CONTROLFLOW_DIR = "controlflow";
+    private static final String DATAFLOW_DIR = "dataflow";
+    private static final String DEADCODE_DIR = "deadcode";
+    private static final String REORDERED_DIR = "reordered";
     private static final Random random = new Random();
     private final JavaParser javaParser;
 
@@ -1403,50 +1407,34 @@ public class JavaCodeGenerator {
      * @return 生成的原始文件路径列表
      */
     public List<String> generateControlFlowFiles(String baseDir, int numFiles) {
-        List<String> generatedFiles = new ArrayList<>();
-
+        List<String> controlFlowFiles = new ArrayList<>();
+        
         try {
             // 确保目录存在
-            Files.createDirectories(Paths.get(MUTATED_DIR));
-            Files.createDirectories(Paths.get("controlflow"));
-
+            Files.createDirectories(Paths.get(CONTROLFLOW_DIR));
+            
             for (int i = 0; i < numFiles; i++) {
-                try {
-                    // 生成原始代码
-                    String originalContent = generateRandomJavaClass();
-
-                    // 创建原始文件
-                    String originalFileName = String.format("Example_original_%d.java", i);
-                    String originalFilePath = Paths.get(MUTATED_DIR, originalFileName).toString();
-                    Files.write(Paths.get(originalFilePath), originalContent.getBytes(StandardCharsets.UTF_8));
-                    generatedFiles.add(originalFilePath);
-
-                    // 创建控制流变换文件
-                    String controlFlowContent = transformControlFlow(originalContent);
-                    
-                    String controlFlowFileName = String.format("Example_controlflow_%d.java", i);
-                    String controlFlowFilePath = Paths.get("controlflow", controlFlowFileName).toString();
-                    Files.write(Paths.get(controlFlowFilePath), controlFlowContent.getBytes(StandardCharsets.UTF_8));
-
-                    log.info("Generated control flow file pair: {} -> {}", originalFilePath, controlFlowFilePath);
-                    
-                    // 确认两个文件的差异
-                    if (!controlFlowContent.equals(originalContent)) {
-                        log.info("成功进行控制流变换，两个文件内容不同");
-                    } else {
-                        log.warn("警告：控制流变换后的文件与原始文件相同!");
-                    }
-
-                } catch (Exception e) {
-                    log.error("Error generating control flow file {}", i, e);
-                }
+                // 生成原始代码
+                String originalContent = generateRandomJavaClass();
+                
+                // 对原始代码进行控制流变换
+                String transformedContent = transformControlFlow(originalContent);
+                
+                // 保存变换后的代码
+                String fileName = String.format("Example_controlflow_%d.java", i);
+                String filePath = Paths.get(CONTROLFLOW_DIR, fileName).toString();
+                
+                Files.write(Paths.get(filePath), transformedContent.getBytes(StandardCharsets.UTF_8));
+                controlFlowFiles.add(filePath);
+                
+                log.info("Generated control flow file: {}", filePath);
             }
-
-        } catch (IOException e) {
-            log.error("Error creating directories for control flow files", e);
+            
+        } catch (Exception e) {
+            log.error("Error generating control flow files", e);
         }
-
-        return generatedFiles;
+        
+        return controlFlowFiles;
     }
 
     /**

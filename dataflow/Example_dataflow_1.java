@@ -1,19 +1,19 @@
-public class Example679 {
+public class Example221 {
 
     public static void main(String[] args) {
-        int choice = 2;
-        String unrelatedStr0 = "str35";
-        double unrelatedDouble1 = 48.16;
-        String unrelatedStr2 = "str95";
-        int loopCounter = 0;
-        for (int i = 2; i < 3; i++) {
-            loopCounter += i * 2;
+        int choice = 0;
+        String unrelatedStr0 = "str0";
+        String unrelatedStr1 = "str20";
+        String unrelatedStr2 = "str41";
+        int loopCounter = 3;
+        for (int i = -4; i < 3; i++) {
+            loopCounter += i + 2;
             if (i % 2 == 0) {
-                loopCounter -= -3;
+                loopCounter -= 9;
             }
         }
-        int whileCounter = -1;
-        int j = 0;
+        int whileCounter = 4;
+        int j = 4;
         while (j < 2) {
             whileCounter += j / 3;
             j++;

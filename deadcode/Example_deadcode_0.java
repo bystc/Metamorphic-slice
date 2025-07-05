@@ -1,25 +1,15 @@
-public class Example498 {
+public class Example547 {
 
     public static void main(String[] args) {
         for (int i = 0; i < 0; i++) {
-            val1 = val1 + 75;
             if (val1 > 0) {
-                val1 = val1 - 11;
+                val1 = val1 - 12;
             }
         }
-        for (int i = 0; i < 0; i++) {
-            val1 = val1 + 20;
-            if (val1 > 0) {
-                val1 = val1 - 4;
-            }
-            val1 = val1 * 2 + 31;
-        }
-        int choice = 2;
-        int[] unrelatedArr0 = { 4, 8, 7 };
-        int unrelatedInt1 = 176;
-        int unrelatedInt2 = 136;
-        String unrelatedStr3 = "str8";
-        int unrelatedInt4 = 143;
+        int choice = 1;
+        String unrelatedStr0 = "str24";
+        String unrelatedStr1 = "str34";
+        double unrelatedDouble2 = 7.64;
         int loopCounter = 0;
         for (int i = 0; i < 3; i++) {
             loopCounter += i * 2;

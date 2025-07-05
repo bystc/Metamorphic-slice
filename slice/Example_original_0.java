@@ -3,7 +3,7 @@
 	file: mutated\Example_original_0.java, line: 24, variable: val1
 	Original file: D:\software\Metamorphic-slice\mutated\Example_original_0.java
 */
-public class Example592 {
+public class Example602 {
 
     public static void main(String[] args) {
         int choice = 0;

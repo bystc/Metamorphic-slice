@@ -3,10 +3,10 @@
 	file: reordered\Example_reordered_0.java, line: 25, variable: val1
 	Original file: D:\software\Metamorphic-slice\reordered\Example_reordered_0.java
 */
-public class Example778 {
+public class Example877 {
 
     public static void main(String[] args) {
-        int choice = 3;
+        int choice = 2;
         int val1 = 0, val2 = 0, val3 = 0;
         int temp1 = 10, temp2 = 20, temp3 = 30;
         switch(choice) {

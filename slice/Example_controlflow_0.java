@@ -3,7 +3,7 @@
 	file: controlflow\Example_controlflow_0.java, line: 27, variable: val1
 	Original file: D:\software\Metamorphic-slice\controlflow\Example_controlflow_0.java
 */
-public class Example379 {
+public class Example179 {
 
     public static void main(String[] args) {
         int choice = 1;

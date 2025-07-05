@@ -1,12 +1,12 @@
 /*
 	This file was automatically generated as part of a slice with criterion
-	file: dataflow\Example_dataflow_3.java, line: 27, variable: val1
+	file: dataflow\Example_dataflow_3.java, line: 26, variable: val1
 	Original file: D:\software\Metamorphic-slice\dataflow\Example_dataflow_3.java
 */
-public class Example61 {
+public class Example494 {
 
     public static void main(String[] args) {
-        int choice = 1;
+        int choice = 3;
         int val1 = 0, val2 = 0, val3 = 0;
         int temp1 = 10, temp2 = 20, temp3 = 30;
         switch(choice) {
