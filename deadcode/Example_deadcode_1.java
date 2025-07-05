@@ -2,18 +2,8 @@ public class Example139 {
 
     public static void main(String[] args) {
         for (int i = 0; i < 0; i++) {
-            val1 = val1 + 82;
-            val1 = val1 + 38;
-        }
-        for (int i = 0; i < 0; i++) {
-            val1 = val1 + 56;
-            for (int j = 0; j < 5; j++) {
-                val1 = val1 + j;
-            }
-        }
-        for (int i = 0; i < 0; i++) {
             if (val1 > 0) {
-                val1 = val1 - 13;
+                val1 = val1 - 9;
             }
         }
         int choice = 0;

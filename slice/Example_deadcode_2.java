@@ -1,6 +1,6 @@
 /*
 	This file was automatically generated as part of a slice with criterion
-	file: deadcode\Example_deadcode_2.java, line: 42, variable: val1
+	file: deadcode\Example_deadcode_2.java, line: 45, variable: val1
 	Original file: D:\software\Metamorphic-slice\deadcode\Example_deadcode_2.java
 */
 public class Example999 {

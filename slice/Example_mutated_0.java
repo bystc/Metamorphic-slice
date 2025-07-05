@@ -3,10 +3,10 @@
 	file: mutated\Example_mutated_0.java, line: 26, variable: val1
 	Original file: D:\software\Metamorphic-slice\mutated\Example_mutated_0.java
 */
-public class Example498 {
+public class Example117 {
 
     public static void main(String[] args) {
-        int choice = 2;
+        int choice = 0;
         int val1 = 0, val2 = 0, val3 = 0;
         int temp1 = 10, temp2 = 20, temp3 = 30;
         switch(choice) {

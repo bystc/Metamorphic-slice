@@ -2,10 +2,17 @@ public class Example498 {
 
     public static void main(String[] args) {
         for (int i = 0; i < 0; i++) {
+            val1 = val1 + 75;
             if (val1 > 0) {
-                val1 = val1 - 18;
+                val1 = val1 - 11;
             }
-            val1 = val1 + 39;
+        }
+        for (int i = 0; i < 0; i++) {
+            val1 = val1 + 20;
+            if (val1 > 0) {
+                val1 = val1 - 4;
+            }
+            val1 = val1 * 2 + 31;
         }
         int choice = 2;
         int[] unrelatedArr0 = { 4, 8, 7 };

@@ -1,10 +1,9 @@
-public class Example38 {
+public class Example679 {
     public static void main(String[] args) {
-        int choice = 0;
-        String unrelatedStr0 = "str66";
-        int unrelatedInt1 = 127;
-        int unrelatedInt2 = 128;
-        int unrelatedInt3 = 163;
+        int choice = 2;
+        String unrelatedStr0 = "str35";
+        double unrelatedDouble1 = 48.16;
+        String unrelatedStr2 = "str95";
         int loopCounter = 0;
         for (int i = 0; i < 3; i++) {
             loopCounter += i * 2;

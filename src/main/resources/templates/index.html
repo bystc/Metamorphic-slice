@@ -57,15 +57,6 @@
         <h2 class="mb-4 text-center">Metamorphic Testing Framework</h2>
         <p class="text-muted text-center mb-4">使用自定义Java代码生成器进行程序切片蜕变测试</p>
         
-        <!-- 导航链接 -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-md-8">
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="/slice" class="btn btn-outline-primary">主页</a>
-                </div>
-            </div>
-        </div>
-        
         <form id="testForm">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -76,6 +67,7 @@
                             <option value="deadcode">无用代码添加蜕变关系</option>
                             <option value="reorder">语句重排序蜕变关系</option>
                             <option value="controlflow">控制流等价变换蜕变关系</option>
+                            <option value="dataflow">数据流等价变换蜕变关系</option>
                         </select>
                         <div class="form-text">选择要测试的蜕变关系类型</div>
                     </div>
@@ -127,6 +119,8 @@
                     endpoint = '/slice/test-reorder';
                 } else if (testType === 'controlflow') {
                     endpoint = '/slice/test-controlflow';
+                } else if (testType === 'dataflow') {
+                    endpoint = '/slice/test-dataflow';
                 } else {
                     endpoint = '/slice/test';
                 }
@@ -179,6 +173,7 @@
             const testTypeTitle = testType === 'deadcode' ? '无用代码添加蜕变关系' : 
                                  testType === 'reorder' ? '语句重排序蜕变关系' : 
                                  testType === 'controlflow' ? '控制流等价变换蜕变关系' : 
+                                 testType === 'dataflow' ? '数据流等价变换蜕变关系' : 
                                  '变量重命名蜕变关系';
             
             summaryDiv.innerHTML = `
@@ -298,8 +293,8 @@
                                     <div class="code-block">${escapeHtml(testResult.originalFileContent || '无内容')}</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>控制流变换后</h6>
-                                    <div class="code-block">${escapeHtml(testResult.controlFlowFileContent || '无内容')}</div>
+                                    <h6>控制流等价变换后</h6>
+                                    <div class="code-block">${escapeHtml(testResult.controlflowFileContent || '无内容')}</div>
                                 </div>
                             </div>
                             <div class="row mt-3">
@@ -308,14 +303,43 @@
                                     <div class="code-block">${escapeHtml(testResult.originalSliceContent || '无切片内容')}</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>控制流变换代码切片</h6>
-                                    <div class="code-block">${escapeHtml(testResult.controlFlowSliceContent || '无切片内容')}</div>
+                                    <h6>控制流等价变换代码切片</h6>
+                                    <div class="code-block">${escapeHtml(testResult.controlflowSliceContent || '无切片内容')}</div>
                                 </div>
                             </div>
                             <div class="mt-3">
                                 <h6>等价性结果</h6>
                                 <div class="${testResult.equivalent ? 'equivalent' : 'not-equivalent'}">
-                                    ${testResult.equivalent ? '✅ 等价 - 控制流变换不影响程序切片' : '❌ 不等价 - 控制流变换影响了程序切片'}
+                                    ${testResult.equivalent ? '✅ 等价 - 控制流等价变换不影响程序切片' : '❌ 不等价 - 控制流等价变换影响了程序切片'}
+                                </div>
+                            </div>
+                        `;
+                    } else if (testType === 'dataflow') {
+                        content += `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>原始代码</h6>
+                                    <div class="code-block">${escapeHtml(testResult.originalFileContent || '无内容')}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>数据流等价变换后</h6>
+                                    <div class="code-block">${escapeHtml(testResult.dataflowFileContent || '无内容')}</div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <h6>原始代码切片</h6>
+                                    <div class="code-block">${escapeHtml(testResult.originalSliceContent || '无切片内容')}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>数据流等价变换代码切片</h6>
+                                    <div class="code-block">${escapeHtml(testResult.dataflowSliceContent || '无切片内容')}</div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <h6>等价性结果</h6>
+                                <div class="${testResult.equivalent ? 'equivalent' : 'not-equivalent'}">
+                                    ${testResult.equivalent ? '✅ 等价 - 数据流等价变换不影响程序切片' : '❌ 不等价 - 数据流等价变换影响了程序切片'}
                                 </div>
                             </div>
                         `;

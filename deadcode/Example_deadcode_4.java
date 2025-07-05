@@ -2,7 +2,27 @@ public class Example540 {
 
     public static void main(String[] args) {
         for (int i = 0; i < 0; i++) {
-            val1 = val1 * 0 + 26;
+            if (val1 > 0) {
+                val1 = val1 - 3;
+            }
+            for (int j = 0; j < 5; j++) {
+                val1 = val1 + j;
+            }
+            val1 = val1 * 2 + 42;
+        }
+        if (false) {
+            for (int j = 0; j < 5; j++) {
+                val1 = val1 + j;
+            }
+            val1 = val1 + 37;
+            if (val1 > 0) {
+                val1 = val1 - 16;
+            }
+        }
+        if (false) {
+            if (val1 > 0) {
+                val1 = val1 - 19;
+            }
         }
         int choice = 3;
         int unrelatedInt0 = 191;

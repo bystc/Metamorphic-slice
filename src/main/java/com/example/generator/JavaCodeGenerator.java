@@ -1387,12 +1387,13 @@ public class JavaCodeGenerator {
      */
     private boolean isSliceRelatedVariable(String varName) {
         // 明确排除无关变量
-        if (varName.startsWith("unrelated") || varName.equals("choice")) {
+        if (varName.startsWith("unrelated")) {
             return false;
         }
         // 明确识别切片相关变量
         return varName.matches("val\\d+") || varName.matches("temp\\d+") || 
-               varName.matches("result\\d+") || varName.equals("temp");
+               varName.matches("result\\d+") || varName.equals("temp") ||
+               varName.equals("choice"); // choice控制switch语句执行路径，是切片相关变量
     }
 
     /**
@@ -2218,5 +2219,442 @@ public class JavaCodeGenerator {
         
         log.info("Generated slice command: {}", command);
         return command;
+    }
+
+    /**
+     * 生成数据流等价变换的变异文件
+     * @param baseDir 基础目录
+     * @param numFiles 要生成的文件数量
+     * @return 生成的原始文件路径列表
+     */
+    public List<String> generateDataFlowFiles(String baseDir, int numFiles) {
+        List<String> generatedFiles = new ArrayList<>();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get("dataflow"));
+
+            for (int i = 0; i < numFiles; i++) {
+                try {
+                    // 生成原始代码
+                    String originalContent = generateRandomJavaClass();
+
+                    // 创建原始文件
+                    String originalFileName = String.format("Example_original_%d.java", i);
+                    String originalFilePath = Paths.get(MUTATED_DIR, originalFileName).toString();
+                    Files.write(Paths.get(originalFilePath), originalContent.getBytes(StandardCharsets.UTF_8));
+                    generatedFiles.add(originalFilePath);
+
+                    // 创建数据流变换文件
+                    String dataFlowContent = transformDataFlow(originalContent);
+                    
+                    String dataFlowFileName = String.format("Example_dataflow_%d.java", i);
+                    String dataFlowFilePath = Paths.get("dataflow", dataFlowFileName).toString();
+                    Files.write(Paths.get(dataFlowFilePath), dataFlowContent.getBytes(StandardCharsets.UTF_8));
+
+                    log.info("Generated data flow file pair: {} -> {}", originalFilePath, dataFlowFilePath);
+                    
+                    // 确认两个文件的差异
+                    if (!dataFlowContent.equals(originalContent)) {
+                        log.info("Successfully performed data flow transformation, files are different");
+                    } else {
+                        log.warn("Warning: Data flow transformation resulted in identical files!");
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error generating data flow file {}", i, e);
+                }
+            }
+
+        } catch (IOException e) {
+            log.error("Error creating directories for data flow files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 数据流等价变换 - 确保不影响切片点的数据流结构
+     */
+    public String transformDataFlow(String originalContent) {
+        try {
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse content for data flow transformation"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md -> 
+                    md.getNameAsString().equals("main"));
+
+            boolean changed = false;
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 分析切片相关变量和数据依赖关系
+                    Set<String> sliceVariables = findSliceRelatedVariables(body);
+                    Map<String, Set<String>> dataDependencies = analyzeDataDependencies(body, sliceVariables);
+                    
+                    log.info("Found slice variables: {}", sliceVariables);
+                    log.info("Data dependencies: {}", dataDependencies);
+                    
+                    // 应用各种数据流变换，但确保不影响切片点
+                    changed |= transformUnrelatedVariableAssignments(body, sliceVariables, dataDependencies);
+                    changed |= transformUnrelatedExpressions(body, sliceVariables, dataDependencies);
+                    changed |= transformUnrelatedCalculations(body, sliceVariables, dataDependencies);
+
+                    // 如果没有任何变换，尝试对无关的数据流结构进行变换
+                    if (!changed) {
+                        changed |= transformUnrelatedDataFlow(body, sliceVariables);
+                    }
+                    
+                    return cu.toString();
+                }
+            }
+            return originalContent;
+        } catch (Exception e) {
+            log.error("Error in data flow transformation", e);
+            return originalContent;
+        }
+    }
+
+    /**
+     * 分析数据依赖关系
+     */
+    private Map<String, Set<String>> analyzeDataDependencies(BlockStmt body, Set<String> sliceVariables) {
+        Map<String, Set<String>> dependencies = new HashMap<>();
+        
+        // 分析所有赋值语句的数据依赖
+        body.findAll(AssignExpr.class).forEach(assign -> {
+            Expression target = assign.getTarget();
+            Expression value = assign.getValue();
+            
+            if (target instanceof NameExpr) {
+                String targetVar = ((NameExpr) target).getNameAsString();
+                Set<String> usedVars = extractVariablesFromExpression(value);
+                
+                // 建立数据依赖关系
+                dependencies.computeIfAbsent(targetVar, k -> new HashSet<>()).addAll(usedVars);
+                
+                // 反向依赖：使用该变量的语句依赖于该变量
+                for (String usedVar : usedVars) {
+                    dependencies.computeIfAbsent(usedVar, k -> new HashSet<>()).add(targetVar);
+                }
+            }
+        });
+        
+        // 分析变量声明中的数据依赖
+        body.findAll(VariableDeclarator.class).forEach(vd -> {
+            if (vd.getInitializer().isPresent()) {
+                String targetVar = vd.getNameAsString();
+                Set<String> usedVars = extractVariablesFromExpression(vd.getInitializer().get());
+                
+                dependencies.computeIfAbsent(targetVar, k -> new HashSet<>()).addAll(usedVars);
+                for (String usedVar : usedVars) {
+                    dependencies.computeIfAbsent(usedVar, k -> new HashSet<>()).add(targetVar);
+                }
+            }
+        });
+        
+        return dependencies;
+    }
+
+    /**
+     * 变换无关的变量赋值
+     */
+    private boolean transformUnrelatedVariableAssignments(BlockStmt body, Set<String> sliceVariables, 
+                                                         Map<String, Set<String>> dataDependencies) {
+        boolean changed = false;
+        List<AssignExpr> assignments = body.findAll(AssignExpr.class);
+        
+        for (AssignExpr assign : assignments) {
+            Expression target = assign.getTarget();
+            if (target instanceof NameExpr) {
+                String targetVar = ((NameExpr) target).getNameAsString();
+                
+                // 检查这个赋值是否影响切片点
+                if (!affectsSlicePoint(assign, sliceVariables, dataDependencies)) {
+                    // 安全变换：修改无关变量的赋值
+                    Expression newValue = transformUnrelatedExpression(assign.getValue(), sliceVariables);
+                    if (newValue != null && !newValue.equals(assign.getValue())) {
+                        assign.setValue(newValue);
+                        log.info("Transformed unrelated variable assignment: {} = {}", targetVar, newValue);
+                        changed = true;
+                    }
+                }
+            }
+        }
+        
+        return changed;
+    }
+
+    /**
+     * 变换无关的表达式
+     */
+    private boolean transformUnrelatedExpressions(BlockStmt body, Set<String> sliceVariables, 
+                                                 Map<String, Set<String>> dataDependencies) {
+        java.util.concurrent.atomic.AtomicBoolean exprChanged = new java.util.concurrent.atomic.AtomicBoolean(false);
+        
+        // 变换无关的变量声明初始化
+        body.findAll(VariableDeclarator.class).forEach(vd -> {
+            if (vd.getInitializer().isPresent()) {
+                String varName = vd.getNameAsString();
+                if (!sliceVariables.contains(varName) && !hasDataDependency(varName, sliceVariables, dataDependencies)) {
+                    Expression newValue = transformUnrelatedExpression(vd.getInitializer().get(), sliceVariables);
+                    if (newValue != null && !newValue.equals(vd.getInitializer().get())) {
+                        vd.setInitializer(newValue);
+                        log.info("Transformed unrelated variable initialization: {} = {}", varName, newValue);
+                        exprChanged.set(true);
+                    }
+                }
+            }
+        });
+        
+        return exprChanged.get();
+    }
+
+    /**
+     * 变换无关的计算
+     */
+    private boolean transformUnrelatedCalculations(BlockStmt body, Set<String> sliceVariables, 
+                                                  Map<String, Set<String>> dataDependencies) {
+        java.util.concurrent.atomic.AtomicBoolean calcChanged = new java.util.concurrent.atomic.AtomicBoolean(false);
+        
+        // 查找无关的计算语句并变换
+        body.findAll(ExpressionStmt.class).forEach(exprStmt -> {
+            Expression expr = exprStmt.getExpression();
+            if (expr instanceof AssignExpr) {
+                AssignExpr assign = (AssignExpr) expr;
+                Expression target = assign.getTarget();
+                
+                if (target instanceof NameExpr) {
+                    String targetVar = ((NameExpr) target).getNameAsString();
+                    if (!sliceVariables.contains(targetVar) && !hasDataDependency(targetVar, sliceVariables, dataDependencies)) {
+                        Expression newValue = transformUnrelatedExpression(assign.getValue(), sliceVariables);
+                        if (newValue != null && !newValue.equals(assign.getValue())) {
+                            assign.setValue(newValue);
+                            log.info("Transformed unrelated calculation: {} = {}", targetVar, newValue);
+                            calcChanged.set(true);
+                        }
+                    }
+                }
+            }
+        });
+        
+        return calcChanged.get();
+    }
+
+    /**
+     * 检查变量是否影响切片点
+     */
+    private boolean affectsSlicePoint(AssignExpr assign, Set<String> sliceVariables, 
+                                    Map<String, Set<String>> dataDependencies) {
+        Expression target = assign.getTarget();
+        Expression value = assign.getValue();
+        
+        if (target instanceof NameExpr) {
+            String targetVar = ((NameExpr) target).getNameAsString();
+            
+            // 直接检查：目标变量是否是切片变量
+            if (sliceVariables.contains(targetVar)) {
+                return true;
+            }
+            
+            // 间接检查：目标变量是否与切片变量有数据依赖
+            if (hasDataDependency(targetVar, sliceVariables, dataDependencies)) {
+                return true;
+            }
+            
+            // 检查赋值表达式中的变量是否与切片变量相关
+            Set<String> usedVars = extractVariablesFromExpression(value);
+            for (String usedVar : usedVars) {
+                if (sliceVariables.contains(usedVar) || hasDataDependency(usedVar, sliceVariables, dataDependencies)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 检查变量是否有数据依赖关系
+     */
+    private boolean hasDataDependency(String varName, Set<String> sliceVariables, 
+                                    Map<String, Set<String>> dataDependencies) {
+        // 直接依赖
+        if (sliceVariables.contains(varName)) {
+            return true;
+        }
+        
+        // 间接依赖：通过数据依赖图检查
+        Set<String> visited = new HashSet<>();
+        return hasDataDependencyRecursive(varName, sliceVariables, dataDependencies, visited);
+    }
+
+    /**
+     * 递归检查数据依赖关系
+     */
+    private boolean hasDataDependencyRecursive(String varName, Set<String> sliceVariables, 
+                                             Map<String, Set<String>> dataDependencies, Set<String> visited) {
+        if (visited.contains(varName)) {
+            return false; // 避免循环依赖
+        }
+        
+        visited.add(varName);
+        
+        Set<String> dependencies = dataDependencies.get(varName);
+        if (dependencies != null) {
+            for (String depVar : dependencies) {
+                if (sliceVariables.contains(depVar)) {
+                    return true;
+                }
+                if (hasDataDependencyRecursive(depVar, sliceVariables, dataDependencies, visited)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 变换无关的表达式
+     */
+    private Expression transformUnrelatedExpression(Expression expr, Set<String> sliceVariables) {
+        if (expr == null) {
+            return null;
+        }
+        
+        // 如果表达式中包含切片变量，不进行变换
+        Set<String> exprVars = extractVariablesFromExpression(expr);
+        for (String var : exprVars) {
+            if (sliceVariables.contains(var)) {
+                return null; // 不变换包含切片变量的表达式
+            }
+        }
+        
+        // 变换数值表达式
+        if (expr instanceof BinaryExpr) {
+            BinaryExpr binaryExpr = (BinaryExpr) expr;
+            BinaryExpr.Operator operator = binaryExpr.getOperator();
+            
+            // 变换操作符
+            BinaryExpr.Operator newOperator = transformArithmeticOperator(operator);
+            if (newOperator != null && newOperator != operator) {
+                binaryExpr.setOperator(newOperator);
+                return binaryExpr;
+            }
+        }
+        
+        // 变换数值字面量
+        if (expr instanceof com.github.javaparser.ast.expr.IntegerLiteralExpr) {
+            com.github.javaparser.ast.expr.IntegerLiteralExpr intExpr = 
+                (com.github.javaparser.ast.expr.IntegerLiteralExpr) expr;
+            int value = intExpr.asInt();
+            
+            // 生成新的数值，但保持合理的范围
+            int newValue = value + random.nextInt(10) - 5; // ±5的随机变化
+            if (newValue != value) {
+                return new com.github.javaparser.ast.expr.IntegerLiteralExpr(newValue);
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * 变换算术操作符
+     */
+    private BinaryExpr.Operator transformArithmeticOperator(BinaryExpr.Operator operator) {
+        switch (operator) {
+            case PLUS:
+                return random.nextBoolean() ? BinaryExpr.Operator.MINUS : BinaryExpr.Operator.MULTIPLY;
+            case MINUS:
+                return random.nextBoolean() ? BinaryExpr.Operator.PLUS : BinaryExpr.Operator.DIVIDE;
+            case MULTIPLY:
+                return random.nextBoolean() ? BinaryExpr.Operator.PLUS : BinaryExpr.Operator.MINUS;
+            case DIVIDE:
+                return random.nextBoolean() ? BinaryExpr.Operator.MULTIPLY : BinaryExpr.Operator.PLUS;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 变换无关的数据流结构
+     */
+    private boolean transformUnrelatedDataFlow(BlockStmt body, Set<String> sliceVariables) {
+        boolean changed = false;
+        
+        // 添加无关的计算语句
+        List<String> unrelatedCalculations = generateUnrelatedCalculations(sliceVariables);
+        for (String calculation : unrelatedCalculations) {
+            try {
+                Statement calcStmt = javaParser.parseStatement(calculation).getResult().orElse(null);
+                if (calcStmt != null) {
+                    // 在合适的位置插入无关计算
+                    body.addStatement(calcStmt);
+                    log.info("Added unrelated calculation: {}", calculation);
+                    changed = true;
+                }
+            } catch (Exception e) {
+                log.error("Failed to parse unrelated calculation: {}", calculation, e);
+            }
+        }
+        
+        return changed;
+    }
+
+    /**
+     * 生成无关的计算语句
+     */
+    private List<String> generateUnrelatedCalculations(Set<String> sliceVariables) {
+        List<String> calculations = new ArrayList<>();
+        Random random = new Random();
+        
+        // 生成1-3个无关的计算语句
+        int count = random.nextInt(3) + 1;
+        
+        for (int i = 0; i < count; i++) {
+            String varName = generateUnrelatedVariableName(sliceVariables);
+            String calculation = generateUnrelatedCalculation(varName);
+            if (calculation != null) {
+                calculations.add(calculation);
+            }
+        }
+        
+        return calculations;
+    }
+
+    /**
+     * 生成无关的变量名
+     */
+    private String generateUnrelatedVariableName(Set<String> sliceVariables) {
+        String[] unrelatedPrefixes = {"unrelated", "temp", "dummy", "aux", "helper"};
+        String[] unrelatedSuffixes = {"Var", "Value", "Data", "Calc", "Result"};
+        
+        String varName;
+        do {
+            String prefix = unrelatedPrefixes[random.nextInt(unrelatedPrefixes.length)];
+            String suffix = unrelatedSuffixes[random.nextInt(unrelatedSuffixes.length)];
+            int number = random.nextInt(100);
+            varName = prefix + suffix + number;
+        } while (sliceVariables.contains(varName));
+        
+        return varName;
+    }
+
+    /**
+     * 生成无关的计算语句
+     */
+    private String generateUnrelatedCalculation(String varName) {
+        String[] operations = {
+            varName + " = " + random.nextInt(100) + ";",
+            varName + " = " + random.nextInt(50) + " + " + random.nextInt(50) + ";",
+            varName + " = " + random.nextInt(20) + " * " + random.nextInt(10) + ";",
+            varName + " = " + random.nextInt(100) + " - " + random.nextInt(50) + ";"
+        };
+        
+        return operations[random.nextInt(operations.length)];
     }
 }

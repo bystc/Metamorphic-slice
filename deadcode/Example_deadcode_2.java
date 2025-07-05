@@ -1,19 +1,22 @@
 public class Example999 {
 
     public static void main(String[] args) {
-        if (false) {
-            val1 = val1 + 29;
+        for (int i = 0; i < 0; i++) {
+            val1 = val1 * 4 + 24;
             if (val1 > 0) {
                 val1 = val1 - 7;
             }
-            if (val1 > 0) {
-                val1 = val1 - 17;
-            }
+            val1 = val1 * 0 + 38;
         }
         for (int i = 0; i < 0; i++) {
-            val1 = val1 * 4 + 43;
-            if (val1 > 0) {
-                val1 = val1 - 9;
+            val1 = val1 + 2;
+            val1 = val1 * 2 + 18;
+        }
+        if (false) {
+            val1 = val1 + 18;
+            val1 = val1 + 53;
+            for (int j = 0; j < 5; j++) {
+                val1 = val1 + j;
             }
         }
         int choice = 0;

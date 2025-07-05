@@ -1,19 +1,19 @@
-public class Example289 {
+public class Example132 {
 
     public static void main(String[] args) {
+        double unrelatedDouble4 = 76.70;
+        int j = 0;
+        String unrelatedStr1 = "str1";
+        int loopCounter = 0;
+        double unrelatedDouble3 = 79.02;
         while (j < 2) {
             whileCounter += j * 3;
             j++;
         }
-        int j = 0;
-        int[] unrelatedArr2 = { 8, 8, 9 };
-        int[] unrelatedArr0 = { 0, 7, 0 };
-        int unrelatedInt1 = 134;
-        int loopCounter = 0;
-        int choice = 1;
         int whileCounter = 0;
-        int unrelatedInt3 = 104;
-        String unrelatedStr4 = "str69";
+        double unrelatedDouble2 = 40.29;
+        int choice = 2;
+        String unrelatedStr0 = "str6";
         for (int i = 0; i < 3; i++) {
             loopCounter += i * 2;
             if (i % 2 == 0) {
@@ -47,11 +47,11 @@ public class Example289 {
         int result1 = val1 + val2;
         int result2 = val2 + val3;
         int result3 = val1 + val3;
-        System.out.println(val2);
-        System.out.println(result2);
-        System.out.println(val3);
-        System.out.println(result3);
         System.out.println(val1);
         System.out.println(result1);
+        System.out.println(result3);
+        System.out.println(result2);
+        System.out.println(val3);
+        System.out.println(val2);
     }
 }

@@ -2,6 +2,13 @@ public class Example488 {
 
     public static void main(String[] args) {
         for (int i = 0; i < 0; i++) {
+            val1 = val1 + 36;
+            val1 = val1 + 2;
+            val1 = val1 * 4 + 47;
+        }
+        for (int i = 0; i < 0; i++) {
+            val1 = val1 * 7 + 34;
+            val1 = val1 + 16;
             val1 = val1 * 1 + 2;
         }
         int choice = 2;

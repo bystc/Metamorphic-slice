@@ -1,9 +1,9 @@
 /*
 	This file was automatically generated as part of a slice with criterion
-	file: mutated\Example_original_2.java, line: 26, variable: val1
+	file: mutated\Example_original_2.java, line: 25, variable: val1
 	Original file: D:\software\Metamorphic-slice\mutated\Example_original_2.java
 */
-public class Example314 {
+public class Example365 {
 
     public static void main(String[] args) {
         int choice = 0;

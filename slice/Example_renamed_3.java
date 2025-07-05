@@ -1,17 +1,17 @@
 /*
 	This file was automatically generated as part of a slice with criterion
-	file: renamed\Example_renamed_3.java, line: 25, variable: va_501
+	file: renamed\Example_renamed_3.java, line: 24, variable: va_363
 	Original file: D:\software\Metamorphic-slice\renamed\Example_renamed_3.java
 */
-public class Example488 {
+public class Example678 {
 
     public static void main(String[] args) {
-        int ch_69 = 2;
-        int va_501 = 0, va_827 = 0, va_98 = 0;
-        int te_71 = 10, te_213 = 20, te_405 = 30;
-        switch(ch_69) {
+        int ch_924 = 3;
+        int va_363 = 0, va_599 = 0, va_954 = 0;
+        int te_179 = 10, te_574 = 20, te_979 = 30;
+        switch(ch_924) {
             case 0:
-                va_501 = te_71 * 2;
+                va_363 = te_179 * 2;
         }
     }
 }

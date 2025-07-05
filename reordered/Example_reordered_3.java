@@ -1,24 +1,23 @@
-public class Example701 {
+public class Example331 {
 
     public static void main(String[] args) {
-        int choice = 0;
-        int unrelatedInt3 = 192;
-        int j = 0;
+        int choice = 1;
+        int[] unrelatedArr1 = { 4, 6, 9 };
+        int[] unrelatedArr0 = { 9, 4, 2 };
+        int whileCounter = 0;
         int loopCounter = 0;
-        while (j < 2) {
-            whileCounter += j * 3;
-            j++;
-        }
-        double unrelatedDouble1 = 95.89;
         for (int i = 0; i < 3; i++) {
             loopCounter += i * 2;
             if (i % 2 == 0) {
                 loopCounter -= 1;
             }
         }
-        int whileCounter = 0;
-        int[] unrelatedArr0 = { 5, 2, 4 };
-        int[] unrelatedArr2 = { 8, 8, 3 };
+        double unrelatedDouble2 = 25.24;
+        while (j < 2) {
+            whileCounter += j * 3;
+            j++;
+        }
+        int j = 0;
         int val1 = 0, val2 = 0, val3 = 0;
         int temp1 = 10, temp2 = 20, temp3 = 30;
         switch(choice) {
@@ -46,11 +45,11 @@ public class Example701 {
         int result1 = val1 + val2;
         int result2 = val2 + val3;
         int result3 = val1 + val3;
-        System.out.println(val1);
-        System.out.println(result3);
-        System.out.println(val2);
         System.out.println(result1);
-        System.out.println(val3);
+        System.out.println(result3);
+        System.out.println(val1);
         System.out.println(result2);
+        System.out.println(val3);
+        System.out.println(val2);
     }
 }

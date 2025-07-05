@@ -427,6 +427,95 @@ public class SliceController {
         return result;
     }
 
+    @PostMapping("/test-dataflow")
+    @ResponseBody
+    public Map<String, Object> runDataFlowTest(@RequestParam int numMutations) {
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> testResults = new ArrayList<>();
+
+        try {
+            log.info("Starting data flow metamorphic test with {} mutations", numMutations);
+
+            // 生成数据流等价变换的变异文件
+            List<String> originalFiles = javaCodeGenerator.generateDataFlowFiles("", numMutations);
+            log.info("Generated {} data flow files", originalFiles.size());
+
+            // 对每个原始文件进行切片
+            for (String originalFile : originalFiles) {
+                log.info("Processing file: {}", originalFile);
+                Map<String, Object> testResult = new HashMap<>();
+                testResult.put("originalFile", originalFile);
+
+                try {
+                    // 获取对应的数据流变换文件
+                    String dataFlowFile = originalFile.replace("mutated", "dataflow").replace("_original_", "_dataflow_");
+                    testResult.put("dataflowFile", dataFlowFile);
+
+                    // 读取原始文件内容用于显示
+                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(originalFile)));
+                    testResult.put("originalFileContent", originalContent);
+
+                    // 读取数据流变换文件内容用于显示
+                    String dataFlowContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(dataFlowFile)));
+                    testResult.put("dataflowFileContent", dataFlowContent);
+
+                    // 对原始文件选择切片变量
+                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForSlicing(originalFile);
+                    if (originalVariableInfo == null) {
+                        throw new RuntimeException("No suitable variable found for slicing in original file: " + originalFile);
+                    }
+
+                    log.info("Selected variable for slicing: {} at line {}",
+                            originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+
+                    // 对原始文件执行切片
+                    log.info("Executing slice for original file: {}", originalFile);
+                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(originalFile, originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                    log.info("Original slice content: {}", originalSliceContent);
+                    testResult.put("originalSliceContent", originalSliceContent);
+
+                    // 对数据流变换文件重新查找变量最新行号
+                    VariableInfo dataFlowVariableInfo = javaCodeGenerator.findVariableLastAssignment(dataFlowFile, originalVariableInfo.getVariableName());
+                    if (dataFlowVariableInfo == null) {
+                        throw new RuntimeException("No suitable variable found for slicing in data flow file: " + dataFlowFile);
+                    }
+
+                    log.info("Executing slice for data flow file: {} with variable: {} at line {}",
+                            dataFlowFile, dataFlowVariableInfo.getVariableName(), dataFlowVariableInfo.getLineNumber());
+                    String dataFlowSliceContent = sliceExecutor.executeSliceWithVariable(dataFlowFile, dataFlowVariableInfo.getVariableName(), dataFlowVariableInfo.getLineNumber());
+                    log.info("Data flow slice content: {}", dataFlowSliceContent);
+                    testResult.put("dataflowSliceContent", dataFlowSliceContent);
+
+                    // 比较切片是否等价
+                    boolean isEquivalent = compareSlices(originalSliceContent, dataFlowSliceContent);
+                    log.info("Slices are {} equivalent", isEquivalent ? "" : "not");
+                    testResult.put("equivalent", isEquivalent);
+
+                    testResult.put("success", true);
+
+                } catch (Exception e) {
+                    log.error("Error processing file: " + originalFile, e);
+                    testResult.put("error", e.getMessage());
+                    testResult.put("success", false);
+                }
+
+                testResults.add(testResult);
+            }
+
+            // 统计结果
+            result.put("total", testResults.size());
+            result.put("results", testResults);
+
+        } catch (Exception e) {
+            log.error("Error running data flow test", e);
+            result.put("error", e.getMessage());
+            result.put("total", 0);
+            result.put("results", new ArrayList<>());
+        }
+
+        return result;
+    }
+
     /**
      * 比较两个切片是否等价
      * 通过解析AST并比较结构来判断等价性，使用公共变量名标准化

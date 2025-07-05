@@ -1,9 +1,9 @@
 /*
 	This file was automatically generated as part of a slice with criterion
-	file: reordered\Example_reordered_4.java, line: 26, variable: val1
+	file: reordered\Example_reordered_4.java, line: 25, variable: val1
 	Original file: D:\software\Metamorphic-slice\reordered\Example_reordered_4.java
 */
-public class Example249 {
+public class Example613 {
 
     public static void main(String[] args) {
         int choice = 1;
