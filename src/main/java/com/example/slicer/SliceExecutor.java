@@ -135,10 +135,10 @@ public class SliceExecutor {
             throw new RuntimeException(error);
         }
 
-        // 检查可能的输出文件路径
+        // 检查可能的输出文件路径，优先查找slice目录下的文件
         String[] possibleOutputFiles = {
+                sliceOutputDir + "/" + new File(sourceFile).getName(),              // slice目录下（优先）
                 sliceOutputDir + "/com/example/" + new File(sourceFile).getName(),  // slice/com/example目录下
-                sliceOutputDir + "/" + new File(sourceFile).getName(),              // slice目录下
                 new File(sourceFile).getName()                                      // 当前目录
         };
 
@@ -151,6 +151,18 @@ public class SliceExecutor {
                 // 打印文件的基本信息
                 log.info("File size: {} bytes", Files.size(filePath));
                 log.info("File last modified: {}", Files.getLastModifiedTime(filePath));
+
+                // 如果文件在子目录中，移动到slice根目录
+                if (path.contains("/com/example/")) {
+                    String targetPath = sliceOutputDir + "/" + new File(sourceFile).getName();
+                    try {
+                        Files.move(filePath, Paths.get(targetPath), StandardCopyOption.REPLACE_EXISTING);
+                        outputFile = targetPath;
+                        log.info("Moved slice file from {} to {}", path, targetPath);
+                    } catch (IOException e) {
+                        log.warn("Failed to move slice file, using original location: {}", e.getMessage());
+                    }
+                }
                 break;
             } else {
                 log.info("Slice output file not found at: {}", path);

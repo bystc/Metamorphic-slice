@@ -1,11 +1,10 @@
-public class Example484 {
+public class Example301 {
 
     public static void main(String[] args) {
-        int choice = 1;
-        int[] unrelatedArr0 = { 9, 4, 2 };
-        double unrelatedDouble1 = 78.64;
-        double unrelatedDouble2 = 52.87;
-        int[] unrelatedArr3 = { 2, 2, 0 };
+        int choice = 0;
+        String unrelatedStr0 = "str15";
+        String unrelatedStr1 = "str82";
+        double unrelatedDouble2 = 67.82;
         int loopCounter = 0;
         int i = 0;
         while (i < 3) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,11 +51,20 @@ public class SliceController {
         List<Map<String, Object>> testResults = new ArrayList<>();
 
         try {
-            log.info("Starting metamorphic test with {} mutations", numMutations);
+            log.info("Starting JSmith metamorphic test with {} mutations", numMutations);
 
-            // 生成变异文件（使用自定义生成器生成随机代码）
-            List<String> mutatedFiles = javaCodeGenerator.generateMutatedFiles("", numMutations);
-            log.info("Generated {} mutated files", mutatedFiles.size());
+            // 清理之前的切片文件
+            cleanupSliceFiles();
+
+            // 使用JSmith生成器生成变异文件
+            List<String> mutatedFiles = javaCodeGenerator.generateJSmithVariableRenameTestFiles(numMutations);
+            log.info("Generated {} JSmith test files", mutatedFiles.size());
+            
+            // 过滤出原始文件（mutated目录中的文件）
+            mutatedFiles = mutatedFiles.stream()
+                .filter(file -> file.contains("mutated") && file.contains("JSmith"))
+                .collect(java.util.stream.Collectors.toList());
+            log.info("Filtered to {} JSmith mutated files for testing", mutatedFiles.size());
 
             // 对每个变异文件进行切片
             for (String file : mutatedFiles) {
@@ -63,8 +73,8 @@ public class SliceController {
                 testResult.put("originalFile", file);
 
                 try {
-                    // 获取对应的重命名文件
-                    String renamedFile = file.replace("mutated", "renamed").replace("_mutated_", "_renamed_");
+                    // 获取对应的JSmith重命名文件
+                    String renamedFile = file.replace("mutated", "renamed").replace("JSmith_mutated_", "JSmith_renamed_");
                     testResult.put("renamedFile", renamedFile);
 
                     // 读取原始文件内容用于显示
@@ -83,25 +93,75 @@ public class SliceController {
 
                     // 根据变量映射关系，找到重命名文件中对应的变量名
                     String originalVarName = originalVariableInfo.getVariableName();
-                    String renamedVarName = findRenamedVariableName(file, originalVarName);
+
+                    log.info("=== Variable Mapping Debug ===");
+                    log.info("Original file: {}", file);
+                    log.info("Renamed file: {}", renamedFile);
+                    log.info("Original variable: {} at line {}", originalVarName, originalVariableInfo.getLineNumber());
+
+                    // 对于变量重命名蜕变关系，直接在重命名文件的相同行号查找变量
+                    log.info("=== Attempting to find variable at same line ===");
+                    log.info("Looking for variable at line {} in file: {}", originalVariableInfo.getLineNumber(), renamedFile);
+                    String renamedVarName = findVariableAtSameLine(renamedFile, originalVariableInfo.getLineNumber());
+                    log.info("findVariableAtSameLine returned: {}", renamedVarName);
 
                     if (renamedVarName == null) {
-                        throw new RuntimeException("Could not find renamed variable for: " + originalVarName);
+                        log.error("=== Variable Mapping Failed ===");
+                        log.error("Could not find variable at line {} in renamed file: {}", originalVariableInfo.getLineNumber(), renamedFile);
+                        log.error("This violates the metamorphic relation requirement: variables must exist at the same line");
+
+                        // 对于蜕变测试，我们不能回退到不同的变量选择
+                        // 这会破坏蜕变关系的一致性
+                        throw new RuntimeException(String.format(
+                            "Metamorphic relation violation: Could not find corresponding variable at line %d in renamed file. " +
+                            "Original variable '%s' at line %d should have a corresponding renamed variable at the same line.",
+                            originalVariableInfo.getLineNumber(), originalVarName, originalVariableInfo.getLineNumber()));
+                    }
+
+                    log.info("Found renamed variable: {}", renamedVarName);
+
+                    // 验证变量确实存在于对应的文件中
+                    boolean originalVarExists = verifyVariableExists(file, originalVarName);
+                    boolean renamedVarExists = verifyVariableExists(renamedFile, renamedVarName);
+
+                    log.info("Variable existence verification:");
+                    log.info("  Original variable '{}' exists in {}: {}", originalVarName, file, originalVarExists);
+                    log.info("  Renamed variable '{}' exists in {}: {}", renamedVarName, renamedFile, renamedVarExists);
+
+                    if (!originalVarExists) {
+                        throw new RuntimeException("Original variable '" + originalVarName + "' does not exist in file: " + file);
+                    }
+
+                    if (!renamedVarExists) {
+                        throw new RuntimeException("Renamed variable '" + renamedVarName + "' does not exist in file: " + renamedFile);
                     }
 
                     log.info("Original variable: {} -> Renamed variable: {} at line {}",
                             originalVarName, renamedVarName, originalVariableInfo.getLineNumber());
 
-                    // 对变异文件执行切片
-                    log.info("Executing slice for mutated file: {}", file);
-                    String mutatedSliceContent = sliceExecutor.executeSlice(file);
+                    // 对变异文件执行切片（使用已选择的变量和行号）
+                    log.info("Executing slice for mutated file: {} with variable: {} at line {}",
+                            file, originalVarName, originalVariableInfo.getLineNumber());
+                    String mutatedSliceContent = sliceExecutor.executeSliceWithVariable(file, originalVarName, originalVariableInfo.getLineNumber());
                     log.info("Mutated slice content: {}", mutatedSliceContent);
                     testResult.put("mutatedSliceContent", mutatedSliceContent);
 
-                    // 对重命名文件执行切片（使用对应的重命名变量，但行号与原文件相同）
+                    // 对于变量重命名蜕变关系，应该使用相同的行号
+                    // 因为重命名只是改变了变量名，代码结构和行号应该保持一致
+                    int targetLineNumber = originalVariableInfo.getLineNumber();
+
+                    log.info("=== Line Number Debug ===");
+                    log.info("Original variable info: {} at line {}", originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                    log.info("Target line number for renamed file: {}", targetLineNumber);
+                    log.info("Renamed variable found: {}", renamedVarName);
+
+                    log.info("Using same line number for renamed variable: {} at line {} (variable rename metamorphic relation)",
+                            renamedVarName, targetLineNumber);
+
+                    // 对重命名文件执行切片（使用相同的行号，但是重命名的变量）
                     log.info("Executing slice for renamed file: {} with variable: {} at line {}",
-                            renamedFile, renamedVarName, originalVariableInfo.getLineNumber());
-                    String renamedSliceContent = sliceExecutor.executeSliceWithVariable(renamedFile, renamedVarName, originalVariableInfo.getLineNumber());
+                            renamedFile, renamedVarName, targetLineNumber);
+                    String renamedSliceContent = sliceExecutor.executeSliceWithVariable(renamedFile, renamedVarName, targetLineNumber);
                     log.info("Renamed slice content: {}", renamedSliceContent);
                     testResult.put("renamedSliceContent", renamedSliceContent);
 
@@ -356,7 +416,7 @@ public class SliceController {
                 String originalFile = originalFiles.get(i);
                 
                 // 读取原始文件内容
-                String originalFileContent = Files.readString(Paths.get(originalFile));
+                String originalFileContent = Files.readString(Paths.get(originalFile), StandardCharsets.UTF_8);
                 
                 // 对原始内容进行控制流变换
                 String transformedContent = javaCodeGenerator.transformControlFlow(originalFileContent);
@@ -595,9 +655,9 @@ public class SliceController {
             // 标准化第二个切片中的变量名
             String normalizedSlice2 = normalizeSlice(cu2, varMap2);
 
-            // 移除空白字符后比较
-            normalizedSlice1 = normalizedSlice1.replaceAll("\\s+", "").trim();
-            normalizedSlice2 = normalizedSlice2.replaceAll("\\s+", "").trim();
+            // 去除注释和空白字符后比较
+            normalizedSlice1 = removeCommentsAndWhitespace(normalizedSlice1);
+            normalizedSlice2 = removeCommentsAndWhitespace(normalizedSlice2);
 
             boolean isEquivalent = normalizedSlice1.equals(normalizedSlice2);
             if (!isEquivalent) {
@@ -648,6 +708,28 @@ public class SliceController {
         }
         
         return varMap;
+    }
+
+    /**
+     * 去除注释和空白字符，用于切片比较
+     */
+    private String removeCommentsAndWhitespace(String code) {
+        try {
+            // 去除多行注释 /* ... */
+            code = code.replaceAll("/\\*[\\s\\S]*?\\*/", "");
+
+            // 去除单行注释 // ...
+            code = code.replaceAll("//.*", "");
+
+            // 去除所有空白字符（空格、制表符、换行符等）
+            code = code.replaceAll("\\s+", "");
+
+            return code.trim();
+
+        } catch (Exception e) {
+            log.error("Error removing comments and whitespace: {}", e.getMessage());
+            return code.replaceAll("\\s+", "").trim();
+        }
     }
 
     /**
@@ -726,6 +808,149 @@ public class SliceController {
 
         } catch (Exception e) {
             log.error("Error finding renamed variable: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 根据原始变量名，在JSmith重命名文件中找到对应的重命名变量名
+     */
+    private String findJSmithRenamedVariableName(String file, String originalVarName) {
+        try {
+            // 从文件路径中提取基础文件名
+            String fileName = java.nio.file.Paths.get(file).getFileName().toString();
+            
+            // 从JavaCodeGenerator中获取JSmith变量映射关系
+            Map<String, String> variableMapping = javaCodeGenerator.getVariableMapping(fileName);
+
+            if (variableMapping != null && variableMapping.containsKey(originalVarName)) {
+                String renamedVarName = variableMapping.get(originalVarName);
+                log.info("Found JSmith renamed variable using mapping: {} -> {}", originalVarName, renamedVarName);
+                return renamedVarName;
+            }
+
+            // 如果映射中没有找到，尝试直接从重命名文件中分析
+            String renamedFile = file.replace("mutated", "renamed").replace("JSmith_mutated_", "JSmith_renamed_");
+            if (java.nio.file.Files.exists(java.nio.file.Paths.get(renamedFile))) {
+                String renamedContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(renamedFile)));
+                String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file)));
+                
+                // 通过比较两个文件来推断变量映射
+                String inferredRenamedVar = inferVariableMapping(originalContent, renamedContent, originalVarName);
+                if (inferredRenamedVar != null) {
+                    log.info("Inferred JSmith renamed variable: {} -> {}", originalVarName, inferredRenamedVar);
+                    return inferredRenamedVar;
+                }
+            }
+
+            log.error("JSmith variable mapping not found for: {} in file: {}", originalVarName, fileName);
+            return null;
+
+        } catch (Exception e) {
+            log.error("Error finding JSmith renamed variable: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 通过比较原始文件和重命名文件来推断变量映射
+     * 专门针对变量重命名蜕变关系：基于行号和位置来匹配变量
+     */
+    private String inferVariableMapping(String originalContent, String renamedContent, String originalVarName) {
+        try {
+            // 解析两个文件
+            CompilationUnit originalCu = javaParser.parse(originalContent).getResult().orElse(null);
+            CompilationUnit renamedCu = javaParser.parse(renamedContent).getResult().orElse(null);
+
+            if (originalCu == null || renamedCu == null) {
+                log.warn("Failed to parse one or both files for variable mapping inference");
+                return null;
+            }
+
+            // 获取变量声明
+            List<VariableDeclarator> originalVars = originalCu.findAll(VariableDeclarator.class);
+            List<VariableDeclarator> renamedVars = renamedCu.findAll(VariableDeclarator.class);
+
+            log.info("Original file has {} variables, renamed file has {} variables",
+                    originalVars.size(), renamedVars.size());
+
+            // 找到目标变量在原始文件中的行号
+            int targetLineNumber = -1;
+            String targetType = null;
+            String targetInitValue = null;
+
+            for (VariableDeclarator var : originalVars) {
+                if (var.getNameAsString().equals(originalVarName)) {
+                    if (var.getBegin().isPresent()) {
+                        targetLineNumber = var.getBegin().get().line;
+                        targetType = var.getTypeAsString();
+                        targetInitValue = var.getInitializer().map(Object::toString).orElse("");
+                        break;
+                    }
+                }
+            }
+
+            if (targetLineNumber == -1) {
+                log.warn("Could not find line number for target variable '{}' in original file", originalVarName);
+                return null;
+            }
+
+            log.info("Target variable '{}' found at line {} (type={}, initValue={})",
+                    originalVarName, targetLineNumber, targetType, targetInitValue);
+
+            // 在重命名文件中查找相同行号的变量
+            for (VariableDeclarator var : renamedVars) {
+                if (var.getBegin().isPresent()) {
+                    int varLineNumber = var.getBegin().get().line;
+
+                    // 检查是否在相同行号
+                    if (varLineNumber == targetLineNumber) {
+                        String candidateType = var.getTypeAsString();
+                        String candidateInitValue = var.getInitializer().map(Object::toString).orElse("");
+
+                        // 验证类型和初始值是否匹配（应该完全一致，除了变量名）
+                        if (targetType.equals(candidateType) && targetInitValue.equals(candidateInitValue)) {
+                            String candidateName = var.getNameAsString();
+                            log.info("Found matching variable at same line {}: '{}' -> '{}' (type={}, initValue={})",
+                                    targetLineNumber, originalVarName, candidateName, candidateType, candidateInitValue);
+                            return candidateName;
+                        } else {
+                            log.warn("Variable at line {} has different type/value: type {} vs {}, initValue {} vs {}",
+                                    varLineNumber, targetType, candidateType, targetInitValue, candidateInitValue);
+                        }
+                    }
+                }
+            }
+
+            // 如果按行号匹配失败，回退到位置索引匹配
+            log.warn("Line-based matching failed, trying position-based matching");
+
+            int targetIndex = -1;
+            for (int i = 0; i < originalVars.size(); i++) {
+                if (originalVars.get(i).getNameAsString().equals(originalVarName)) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            if (targetIndex >= 0 && targetIndex < renamedVars.size()) {
+                VariableDeclarator candidateVar = renamedVars.get(targetIndex);
+                String candidateType = candidateVar.getTypeAsString();
+                String candidateInitValue = candidateVar.getInitializer().map(Object::toString).orElse("");
+
+                if (targetType.equals(candidateType) && targetInitValue.equals(candidateInitValue)) {
+                    String candidateName = candidateVar.getNameAsString();
+                    log.info("Found matching variable by position {}: '{}' -> '{}' (type={}, initValue={})",
+                            targetIndex, originalVarName, candidateName, candidateType, candidateInitValue);
+                    return candidateName;
+                }
+            }
+
+            log.error("Could not find matching variable for '{}' in renamed file", originalVarName);
+            return null;
+
+        } catch (Exception e) {
+            log.error("Error inferring variable mapping: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -930,6 +1155,128 @@ public class SliceController {
     }
 
     /**
+     * 验证指定变量是否存在于文件中
+     */
+    private boolean verifyVariableExists(String filePath, String variableName) {
+        try {
+            String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(filePath)));
+            CompilationUnit cu = javaParser.parse(content).getResult().orElse(null);
+
+            if (cu == null) {
+                log.error("Failed to parse file for variable verification: {}", filePath);
+                return false;
+            }
+
+            // 查找变量声明
+            List<VariableDeclarator> variables = cu.findAll(VariableDeclarator.class);
+            boolean foundDeclaration = variables.stream()
+                    .anyMatch(v -> v.getNameAsString().equals(variableName));
+
+            if (foundDeclaration) {
+                log.debug("Variable '{}' found as declaration in file: {}", variableName, filePath);
+                return true;
+            }
+
+            // 查找变量使用
+            List<NameExpr> nameExprs = cu.findAll(NameExpr.class);
+            boolean foundUsage = nameExprs.stream()
+                    .anyMatch(n -> n.getNameAsString().equals(variableName));
+
+            if (foundUsage) {
+                log.debug("Variable '{}' found as usage in file: {}", variableName, filePath);
+                return true;
+            }
+
+            log.warn("Variable '{}' not found in file: {}", variableName, filePath);
+            return false;
+
+        } catch (Exception e) {
+            log.error("Error verifying variable '{}' in file: {}", variableName, filePath, e);
+            return false;
+        }
+    }
+
+    /**
+     * 在指定文件的指定行号查找变量
+     * 专门用于变量重命名蜕变关系测试
+     */
+    private String findVariableAtSameLine(String filePath, int lineNumber) {
+        try {
+            log.info("=== Finding variable at same line ===");
+            log.info("File: {}, Target line: {}", filePath, lineNumber);
+
+            String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(filePath)));
+            CompilationUnit cu = javaParser.parse(content).getResult().orElse(null);
+
+            if (cu == null) {
+                log.error("Failed to parse file: {}", filePath);
+                return null;
+            }
+
+            // 查找所有变量声明和使用
+            List<VariableDeclarator> variables = cu.findAll(VariableDeclarator.class);
+            List<NameExpr> nameExprs = cu.findAll(NameExpr.class);
+
+            // 首先查找变量声明
+            for (VariableDeclarator var : variables) {
+                if (var.getBegin().isPresent() && var.getBegin().get().line == lineNumber) {
+                    String varName = var.getNameAsString();
+                    log.info("Found variable declaration at line {}: {}", lineNumber, varName);
+                    return varName;
+                }
+            }
+
+            // 如果没有找到声明，查找变量使用
+            log.info("Searching for variable usage at line {}", lineNumber);
+            log.info("Total NameExpr found: {}", nameExprs.size());
+
+            for (NameExpr nameExpr : nameExprs) {
+                if (nameExpr.getBegin().isPresent()) {
+                    int exprLine = nameExpr.getBegin().get().line;
+                    String varName = nameExpr.getNameAsString();
+
+                    log.debug("Checking NameExpr '{}' at line {}", varName, exprLine);
+
+                    if (exprLine == lineNumber) {
+                        // 验证这是一个已声明的变量
+                        boolean isDeclaredVariable = variables.stream()
+                                .anyMatch(v -> v.getNameAsString().equals(varName));
+
+                        log.info("Found NameExpr '{}' at target line {}, isDeclaredVariable: {}",
+                                varName, lineNumber, isDeclaredVariable);
+
+                        if (isDeclaredVariable) {
+                            log.info("Found variable usage at line {}: {}", lineNumber, varName);
+                            return varName;
+                        }
+                    }
+                }
+            }
+
+            // 如果还是没找到，尝试更宽泛的搜索：查找该行的所有变量引用
+            log.info("Trying broader search for line {}", lineNumber);
+            String lineContent = getLineContent(content, lineNumber);
+            log.info("Line {} content: '{}'", lineNumber, lineContent);
+
+            // 从该行内容中提取可能的变量名
+            for (VariableDeclarator var : variables) {
+                String varName = var.getNameAsString();
+                if (lineContent.contains(varName)) {
+                    log.info("Found variable '{}' in line content at line {}", varName, lineNumber);
+                    return varName;
+                }
+            }
+
+            log.warn("No variable found at line {} in file: {}", lineNumber, filePath);
+            return null;
+
+        } catch (Exception e) {
+            log.error("Error finding variable at line {} in file: {}", lineNumber, filePath, e);
+            return null;
+        }
+    }
+
+    /**
      * 判断是否为无用代码行
      */
     private boolean isDeadCodeLine(String line) {
@@ -950,4 +1297,51 @@ public class SliceController {
         log.info("Checking line: '{}' (trimmed: '{}') - isDeadCode: {}", line, trimmedLine, isDeadCode);
         return isDeadCode;
     }
-} 
+
+    /**
+     * 获取指定行的内容
+     */
+    private String getLineContent(String content, int lineNumber) {
+        try {
+            String[] lines = content.split("\n");
+            if (lineNumber > 0 && lineNumber <= lines.length) {
+                return lines[lineNumber - 1].trim();
+            }
+            return "";
+        } catch (Exception e) {
+            log.warn("Error getting line content for line {}: {}", lineNumber, e.getMessage());
+            return "";
+        }
+    }
+
+    /**
+     * 清理之前的切片文件
+     */
+    private void cleanupSliceFiles() {
+        try {
+            Path sliceDir = Paths.get("slice");
+            if (Files.exists(sliceDir)) {
+                log.info("Cleaning up slice directory: {}", sliceDir.toAbsolutePath());
+
+                // 删除slice目录下的所有.java文件
+                Files.walk(sliceDir)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".java"))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                            log.debug("Deleted slice file: {}", path.getFileName());
+                        } catch (IOException e) {
+                            log.warn("Failed to delete slice file {}: {}", path.getFileName(), e.getMessage());
+                        }
+                    });
+
+                log.info("Slice directory cleanup completed");
+            } else {
+                log.info("Slice directory does not exist, no cleanup needed");
+            }
+        } catch (IOException e) {
+            log.error("Error during slice directory cleanup: {}", e.getMessage());
+        }
+    }
+}

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,6 +37,7 @@ import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.Node;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 @Component
@@ -48,6 +50,9 @@ public class JavaCodeGenerator {
     private static final String REORDERED_DIR = "reordered";
     private static final Random random = new Random();
     private final JavaParser javaParser;
+    
+    @Autowired
+    private JSmithCodeGenerator jsmithCodeGenerator;
 
     // 保存变量映射关系：文件名 -> 变量映射
     private final Map<String, Map<String, String>> variableMappings = new HashMap<>();
@@ -66,6 +71,7 @@ public class JavaCodeGenerator {
         createDirectories();
         ParserConfiguration configuration = new ParserConfiguration();
         this.javaParser = new JavaParser(configuration);
+        this.jsmithCodeGenerator = new JSmithCodeGenerator();
     }
 
     private void createDirectories() {
@@ -179,8 +185,318 @@ public class JavaCodeGenerator {
      * 生成结构和内容都不同的Java类
      */
     public String generateRandomJavaClass() {
-        // 强制使用switch模板，确保包含无关语句
-        return generateClassWithSwitchStatements();
+        // 使用JSmith生成器替代原有的模板方法
+        try {
+            log.info("Using JSmith generator to create random Java class");
+            return jsmithCodeGenerator.generateSliceableJavaClass();
+        } catch (Exception e) {
+            log.warn("JSmith generation failed, falling back to original method: {}", e.getMessage());
+            // 如果JSmith生成失败，回退到原有的方法
+            return generateClassWithSwitchStatements();
+        }
+    }
+    
+    /**
+     * 批量生成复杂的随机Java文件（整合BatchGenerator功能）
+     * @param outputDir 输出目录
+     * @param count 生成数量
+     * @return 生成的文件路径列表
+     */
+    public List<String> generateComplexJavaFiles(String outputDir, int count) {
+        try {
+            long baseSeed = System.currentTimeMillis();
+            log.info("Generating {} complex Java files using integrated BatchGenerator approach", count);
+            return jsmithCodeGenerator.generateComplexJavaFiles(count, outputDir, baseSeed);
+        } catch (Exception e) {
+            log.error("Failed to generate complex Java files: {}", e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * 使用JSmith生成器生成用于变量重命名蜕变关系测试的文件对
+     * @param numPairs 生成的文件对数量
+     * @return 生成的文件路径列表（包含原始文件和重命名文件）
+     */
+    public List<String> generateJSmithVariableRenameTestFiles(int numPairs) {
+        List<String> generatedFiles = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+        
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get(RENAMED_DIR));
+            log.info("Created directories for JSmith variable rename test: {}, {}", MUTATED_DIR, RENAMED_DIR);
+            
+            for (int i = 0; i < numPairs; i++) {
+                try {
+                    log.info("Generating JSmith file pair {} at {}", i + 1, new Date());
+                    
+                    // 1. 使用JSmith生成复杂的Java类
+                    // 使用更加随机的种子生成策略
+                    long seed = generateHighEntropyRandomSeed(startTime, i);
+                    String originalContent = jsmithCodeGenerator.generateRandomJavaClassWithEnhancedRandomness(seed);
+                    
+                    // 2. 保存原始文件到mutated目录
+                    String mutatedFileName = String.format("JSmith_mutated_%d.java", i);
+                    String mutatedFilePath = Paths.get(MUTATED_DIR, mutatedFileName).toString();
+
+                    // 移除package声明并标准化原始文件格式
+                    String cleanedContent = removePackageDeclaration(originalContent);
+                    String standardizedContent = standardizeJavaFormat(cleanedContent);
+
+                    try (FileWriter writer = new FileWriter(mutatedFilePath)) {
+                        writer.write(standardizedContent);
+                    }
+                    generatedFiles.add(mutatedFilePath);
+                    log.info("Generated JSmith original file: {}", mutatedFilePath);
+                    
+                    // 3. 创建变量重命名版本（使用标准化的内容）
+                    String renamedFilePath = createJSmithRenamedVersion(standardizedContent, i);
+                    if (renamedFilePath != null) {
+                        generatedFiles.add(renamedFilePath);
+                        log.info("Generated JSmith renamed file: {}", renamedFilePath);
+                        
+                        // 4. 验证重命名是否成功
+                        if (validateRenamedFile(mutatedFilePath, renamedFilePath)) {
+                            log.info("Successfully validated JSmith file pair: {} <-> {}", mutatedFilePath, renamedFilePath);
+                        } else {
+                            log.warn("Validation failed for JSmith file pair: {} <-> {}", mutatedFilePath, renamedFilePath);
+                        }
+                    } else {
+                        log.warn("Failed to create renamed version for JSmith file: {}", mutatedFilePath);
+                    }
+                    
+                } catch (Exception e) {
+                    log.error("Error generating JSmith file pair {}: {}", i + 1, e.getMessage(), e);
+                }
+            }
+            
+            long endTime = System.currentTimeMillis();
+            log.info("JSmith variable rename test file generation completed. Generated {} files in {} ms", 
+                    generatedFiles.size(), endTime - startTime);
+            
+        } catch (IOException e) {
+            log.error("Failed to create directories for JSmith test files", e);
+        }
+        
+        return generatedFiles;
+    }
+    
+    /**
+     * 为JSmith生成的代码创建变量重命名版本
+     * @param originalContent 原始代码内容
+     * @param index 文件索引
+     * @return 重命名文件的路径，如果失败返回null
+     */
+    private String createJSmithRenamedVersion(String originalContent, int index) {
+        try {
+            String renamedFileName = String.format("JSmith_renamed_%d.java", index);
+            String renamedFilePath = Paths.get(RENAMED_DIR, renamedFileName).toString();
+            
+            // 解析原始代码
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse JSmith generated code"));
+            
+            // 创建变量名映射（专门处理JSmith生成的复杂变量名）
+            Map<String, String> variableMap = createJSmithVariableMapping(cu);
+            
+            if (variableMap.isEmpty()) {
+                log.warn("No variables found in JSmith generated code, copying file as is");
+                try (FileWriter writer = new FileWriter(renamedFilePath)) {
+                    writer.write(originalContent);
+                }
+                return renamedFilePath;
+            }
+            
+            // 保存变量映射关系
+            String baseFileName = "JSmith_mutated_" + index + ".java";
+            variableMappings.put(baseFileName, variableMap);
+            log.info("Saved JSmith variable mapping for {}: {}", baseFileName, variableMap);
+            
+            // 应用变量重命名
+            String renamedContent = applyJSmithVariableRenaming(cu, variableMap);
+            
+            // 验证重命名后的代码
+            if (validateJSmithRenamedCode(renamedContent, variableMap)) {
+                try (FileWriter writer = new FileWriter(renamedFilePath)) {
+                    writer.write(renamedContent);
+                }
+                return renamedFilePath;
+            } else {
+                log.error("JSmith renamed code validation failed, copying original");
+                try (FileWriter writer = new FileWriter(renamedFilePath)) {
+                    writer.write(originalContent);
+                }
+                return renamedFilePath;
+            }
+            
+        } catch (Exception e) {
+            log.error("Error creating JSmith renamed version: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+    
+    /**
+     * 为JSmith生成的代码创建变量映射（处理复杂的变量名）
+     * @param cu 编译单元
+     * @return 变量映射
+     */
+    private Map<String, String> createJSmithVariableMapping(CompilationUnit cu) {
+        Map<String, String> variableMap = new HashMap<>();
+        
+        // 收集所有变量声明
+        cu.findAll(VariableDeclarator.class).forEach(vd -> {
+            String oldName = vd.getNameAsString();
+            if (!variableMap.containsKey(oldName)) {
+                // 为JSmith生成的复杂变量名创建更合适的新名称
+                String newName = generateJSmithVariableName(oldName);
+                variableMap.put(oldName, newName);
+                log.debug("JSmith variable mapping: {} -> {}", oldName, newName);
+            }
+        });
+        
+        return variableMap;
+    }
+    
+    /**
+     * 为JSmith变量生成新的变量名
+     * 使用长度一致的重命名策略
+     * @param oldName 原变量名
+     * @return 新变量名
+     */
+    private String generateJSmithVariableName(String oldName) {
+        // 使用新的长度一致的变量名生成策略
+        return generateNewVariableName(oldName);
+    }
+    
+    /**
+     * 检查变量名是否已被使用
+     * @param name 变量名
+     * @return 是否已被使用
+     */
+    private boolean isVariableNameUsed(String name) {
+        // 简单的检查，可以根据需要扩展
+        return name.equals("args") || name.equals("main") || name.equals("String") || name.equals("System");
+    }
+    
+    /**
+     * 应用JSmith变量重命名
+     * @param cu 编译单元
+     * @param variableMap 变量映射
+     * @return 重命名后的代码
+     */
+    private String applyJSmithVariableRenaming(CompilationUnit cu, Map<String, String> variableMap) {
+        // 创建访问者来重命名变量
+        ModifierVisitor<Void> visitor = new ModifierVisitor<Void>() {
+            @Override
+            public Visitable visit(VariableDeclarator vd, Void arg) {
+                String oldName = vd.getNameAsString();
+                if (variableMap.containsKey(oldName)) {
+                    String newName = variableMap.get(oldName);
+                    vd.setName(newName);
+                    log.debug("Renamed JSmith variable declaration: {} -> {}", oldName, newName);
+                }
+                return super.visit(vd, arg);
+            }
+            
+            @Override
+            public Visitable visit(NameExpr nameExpr, Void arg) {
+                String oldName = nameExpr.getNameAsString();
+                if (variableMap.containsKey(oldName)) {
+                    String newName = variableMap.get(oldName);
+                    nameExpr.setName(newName);
+                    log.debug("Renamed JSmith variable usage: {} -> {}", oldName, newName);
+                }
+                return super.visit(nameExpr, arg);
+            }
+        };
+        
+        // 应用访问者
+        cu.accept(visitor, null);
+        
+        return cu.toString();
+    }
+    
+    /**
+     * 验证JSmith重命名后的代码
+     * @param renamedContent 重命名后的代码
+     * @param variableMap 变量映射
+     * @return 是否验证通过
+     */
+    private boolean validateJSmithRenamedCode(String renamedContent, Map<String, String> variableMap) {
+        try {
+            // 尝试解析重命名后的代码
+            CompilationUnit parsedCu = javaParser.parse(renamedContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse JSmith renamed code"));
+            
+            // 验证基本结构
+            if (parsedCu.getTypes().isEmpty()) {
+                log.error("JSmith renamed code is missing class declarations");
+                return false;
+            }
+            
+            // 验证变量重命名
+            List<VariableDeclarator> variables = parsedCu.findAll(VariableDeclarator.class);
+            if (variables.isEmpty()) {
+                log.warn("JSmith renamed code has no variable declarations");
+                return true; // 没有变量也是有效的
+            }
+            
+            // 检查是否有变量被正确重命名
+            boolean hasRenamedVariables = false;
+            for (VariableDeclarator vd : variables) {
+                String name = vd.getNameAsString();
+                if (variableMap.containsValue(name)) {
+                    hasRenamedVariables = true;
+                    break;
+                }
+            }
+            
+            if (!hasRenamedVariables) {
+                log.warn("No variables appear to have been renamed in JSmith code");
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            log.error("JSmith renamed code validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 验证重命名文件对
+     * @param originalFile 原始文件路径
+     * @param renamedFile 重命名文件路径
+     * @return 是否验证通过
+     */
+    private boolean validateRenamedFile(String originalFile, String renamedFile) {
+        try {
+            String originalContent = Files.readString(Paths.get(originalFile), StandardCharsets.UTF_8);
+            String renamedContent = Files.readString(Paths.get(renamedFile), StandardCharsets.UTF_8);
+            
+            // 基本检查：两个文件都应该能被解析
+            CompilationUnit originalCu = javaParser.parse(originalContent).getResult().orElse(null);
+            CompilationUnit renamedCu = javaParser.parse(renamedContent).getResult().orElse(null);
+            
+            if (originalCu == null || renamedCu == null) {
+                log.error("Failed to parse one or both files: {} / {}", originalFile, renamedFile);
+                return false;
+            }
+            
+            // 检查类的数量是否相同
+            if (originalCu.getTypes().size() != renamedCu.getTypes().size()) {
+                log.error("Different number of types in original vs renamed file");
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            log.error("Error validating renamed file pair: {}", e.getMessage());
+            return false;
+        }
     }
 
     // 模板1：复杂的main方法，包含多个变量、条件语句和循环
@@ -608,7 +924,7 @@ public class JavaCodeGenerator {
 
     public String renameVariables(String sourceFile) {
         try {
-            String content = Files.readString(Paths.get(sourceFile));
+            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
             String baseName = getBaseName(sourceFile);
             String renamedFileName = baseName + "_renamed.java";
             String renamedFilePath = Paths.get(RENAMED_DIR, renamedFileName).toString();
@@ -665,8 +981,8 @@ public class JavaCodeGenerator {
             // 应用访问者
             cu.accept(visitor, null);
 
-            // 验证重命名后的代码是否可以被解析
-            String renamedContent = cu.toString();
+            // 使用字符串替换保持原始格式
+            String renamedContent = renameVariablesPreservingFormat(content, variableMap);
             try {
                 // 尝试解析重命名后的代码
                 CompilationUnit parsedCu = javaParser.parse(renamedContent).getResult().orElseThrow(() ->
@@ -725,10 +1041,237 @@ public class JavaCodeGenerator {
     }
 
     private String generateNewVariableName(String oldName) {
-        // 生成新的变量名，保持类型前缀
-        String prefix = oldName.substring(0, Math.min(2, oldName.length()));
-        // 使用更简单的命名方式，避免特殊字符
-        return prefix + "_" + Math.abs(random.nextInt(1000));
+        // 生成新的变量名，保持与原变量名完全相同的长度
+        int originalLength = oldName.length();
+
+        // 策略：通过字符替换生成相同长度的新变量名
+        StringBuilder newName = new StringBuilder();
+
+        for (int i = 0; i < originalLength; i++) {
+            char originalChar = oldName.charAt(i);
+            char newChar;
+
+            if (i == 0) {
+                // 第一个字符必须是字母
+                if (Character.isLetter(originalChar)) {
+                    // 字母偏移：a->n, b->o, c->p, ..., z->m
+                    if (Character.isLowerCase(originalChar)) {
+                        newChar = (char) ((originalChar - 'a' + 13) % 26 + 'a');
+                    } else {
+                        newChar = (char) ((originalChar - 'A' + 13) % 26 + 'A');
+                    }
+                } else {
+                    // 如果原来不是字母，用'v'替换
+                    newChar = 'v';
+                }
+            } else {
+                // 其他位置的字符
+                if (Character.isLetter(originalChar)) {
+                    // 字母偏移
+                    if (Character.isLowerCase(originalChar)) {
+                        newChar = (char) ((originalChar - 'a' + 13) % 26 + 'a');
+                    } else {
+                        newChar = (char) ((originalChar - 'A' + 13) % 26 + 'A');
+                    }
+                } else if (Character.isDigit(originalChar)) {
+                    // 数字偏移：0->5, 1->6, ..., 9->4
+                    newChar = (char) ((originalChar - '0' + 5) % 10 + '0');
+                } else {
+                    // 特殊字符保持不变或替换为数字
+                    newChar = (char) ('0' + (i % 10));
+                }
+            }
+
+            newName.append(newChar);
+        }
+
+        String result = newName.toString();
+
+        // 验证长度完全一致
+        if (result.length() != originalLength) {
+            log.error("Length mismatch in variable renaming: {} ({}) -> {} ({})",
+                    oldName, originalLength, result, result.length());
+            throw new RuntimeException("Variable renaming failed to maintain length consistency");
+        }
+
+        log.debug("Generated new variable name: {} -> {} (length: {} -> {})",
+                oldName, result, originalLength, result.length());
+
+        return result;
+    }
+
+    /**
+     * 移除Java代码中的package声明
+     * @param content 原始代码内容
+     * @return 移除package声明后的代码内容
+     */
+    private String removePackageDeclaration(String content) {
+        try {
+            String result = content;
+
+            // 移除package声明行
+            result = result.replaceAll("package\\s+[^;]+;\\s*\\n?", "");
+
+            // 移除开头的空行
+            result = result.replaceAll("^\\s*\\n+", "");
+
+            log.debug("Removed package declaration from Java code");
+            return result;
+
+        } catch (Exception e) {
+            log.warn("Failed to remove package declaration: {}", e.getMessage());
+            return content;
+        }
+    }
+
+    /**
+     * 标准化Java代码格式
+     * @param content 原始代码内容
+     * @return 标准化后的代码内容
+     */
+    private String standardizeJavaFormat(String content) {
+        try {
+            // 先进行基本的清理，移除可能导致解析问题的内容
+            String cleanedContent = cleanJavaCode(content);
+
+            // 使用JavaParser解析并重新格式化代码
+            CompilationUnit cu = javaParser.parse(cleanedContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse Java code for standardization"));
+
+            // 返回标准格式的代码
+            String standardized = cu.toString();
+            log.debug("Standardized Java code format");
+            return standardized;
+
+        } catch (Exception e) {
+            log.warn("Failed to standardize Java format, using cleaned content: {}", e.getMessage());
+            // 如果标准化失败，至少返回清理后的内容
+            return cleanJavaCode(content);
+        }
+    }
+
+    /**
+     * 清理Java代码，移除可能导致解析问题的内容
+     * @param content 原始代码内容
+     * @return 清理后的代码内容
+     */
+    private String cleanJavaCode(String content) {
+        try {
+            String cleaned = content;
+
+            // 完全移除package声明
+            cleaned = cleaned.replaceAll("package\\s+[^;]+;\\s*", "");
+
+            // 移除package声明后可能留下的空行
+            cleaned = cleaned.replaceAll("^\\s*\\n", "");
+
+            // 移除可能有问题的静态导入
+            cleaned = cleaned.replaceAll("import static [^;]+;", "");
+
+            // 移除复杂的导入，只保留基本的java.util导入
+            cleaned = cleaned.replaceAll("import java\\.time[^;]*;", "");
+            cleaned = cleaned.replaceAll("import java\\.nio[^;]*;", "");
+
+            // 修复八进制数字（如 01 -> 1）
+            cleaned = cleaned.replaceAll("\\b0([1-7])\\b", "$1");
+
+            // 修复十六进制数字格式
+            cleaned = cleaned.replaceAll("0x([A-Fa-f0-9]+)", "0x$1");
+
+            log.debug("Cleaned Java code to improve compatibility");
+            return cleaned;
+
+        } catch (Exception e) {
+            log.warn("Failed to clean Java code: {}", e.getMessage());
+            return content;
+        }
+    }
+
+    /**
+     * 为切片选择变量的行号
+     * 使用随机策略选择能产生丰富切片的变量使用位置
+     * @param allLines 变量出现的所有行号
+     * @param variableName 变量名
+     * @return 选择的行号
+     */
+    private int selectVariableLineForSlicing(List<Integer> allLines, String variableName) {
+        if (allLines.size() <= 1) {
+            // 只有声明，选择声明行
+            int lineNumber = allLines.get(0);
+            log.info("Selected variable: {} at line {} (declaration only)", variableName, lineNumber);
+            return lineNumber;
+        }
+
+        // 有多次使用，随机选择一个使用位置
+        List<Integer> usageLines = allLines.subList(1, allLines.size());
+        int randomIndex = random.nextInt(usageLines.size());
+        int lineNumber = usageLines.get(randomIndex);
+
+        log.info("Selected variable: {} at randomly chosen line {} (usage #{} out of {} usages)",
+                variableName, lineNumber, randomIndex + 1, usageLines.size());
+        log.info("All usage lines for {}: {}", variableName, usageLines);
+
+        return lineNumber;
+    }
+
+    /**
+     * 使用字符串替换重命名变量，并标准化格式
+     * @param content 原始文件内容
+     * @param variableMap 变量映射表
+     * @return 重命名后的内容
+     */
+    private String renameVariablesPreservingFormat(String content, Map<String, String> variableMap) {
+        String result = content;
+
+        // 按变量名长度降序排序，避免短变量名被长变量名的一部分替换
+        List<Map.Entry<String, String>> sortedEntries = variableMap.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getKey().length(), e1.getKey().length()))
+                .collect(java.util.stream.Collectors.toList());
+
+        for (Map.Entry<String, String> entry : sortedEntries) {
+            String oldName = entry.getKey();
+            String newName = entry.getValue();
+
+            // 使用正则表达式确保只替换完整的变量名，不替换变量名的一部分
+            // \\b 表示单词边界，确保只匹配完整的标识符
+            String regex = "\\b" + java.util.regex.Pattern.quote(oldName) + "\\b";
+            result = result.replaceAll(regex, newName);
+
+            log.debug("String replacement: {} -> {} (preserving format)", oldName, newName);
+        }
+
+        // 对重命名后的代码进行标准化格式处理
+        return standardizeJavaFormat(result);
+    }
+
+    /**
+     * 生成高熵随机种子
+     * 结合多种随机源以增加种子的随机性
+     * @param baseTime 基础时间戳
+     * @param index 文件索引
+     * @return 高熵随机种子
+     */
+    private long generateHighEntropyRandomSeed(long baseTime, int index) {
+        // 结合多种随机源
+        long nanoTime = System.nanoTime();
+        long hashCode = System.identityHashCode(new Object());
+        long memoryHash = Runtime.getRuntime().freeMemory();
+
+        // 使用质数和位运算增加随机性
+        long seed = baseTime * 31L +
+                   nanoTime * 37L +
+                   hashCode * 41L +
+                   memoryHash * 43L +
+                   index * 47L;
+
+        // 进一步混合位
+        seed ^= (seed >>> 32);
+        seed ^= (seed << 13);
+        seed ^= (seed >>> 17);
+        seed ^= (seed << 5);
+
+        log.debug("Generated high entropy seed for index {}: {}", index, seed);
+        return seed;
     }
 
     private String getBaseName(String filePath) {
@@ -737,7 +1280,7 @@ public class JavaCodeGenerator {
 
     public VariableInfo findVariableForSlicing(String sourceFile) {
         try {
-            String content = Files.readString(Paths.get(sourceFile));
+            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
             CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
                     new RuntimeException("Failed to parse Java file"));
 
@@ -785,71 +1328,123 @@ public class JavaCodeGenerator {
             });
 
             // 打印所有变量的行号信息
-            log.info("=== Variable line information ===");
+            log.info("=== Variable Usage Analysis ===");
+            log.info("Found {} variables in total", variableLines.size());
             for (Map.Entry<String, List<Integer>> entry : variableLines.entrySet()) {
                 String varName = entry.getKey();
                 List<Integer> lines = entry.getValue();
-                log.info("Variable '{}': lines = {}", varName, lines);
+                log.info("Variable '{}': lines = {} (count: {})", varName, lines, lines.size());
+                if (lines.size() >= 2) {
+                    log.info("  -> '{}' is a CANDIDATE for slicing (multiple usage)", varName);
+                } else {
+                    log.info("  -> '{}' is NOT suitable (single usage only)", varName);
+                }
             }
 
-            // 查找合适的变量（至少出现两次，且第二次出现不在声明行）
+            // 查找合适的变量（优先选择被多次使用且位置靠后的变量，适合前向切片）
+            log.info("=== Filtering variables for multiple usage ===");
             List<Map.Entry<String, List<Integer>>> suitableVariables = variableLines.entrySet().stream()
-                    .filter(e -> e.getValue().size() >= 2)
+                    .filter(e -> {
+                        boolean hasMultipleUsage = e.getValue().size() >= 2;
+                        log.info("Variable '{}': usage count = {}, hasMultipleUsage = {}",
+                                e.getKey(), e.getValue().size(), hasMultipleUsage);
+                        return hasMultipleUsage;
+                    })
                     .filter(e -> {
                         List<Integer> lines = e.getValue();
                         int firstLine = lines.get(0);
-                        int secondLine = lines.get(1);
-                        boolean valid = secondLine != firstLine; // 确保第二次出现不是声明行
-                        log.info("Variable '{}': first line = {}, second line = {}, valid = {}",
-                                e.getKey(), firstLine, secondLine, valid);
+                        int lastLine = lines.get(lines.size() - 1);
+                        boolean valid = lastLine > firstLine; // 确保有实际的使用，不只是声明
+                        log.info("Variable '{}': first line = {}, last line = {}, usage count = {}, valid = {}",
+                                e.getKey(), firstLine, lastLine, lines.size(), valid);
                         return valid;
                     })
+                    .sorted((e1, e2) -> {
+                        // 按照以下优先级排序：
+                        // 1. 使用次数更多的变量
+                        // 2. 最后使用位置更靠后的变量（适合前向切片）
+                        List<Integer> lines1 = e1.getValue();
+                        List<Integer> lines2 = e2.getValue();
+
+                        int usageCount1 = lines1.size();
+                        int usageCount2 = lines2.size();
+
+                        if (usageCount1 != usageCount2) {
+                            return Integer.compare(usageCount2, usageCount1); // 使用次数多的优先
+                        }
+
+                        int lastLine1 = lines1.get(lines1.size() - 1);
+                        int lastLine2 = lines2.get(lines2.size() - 1);
+
+                        return Integer.compare(lastLine2, lastLine1); // 最后使用位置靠后的优先
+                    })
                     .collect(Collectors.toList());
+            
+            // 如果没有找到至少出现两次的变量，尝试使用只出现一次的变量（JSmith代码的特殊处理）
+            if (suitableVariables.isEmpty()) {
+                log.info("No variables with multiple usages found, trying single-usage variables for JSmith code");
+                suitableVariables = variableLines.entrySet().stream()
+                        .filter(e -> e.getValue().size() >= 1)
+                        .filter(e -> {
+                            String varName = e.getKey();
+                            // 排除一些不适合切片的变量名
+                            boolean suitable = !varName.equals("args") && 
+                                             !varName.equals("main") && 
+                                             !varName.matches(".*temp.*") &&
+                                             !varName.matches(".*unused.*");
+                            log.info("Single-usage variable '{}': suitable = {}", varName, suitable);
+                            return suitable;
+                        })
+                        .collect(Collectors.toList());
+            }
 
             log.info("Found {} suitable variables", suitableVariables.size());
 
             if (!suitableVariables.isEmpty()) {
-                // 优先选择更有意义的变量名，并且选择第一次使用（第二次出现）
-                Optional<Map.Entry<String, List<Integer>>> preferredVariable = suitableVariables.stream()
-                        .filter(e -> {
-                            String varName = e.getKey();
-                            // 优先选择val、result、sum、total等有意义的变量名，包括res1、res2、res3
-                            boolean preferred = varName.matches(".*(val|result|sum|total|count|data|res).*") &&
-                                    !varName.matches(".*(temp|unusedVar).*");
-                            log.info("Variable '{}': preferred = {}", varName, preferred);
-                            return preferred;
-                        })
-                        .min(Comparator.comparingInt(e -> e.getValue().get(1))); // 选择第一次使用最早的行
+                // 由于已经按优先级排序，直接选择第一个变量
+                Map.Entry<String, List<Integer>> selectedVariable = suitableVariables.get(0);
+                String variableName = selectedVariable.getKey();
+                List<Integer> allLines = selectedVariable.getValue();
 
-                if (preferredVariable.isPresent()) {
-                    String variableName = preferredVariable.get().getKey();
-                    int lineNumber = preferredVariable.get().getValue().get(1); // 第一次使用的行号
-                    List<Integer> allLines = preferredVariable.get().getValue();
-                    log.info("Selected preferred variable: {} at line {} (first usage)", variableName, lineNumber);
-                    log.info("All lines for {}: {}", variableName, allLines);
-                    return new VariableInfo(variableName, lineNumber);
-                }
+                // 为蜕变测试选择确定性的位置，为其他测试选择随机位置
+                int lineNumber = selectVariableLineForSlicing(allLines, variableName);
 
-                // 如果没有找到优先变量，选择第一次使用最早的行，但避免无用代码中的变量
+                log.info("Variable '{}' usage pattern: {}", variableName, allLines);
+                log.info("This variable appears {} times, making it suitable for forward slicing", allLines.size());
+
+                return new VariableInfo(variableName, lineNumber);
+            }
+
+            // 如果没有找到多次使用的变量，选择单次使用但位置靠后的变量
+            if (!suitableVariables.isEmpty()) {
                 Map.Entry<String, List<Integer>> bestVariable = suitableVariables.stream()
                         .filter(e -> {
-                            // 检查变量的第一次使用是否在无用代码中
-                            int firstUsageLine = e.getValue().get(1);
-                            String firstUsageLineContent = getLineContent(sourceFile, firstUsageLine);
-                            boolean isInDeadCode = isDeadCodeLine(firstUsageLineContent.trim());
-                            log.info("Variable '{}' first usage at line {}: '{}', isDeadCode: {}",
-                                    e.getKey(), firstUsageLine, firstUsageLineContent.trim(), isInDeadCode);
+                            // 检查变量的使用是否在无用代码中
+                            List<Integer> lines = e.getValue();
+                            int checkLine = lines.size() > 1 ? lines.get(lines.size() - 1) : lines.get(0); // 优先检查最后一次使用，否则检查声明
+                            String lineContent = getLineContent(sourceFile, checkLine);
+                            boolean isInDeadCode = isDeadCodeLine(lineContent.trim());
+                            log.info("Variable '{}' at line {}: '{}', isDeadCode: {}",
+                                    e.getKey(), checkLine, lineContent.trim(), isInDeadCode);
                             return !isInDeadCode;
                         })
-                        .min(Comparator.comparingInt(e -> e.getValue().get(1))) // 选择第一次使用最早的行
+                        .max(Comparator.comparingInt(e -> {
+                            List<Integer> lines = e.getValue();
+                            return lines.size() > 1 ? lines.get(lines.size() - 1) : lines.get(0); // 按最后一次使用或声明行排序
+                        }))
                         .orElse(suitableVariables.stream()
-                                .min(Comparator.comparingInt(e -> e.getValue().get(1))) // 如果所有变量都在无用代码中，选择最早的行
+                                .max(Comparator.comparingInt(e -> {
+                                    List<Integer> lines = e.getValue();
+                                    return lines.size() > 1 ? lines.get(lines.size() - 1) : lines.get(0);
+                                }))
                                 .orElse(suitableVariables.get(0)));
 
                 String variableName = bestVariable.getKey();
-                int lineNumber = bestVariable.getValue().get(1); // 第一次使用的行号
                 List<Integer> allLines = bestVariable.getValue();
-                log.info("Selected best variable: {} at line {} (first usage)", variableName, lineNumber);
+
+                // 为蜕变测试选择确定性的位置，为其他测试选择随机位置
+                int lineNumber = selectVariableLineForSlicing(allLines, variableName);
+
                 log.info("All lines for {}: {}", variableName, allLines);
                 return new VariableInfo(variableName, lineNumber);
             }
@@ -945,7 +1540,7 @@ public class JavaCodeGenerator {
                 }
                 
                 // 读取mutated文件内容
-                String originalContent = Files.readString(Paths.get(mutatedFilePath));
+                String originalContent = Files.readString(Paths.get(mutatedFilePath), StandardCharsets.UTF_8);
 
                 // 先选择切片变量
                 VariableInfo variableInfo = findVariableForSlicing(mutatedFilePath);
@@ -1299,7 +1894,7 @@ public class JavaCodeGenerator {
      */
     private String getLineContent(String sourceFile, int lineNumber) {
         try {
-            String content = Files.readString(Paths.get(sourceFile));
+            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
             String[] lines = content.split("\n");
             if (lineNumber > 0 && lineNumber <= lines.length) {
                 return lines[lineNumber - 1];
@@ -2052,7 +2647,7 @@ public class JavaCodeGenerator {
      */
     public VariableInfo findVariableLineNumber(String sourceFile, String targetVariable) {
         try {
-            String content = Files.readString(Paths.get(sourceFile));
+            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
             CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
                     new RuntimeException("Failed to parse Java file"));
 
@@ -2117,7 +2712,7 @@ public class JavaCodeGenerator {
      */
     public VariableInfo findVariableLastAssignment(String sourceFile, String targetVariable) {
         try {
-            String content = Files.readString(Paths.get(sourceFile));
+            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
             CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
                     new RuntimeException("Failed to parse Java file"));
 
@@ -2185,6 +2780,42 @@ public class JavaCodeGenerator {
             return findVariableLineNumber(sourceFile, targetVariable);
         } catch (IOException e) {
             log.error("Error finding last assignment for variable '{}' in file: {}", targetVariable, sourceFile, e);
+            return null;
+        }
+    }
+
+    /**
+     * 查找指定变量在文件中的声明行号
+     * @param sourceFile 源文件路径
+     * @param targetVariable 目标变量名
+     * @return 变量的声明行号信息，如果找不到返回null
+     */
+    public VariableInfo findVariableDeclaration(String sourceFile, String targetVariable) {
+        try {
+            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse Java file"));
+
+            // 查找所有变量声明
+            List<VariableDeclarator> variables = cu.findAll(VariableDeclarator.class);
+
+            for (VariableDeclarator var : variables) {
+                if (var.getNameAsString().equals(targetVariable)) {
+                    // 获取变量声明的行号
+                    if (var.getBegin().isPresent()) {
+                        int lineNumber = var.getBegin().get().line;
+                        log.info("Found variable '{}' declaration at line {} in file: {}",
+                                targetVariable, lineNumber, sourceFile);
+                        return new VariableInfo(targetVariable, lineNumber);
+                    }
+                }
+            }
+
+            log.warn("Variable '{}' declaration not found in file: {}", targetVariable, sourceFile);
+            return null;
+
+        } catch (IOException e) {
+            log.error("Error finding variable declaration for '{}' in file: {}", targetVariable, sourceFile, e);
             return null;
         }
     }

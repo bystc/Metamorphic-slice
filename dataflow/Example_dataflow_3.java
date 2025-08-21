@@ -1,22 +1,21 @@
-public class Example494 {
+public class Example164 {
 
     public static void main(String[] args) {
-        int choice = 3;
-        double unrelatedDouble0 = 34.06;
-        double unrelatedDouble1 = 93.10;
-        int unrelatedInt2 = 163;
-        int[] unrelatedArr3 = { 6, 3, 5 };
-        int loopCounter = 1;
-        for (int i = 0; i < 3; i++) {
-            loopCounter += i * 2;
+        int choice = 1;
+        int[] unrelatedArr0 = { 8, 9, 7 };
+        int[] unrelatedArr1 = { 5, 3, 9 };
+        int unrelatedInt2 = 193;
+        int loopCounter = -5;
+        for (int i = 2; i < 3; i++) {
+            loopCounter += i - 2;
             if (i % 2 == 0) {
-                loopCounter -= -4;
+                loopCounter -= 1;
             }
         }
-        int whileCounter = -4;
-        int j = -1;
+        int whileCounter = 3;
+        int j = -2;
         while (j < 2) {
-            whileCounter += j - 3;
+            whileCounter += j / 3;
             j++;
         }
         int val1 = 0, val2 = 0, val3 = 0;

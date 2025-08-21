@@ -79,11 +79,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Jsmith for random Java code generation -->
+        <!-- Jsmith for random Java code generation (local version) -->
         <dependency>
             <groupId>com.github.volodya-lombrozo</groupId>
             <artifactId>jsmith</artifactId>
-            <version>0.1.3</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Apache Commons -->
