@@ -368,7 +368,6 @@ expressionStatement
     | simpleVariableOperations
     | simpleVariableOperations
     | simpleVariableOperations
-    | simpleVariableOperations
     | consecutiveVariableOperations
     | singleVariableMultipleOperations
     ;
@@ -420,15 +419,18 @@ nestedControlFlow
     ;
 
 simpleIfStatement
-    : NL 'if' SPACE '(' BooleanLiteral ')' SPACE '{' NL NL initializedVariableDeclaration ';' NL '}' NL
+    : NL 'if' SPACE '(' BooleanLiteral ')' SPACE ifBlock NL
     ;
 
+ifBlock /* $jsmith-scope */
+    : '{' NL NL initializedVariableDeclaration ';' NL '}'
+
 complexIfStatement
-    : NL 'if' SPACE '(' reachableBooleanExpression ')' SPACE '{' NL NL initializedVariableDeclaration ';' NL '}' NL
+    : NL 'if' SPACE '(' reachableBooleanExpression ')' SPACE ifBlock NL
     ;
 
 nestedIfStatement
-    : NL 'if' SPACE '(' reachableBooleanExpression ')' SPACE '{' NL NL initializedVariableDeclaration ';' NL '}' NL
+    : NL 'if' SPACE '(' reachableBooleanExpression ')' SPACE ifBlock NL
     ;
 
 multipleVariableDeclaration
@@ -474,13 +476,18 @@ simpleInstanceMethodCall
 // Removed complex method call rules to simplify grammar
 
 simpleForStatement
-    : NL 'for' SPACE '(' 'int' SPACE 'i' '=' '0' ';' 'i' '<' '5' ';' 'i' '++' ')' SPACE '{' NL NL initializedVariableDeclaration ';' NL '}' NL
-    | NL 'for' SPACE '(' 'int' SPACE 'j' '=' '0' ';' 'j' '<' '3' ';' 'j' '++' ')' SPACE '{' NL NL initializedVariableDeclaration ';' NL '}' NL
+    : NL 'for' SPACE '(' 'int' SPACE 'i' '=' '0' ';' 'i' '<' '5' ';' 'i' '++' ')' SPACE forBlock NL
+    | NL 'for' SPACE '(' 'int' SPACE 'j' '=' '0' ';' 'j' '<' '3' ';' 'j' '++' ')' SPACE forBlock NL
     ;
+
+forBlock /* $jsmith-scope */
+    : '{' NL NL initializedVariableDeclaration ';' NL '}'
 
 safeWhileStatement
     : NL 'int' SPACE 'k' '=' '0' ';' NL 'while' SPACE '(' 'k' SPACE '<' SPACE '5' ')' SPACE '{' NL NL initializedVariableDeclaration ';' NL 'k' '++' ';' NL '}' NL
     ;
+
+
 
 
 
@@ -604,8 +611,11 @@ simplifiedExpression
 
 // 新增的复杂语句类型
 enhancedForStatement
-    : NL 'for' SPACE '(' 'int' SPACE 'p' SPACE '=' SPACE nonZeroIntegerLiteral ';' SPACE 'p' SPACE '<' SPACE nonZeroIntegerLiteral ';' SPACE 'p' '++' ')' SPACE '{' NL localVariableDeclarationStatement ';' NL '}' NL
+    : NL 'for' SPACE '(' 'int' SPACE 'p' SPACE '=' SPACE nonZeroIntegerLiteral ';' SPACE 'p' SPACE '<' SPACE nonZeroIntegerLiteral ';' SPACE 'p' '++' ')' SPACE enhancedForBlock NL
     ;
+
+enhancedForBlock /* $jsmith-scope */
+    : '{' NL localVariableDeclarationStatement ';' NL '}'
 
 switchStatement
     : NL 'switch' SPACE '(' '(' 'int' ')' /* $jsmith-predicate(long) */ /* $jsmith-var-use */ Identifier ')' SPACE '{' NL 'case' SPACE nonZeroIntegerLiteral ':' NL localVariableDeclarationStatement ';' NL 'break' ';' NL 'default' ':' NL localVariableDeclarationStatement ';' NL 'break' ';' NL '}' NL
@@ -665,6 +675,8 @@ simpleTestRule
     : NL /* $jsmith-type */ 'long' SPACE /* $jsmith-var-decl */ /* $jsmith-unique */ /* $jsmith-var-init */ Identifier '=' '10' ';' NL
       /* $jsmith-var-operations */ NL
     ;
+
+
 
 // Removed existingVariableOperations to maintain scope safety
 

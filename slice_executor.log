@@ -1,228 +1,1424 @@
-8月 21, 2025 10:25:34 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: C44Q7 at line: 121
-8月 21, 2025 10:25:34 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: C44Q7 at line 121
-8月 21, 2025 10:25:34 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#121:C44Q7
-8月 21, 2025 10:25:35 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:35 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:35 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: WAag at line: 105
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: WAag at line 105
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#105:WAag
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:25:35 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:35 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:35 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:25:35 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:35 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:35 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:25:44 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:44 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:44 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:45 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:45 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_0.java
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: P99D2 at line: 121
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: P99D2 at line 121
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#121:P99D2
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:45 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: JNnt at line: 105
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: JNnt at line 105
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#105:JNnt
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:45 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:45 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:45 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:25:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:54 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:25:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:54 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:25:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:25:54 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:25:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_0.java
-8月 21, 2025 10:26:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: G660 at line: 59
-8月 21, 2025 10:26:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: G660 at line 59
-8月 21, 2025 10:26:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#59:G660
-8月 21, 2025 10:26:08 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:08 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:08 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_1.java with variable: f452 at line: 52
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: f452 at line 52
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_1.java#52:f452
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:26:08 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:08 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:08 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:26:08 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:08 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:08 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:12 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:12 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:12 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_1.java
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_1.java with variable: s907 at line: 52
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: s907 at line 52
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_1.java#52:s907
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_1.java
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_2.java with variable: X8wz0 at line: 158
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: X8wz0 at line 158
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_2.java#158:X8wz0
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_2.java
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_2.java with variable: K3jm5 at line: 158
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: K3jm5 at line 158
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_2.java#158:K3jm5
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_2.java
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_3.java with variable: h190 at line: 31
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: h190 at line 31
+9月 06, 2025 6:07:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_3.java#31:h190
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_3.java
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_3.java with variable: u645 at line: 31
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: u645 at line 31
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_3.java#31:u645
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_3.java
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_4.java with variable: bf6Q at line: 149
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: bf6Q at line 149
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_4.java#149:bf6Q
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_4.java
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_4.java with variable: os1D at line: 149
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: os1D at line 149
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_4.java#149:os1D
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:07:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:07:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:07:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:07:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:07:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_4.java
+9月 06, 2025 6:08:09 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: Y1Z4 at line: 89
+9月 06, 2025 6:08:09 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: Y1Z4 at line 89
+9月 06, 2025 6:08:09 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#89:Y1Z4
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:10 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:10 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:10 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:10 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:10 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:10 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:10 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_0.java
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: T115 at line: 59
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: T115 at line 59
-8月 21, 2025 10:26:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#59:T115
-8月 21, 2025 10:26:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:13 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: L6M9 at line: 89
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: L6M9 at line 89
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#89:L6M9
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:11 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:26:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:13 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:11 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:26:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:13 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:11 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:26:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:17 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:11 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:26:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:17 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:11 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:11 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:26:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:17 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:12 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_0.java
-8月 21, 2025 10:26:25 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: SxmF at line: 194
-8月 21, 2025 10:26:25 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: SxmF at line 194
-8月 21, 2025 10:26:25 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#194:SxmF
-8月 21, 2025 10:26:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:26 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_1.java with variable: CPlo at line: 61
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: CPlo at line 61
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_1.java#61:CPlo
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:12 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:26:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:26 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:12 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:26:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:26 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:12 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:12 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:29 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:13 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:29 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:13 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:29 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:13 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_1.java
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_1.java with variable: PCyb at line: 61
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: PCyb at line 61
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_1.java#61:PCyb
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:13 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:13 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:13 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:13 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:14 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:14 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:14 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_1.java
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_2.java with variable: wSI9 at line: 98
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: wSI9 at line 98
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_2.java#98:wSI9
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:14 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:14 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:14 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:14 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:15 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:15 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:15 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_2.java
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_2.java with variable: jFV4 at line: 98
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: jFV4 at line 98
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_2.java#98:jFV4
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:15 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:15 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:15 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:15 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:16 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:16 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:16 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_2.java
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_4.java with variable: HMyS at line: 9
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: HMyS at line 9
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_4.java#9:HMyS
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:16 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:16 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:16 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:16 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:17 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:17 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:17 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_4.java
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_4.java with variable: UZlF at line: 9
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: UZlF at line 9
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_4.java#9:UZlF
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:17 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:17 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:17 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:17 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:18 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:18 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:18 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_4.java
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_5.java with variable: qOfV at line: 108
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: qOfV at line 108
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_5.java#108:qOfV
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:18 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:18 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:18 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:19 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:19 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:19 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:19 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_5.java
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_5.java with variable: dBsI at line: 108
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: dBsI at line 108
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_5.java#108:dBsI
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:19 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:19 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:19 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:20 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:20 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:20 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:20 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_5.java
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_6.java with variable: B1kaT at line: 113
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: B1kaT at line 113
+9月 06, 2025 6:08:20 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_6.java#113:B1kaT
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_6.java with variable: O6xnG at line: 113
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: O6xnG at line 113
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_6.java#113:O6xnG
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:21 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:21 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:22 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:22 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:22 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_7.java with variable: do60z at line: 192
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: do60z at line 192
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_7.java#192:do60z
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:22 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:22 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:22 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:23 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:23 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:23 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:24 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:24 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:24 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_7.java
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_7.java with variable: qb15m at line: 192
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: qb15m at line 192
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_7.java#192:qb15m
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:24 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:24 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:24 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:24 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:26 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:26 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:26 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_7.java
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_8.java with variable: pq0O2 at line: 33
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: pq0O2 at line 33
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_8.java#33:pq0O2
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:26 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:26 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:26 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:26 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_8.java
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_8.java with variable: cd5B7 at line: 33
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: cd5B7 at line 33
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_8.java#33:cd5B7
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:27 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_8.java
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_9.java with variable: hX11 at line: 117
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: hX11 at line 117
+9月 06, 2025 6:08:27 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_9.java#117:hX11
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:28 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:28 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:28 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:28 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:28 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:28 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_9.java
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_9.java with variable: uK66 at line: 117
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: uK66 at line 117
+9月 06, 2025 6:08:28 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_9.java#117:uK66
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:29 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:29 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:29 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:29 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:29 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:29 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_9.java
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: J7093 at line: 22
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: J7093 at line 22
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#22:J7093
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:46 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:46 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:46 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:46 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_0.java
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: FkzS at line: 194
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: FkzS at line 194
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#194:FkzS
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:29 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: W2548 at line: 22
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: W2548 at line 22
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#22:W2548
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:29 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:29 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:26:30 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:30 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:30 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:47 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:47 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:26:33 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:33 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:33 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:26:33 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:33 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:33 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:26:33 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:33 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:33 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:48 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_0.java
-8月 21, 2025 10:26:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: mutated\JSmith_mutated_0.java with variable: B1Adq at line: 179
-8月 21, 2025 10:26:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: B1Adq at line 179
-8月 21, 2025 10:26:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_0.java#179:B1Adq
-8月 21, 2025 10:26:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:52 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_1.java with variable: Ud09 at line: 39
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: Ud09 at line 39
+9月 06, 2025 6:08:48 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_1.java#39:Ud09
+9月 06, 2025 6:08:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:26:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:52 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:26:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:26:52 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:26:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:49 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:49 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:27:00 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Searching for criterion and slicing
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:27:00 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Printing slice to files
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:27:00 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_0.java
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Starting slice execution for file: renamed\JSmith_renamed_0.java with variable: O6Nqd at line: 179
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Using specified variable for slicing: O6Nqd at line 179
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_0.java#179:O6Nqd
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:27:00 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_1.java
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_1.java with variable: Hq54 at line: 39
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: Hq54 at line 39
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_1.java#39:Hq54
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Configuring JavaParser
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:27:00 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Parsing files
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
-信息: Tool output: 8�� 21, 2025 10:27:00 ���� es.upv.mist.slicing.cli.Slicer slice
-8月 21, 2025 10:27:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:50 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:50 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
 信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_1.java
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_2.java with variable: F58k2 at line: 69
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: F58k2 at line 69
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_2.java#69:F58k2
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:51 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:51 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_2.java with variable: S03x7 at line: 69
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: S03x7 at line 69
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_2.java#69:S03x7
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:52 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:52 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_3.java with variable: aXb9m at line: 63
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: aXb9m at line 63
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_3.java#63:aXb9m
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:53 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:53 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_3.java
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_3.java with variable: nKo4z at line: 63
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: nKo4z at line 63
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_3.java#63:nKo4z
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:54 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:54 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_3.java
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_4.java with variable: gst5 at line: 213
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: gst5 at line 213
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_4.java#213:gst5
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:55 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:55 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:56 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:56 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_4.java
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_4.java with variable: tfg0 at line: 213
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: tfg0 at line 213
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_4.java#213:tfg0
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:57 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:57 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:57 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:57 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:58 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_4.java
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_5.java with variable: Kay3 at line: 12
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: Kay3 at line 12
+9月 06, 2025 6:08:58 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_5.java#12:Kay3
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_5.java
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_5.java with variable: Xnl8 at line: 12
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: Xnl8 at line 12
+9月 06, 2025 6:08:59 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_5.java#12:Xnl8
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:08:59 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_5.java
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_6.java with variable: rK079 at line: 52
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: rK079 at line 52
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_6.java#52:rK079
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:00 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:00 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:01 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:01 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:01 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_6.java
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_6.java with variable: eX524 at line: 52
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: eX524 at line 52
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_6.java#52:eX524
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:01 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:01 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:01 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:01 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:02 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:02 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:02 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_6.java
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_7.java with variable: Z499f at line: 64
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: Z499f at line 64
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_7.java#64:Z499f
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:02 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:02 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:02 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:02 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:03 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:03 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:03 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_7.java
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_7.java with variable: M944s at line: 64
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: M944s at line 64
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_7.java#64:M944s
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:03 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:03 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:03 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:04 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:04 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:04 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:04 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_7.java
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_8.java with variable: JP2jU at line: 61
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: JP2jU at line 61
+9月 06, 2025 6:09:04 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_8.java#61:JP2jU
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_8.java
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_8.java with variable: WC7wH at line: 61
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: WC7wH at line 61
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_8.java#61:WC7wH
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:05 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:05 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_8.java
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: mutated\JSmith_mutated_9.java with variable: u05v at line: 20
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: u05v at line 20
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c mutated\JSmith_mutated_9.java#20:u05v
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:06 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:06 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_mutated_9.java
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Starting slice execution for file: renamed\JSmith_renamed_9.java with variable: h50i at line: 20
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Using specified variable for slicing: h50i at line 20
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Executing command: java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c renamed\JSmith_renamed_9.java#20:h50i
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Configuring JavaParser
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Parsing files
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Building the SDG
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Searching for criterion and slicing
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice to files
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: 9�� 06, 2025 6:09:07 ���� es.upv.mist.slicing.cli.Slicer slice
+9月 06, 2025 6:09:07 下午 com.example.slicer.SliceExecutor executeSliceWithVariable
+信息: Tool output: ��Ϣ: Printing slice for JSmith_renamed_9.java

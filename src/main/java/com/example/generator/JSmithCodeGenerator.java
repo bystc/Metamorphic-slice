@@ -3,6 +3,7 @@ package com.example.generator;
 import com.github.lombrozo.jsmith.RandomJavaClass;
 import com.github.lombrozo.jsmith.CodeFormatter;
 import com.github.lombrozo.jsmith.BatchGenerator;
+import com.example.util.JavaSyntaxFixer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +24,14 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 public class JSmithCodeGenerator {
-    
+
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     private final Random random;
-    
+
     public JSmithCodeGenerator() {
         this.random = new Random();
     }
-    
+
     /**
      * 使用JSmith生成随机Java类
      * @return 生成的Java代码字符串
@@ -41,17 +42,17 @@ public class JSmithCodeGenerator {
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             long seed = System.currentTimeMillis() + attempt * 500;
             String code = generateRandomJavaClass(seed);
-            
+
             if (isJavaClass(code)) {
                 return code;
             }
         }
-        
+
         // 如果无法生成类，使用回退策略
         log.warn("Could not generate class with JSmith, using fallback");
         return generateFallbackJavaClass();
     }
-    
+
     /**
      * 使用指定种子生成随机Java类
      * @param seed 随机种子
@@ -60,27 +61,30 @@ public class JSmithCodeGenerator {
     public String generateRandomJavaClass(long seed) {
         try {
             log.info("Generating random Java class using JSmith with seed: {}", seed);
-            
+
             // 创建RandomJavaClass实例，直接传入种子
             RandomJavaClass randomJavaClass = new RandomJavaClass(seed);
-            
+
             // 生成原始Java代码
             String rawCode = randomJavaClass.src();
-            
+
             // 使用CodeFormatter格式化代码（就像BatchGenerator一样）
             String formattedCode = CodeFormatter.format(rawCode);
-            
-            log.info("Successfully generated and formatted Java class with {} characters", formattedCode.length());
-            log.debug("Generated code:\n{}", formattedCode);
-            
-            return formattedCode;
-            
+
+            // FIXED: 修复作用域错误
+            String fixedCode = JavaSyntaxFixer.fixScopeErrors(formattedCode);
+
+            log.info("Successfully generated and formatted Java class with {} characters", fixedCode.length());
+            log.debug("Generated code:\n{}", fixedCode);
+
+            return fixedCode;
+
         } catch (Exception e) {
             log.error("Failed to generate Java class using JSmith: {}", e.getMessage(), e);
             throw new RuntimeException("JSmith code generation failed", e);
         }
     }
-    
+
     /**
      * 生成具有增强随机性的Java类
      * 通过多次尝试和参数调整来增加代码的多样性
@@ -104,11 +108,14 @@ public class JSmithCodeGenerator {
                 // 使用增强的生成方法
                 String code = generateWithEnhancedRandomness(variantSeed, factor);
 
+                // FIXED: 修复作用域错误
+                String fixedCode = JavaSyntaxFixer.fixScopeErrors(code);
+
                 // 检查生成的代码是否足够复杂和多样
-                if (isCodeSufficientlyComplex(code)) {
+                if (isCodeSufficientlyComplex(fixedCode)) {
                     log.info("Generated enhanced random Java class with seed: {}, factor: {}, attempt: {}",
                             variantSeed, factor, attempt + 1);
-                    return code;
+                    return fixedCode;
                 }
 
                 log.debug("Generated code not complex enough on attempt {}, trying again", attempt + 1);
@@ -170,12 +177,15 @@ public class JSmithCodeGenerator {
                 String code = randomJavaClass.src();
                 String formattedCode = CodeFormatter.format(code);
 
+                // FIXED: 修复作用域错误
+                String fixedCode = JavaSyntaxFixer.fixScopeErrors(formattedCode);
+
                 // 计算复杂度分数
-                int complexity = calculateComplexityScore(formattedCode);
+                int complexity = calculateComplexityScore(fixedCode);
 
                 if (complexity > bestComplexity) {
                     bestComplexity = complexity;
-                    bestCode = formattedCode;
+                    bestCode = fixedCode;
                 }
 
             } catch (Exception e) {
@@ -211,31 +221,34 @@ public class JSmithCodeGenerator {
      */
     public String generateRandomJavaClass(long seed, double convergenceFactor) {
         try {
-            log.info("Generating random Java class using JSmith with seed: {} and convergence factor: {}", 
+            log.info("Generating random Java class using JSmith with seed: {} and convergence factor: {}",
                     seed, convergenceFactor);
-            
+
             // 由于Params构造方法限制，我们使用反射或者简化的方法
             // 这里先使用默认的RandomJavaClass，后续可以通过其他方式设置收敛因子
             RandomJavaClass randomJavaClass = new RandomJavaClass(seed);
-            
+
             // 生成原始Java代码
             String rawCode = randomJavaClass.src();
-            
+
             // 使用CodeFormatter格式化代码
             String formattedCode = CodeFormatter.format(rawCode);
-            
-            log.info("Successfully generated Java class with {} characters (convergence factor {} noted but using default)", 
-                    formattedCode.length(), convergenceFactor);
+
+            // FIXED: 修复作用域错误
+            String fixedCode = JavaSyntaxFixer.fixScopeErrors(formattedCode);
+
+            log.info("Successfully generated Java class with {} characters (convergence factor {} noted but using default)",
+                    fixedCode.length(), convergenceFactor);
             log.warn("Convergence factor customization not directly supported by current Params API, using default behavior");
-            
-            return formattedCode;
-            
+
+            return fixedCode;
+
         } catch (Exception e) {
             log.error("Failed to generate Java class using JSmith with convergence factor: {}", e.getMessage(), e);
             throw new RuntimeException("JSmith code generation failed", e);
         }
     }
-    
+
     /**
      * 批量生成随机Java类
      * @param count 生成数量
@@ -243,17 +256,17 @@ public class JSmithCodeGenerator {
      */
     public java.util.List<String> generateRandomJavaClasses(int count) {
         java.util.List<String> results = new java.util.ArrayList<>();
-        
+
         for (int i = 0; i < count; i++) {
             // 使用无参方法，它会自动跳过接口
             String code = generateRandomJavaClass();
             results.add(code);
         }
-        
+
         log.info("Generated {} random Java classes using JSmith", count);
         return results;
     }
-    
+
     /**
      * 批量生成复杂的随机Java类（参考BatchGenerator的方式）
      * @param count 生成数量
@@ -262,22 +275,25 @@ public class JSmithCodeGenerator {
      */
     public java.util.List<String> generateComplexJavaClasses(int count, long baseSeed) {
         java.util.List<String> results = new java.util.ArrayList<>();
-        
+
         log.info("Generating {} complex Java classes using BatchGenerator approach with base seed: {}", count, baseSeed);
-        
+
         for (int i = 0; i < count; i++) {
             try {
                 // 使用不同的种子生成不同的代码（参考BatchGenerator）
                 long currentSeed = baseSeed + i;
                 RandomJavaClass clazz = new RandomJavaClass(currentSeed);
                 String rawCode = clazz.src();
-                
+
                 // 使用CodeFormatter格式化代码
                 String formattedCode = CodeFormatter.format(rawCode);
-                
+
+                // FIXED: 修复作用域错误
+                String fixedCode = JavaSyntaxFixer.fixScopeErrors(formattedCode);
+
                 // 检查是否为类（跳过接口）
-                if (isJavaClass(formattedCode)) {
-                    results.add(formattedCode);
+                if (isJavaClass(fixedCode)) {
+                    results.add(fixedCode);
                     log.debug("Generated complex class {} with seed {}", i + 1, currentSeed);
                 } else {
                     // 如果是接口，尝试用不同种子重新生成
@@ -287,13 +303,17 @@ public class JSmithCodeGenerator {
                         RandomJavaClass retryClazz = new RandomJavaClass(retrySeed);
                         String retryRawCode = retryClazz.src();
                         String retryFormattedCode = CodeFormatter.format(retryRawCode);
-                        if (isJavaClass(retryFormattedCode)) {
-                            results.add(retryFormattedCode);
+
+                        // FIXED: 修复作用域错误
+                        String retryFixedCode = JavaSyntaxFixer.fixScopeErrors(retryFormattedCode);
+
+                        if (isJavaClass(retryFixedCode)) {
+                            results.add(retryFixedCode);
                             log.debug("Successfully generated class on retry {} with seed {}", retry + 1, retrySeed);
                             break;
                         }
                     }
-                    
+
                     // 如果重试都失败，使用回退策略
                     if (results.size() <= i) {
                         String fallbackCode = generateFallbackJavaClass();
@@ -301,7 +321,7 @@ public class JSmithCodeGenerator {
                         log.warn("Used fallback class for generation {}", i + 1);
                     }
                 }
-                
+
             } catch (Exception e) {
                 log.error("Failed to generate complex class {}: {}", i + 1, e.getMessage());
                 // 使用回退策略
@@ -309,11 +329,11 @@ public class JSmithCodeGenerator {
                 results.add(fallbackCode);
             }
         }
-        
+
         log.info("Successfully generated {} complex Java classes", results.size());
         return results;
     }
-    
+
     /**
      * 生成适合切片测试的Java类
      * 跳过接口，只生成类
@@ -325,21 +345,21 @@ public class JSmithCodeGenerator {
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             long seed = System.currentTimeMillis() + attempt * 1000; // 增加更大的种子差异
             String code = generateRandomJavaClass(seed);
-            
+
             // 检查是否生成了类（而不是接口）
             if (isJavaClass(code)) {
                 log.info("Successfully generated Java class on attempt {}", attempt + 1);
-                return code;
+                return code; // generateRandomJavaClass已经包含了JavaSyntaxFixer修复
             } else {
                 log.debug("Attempt {} generated interface, skipping and retrying", attempt + 1);
             }
         }
-        
+
         // 如果多次尝试都没有生成类，使用回退策略
         log.warn("Could not generate a class after {} attempts, using fallback strategy", maxAttempts);
         return generateFallbackJavaClass();
     }
-    
+
     /**
      * 检查生成的代码是否为Java类（而不是接口）
      * @param code 生成的Java代码
@@ -349,15 +369,15 @@ public class JSmithCodeGenerator {
         if (code == null || code.trim().isEmpty()) {
             return false;
         }
-        
+
         // 检查是否包含class关键字且不是interface
         boolean hasClass = code.contains("class ");
-        boolean isInterface = code.trim().startsWith("interface") || 
-                             code.contains("interface ") && !code.contains("class ");
-        
+        boolean isInterface = code.trim().startsWith("interface") ||
+                code.contains("interface ") && !code.contains("class ");
+
         return hasClass && !isInterface;
     }
-    
+
     /**
      * 生成回退的Java类（当JSmith无法生成合适的类时使用）
      * @return 简单的Java类代码
@@ -365,35 +385,35 @@ public class JSmithCodeGenerator {
     private String generateFallbackJavaClass() {
         String className = "GeneratedClass" + System.currentTimeMillis() % 1000;
         String fallbackCode = String.format(
-            "public class %s {\n" +
-            "    private int value = 42;\n" +
-            "    private boolean flag = true;\n" +
-            "    \n" +
-            "    public void method1() {\n" +
-            "        int temp = value * 2;\n" +
-            "        if (flag) {\n" +
-            "            temp += 10;\n" +
-            "        }\n" +
-            "        value = temp;\n" +
-            "    }\n" +
-            "    \n" +
-            "    public int getValue() {\n" +
-            "        return value;\n" +
-            "    }\n" +
-            "    \n" +
-            "    public static void main(String[] args) {\n" +
-            "        // 调用类内方法\n" +
-            "        %s instance = new %s();\n" +
-            "        instance.method1();\n" +
-            "    }\n" +
-            "}\n", 
-            className, className, className
+                "public class %s {\n" +
+                        "    private int value = 42;\n" +
+                        "    private boolean flag = true;\n" +
+                        "    \n" +
+                        "    public void method1() {\n" +
+                        "        int temp = value * 2;\n" +
+                        "        if (flag) {\n" +
+                        "            temp += 10;\n" +
+                        "        }\n" +
+                        "        value = temp;\n" +
+                        "    }\n" +
+                        "    \n" +
+                        "    public int getValue() {\n" +
+                        "        return value;\n" +
+                        "    }\n" +
+                        "    \n" +
+                        "    public static void main(String[] args) {\n" +
+                        "        // 调用类内方法\n" +
+                        "        %s instance = new %s();\n" +
+                        "        instance.method1();\n" +
+                        "    }\n" +
+                        "}\n",
+                className, className, className
         );
-        
+
         // 使用CodeFormatter格式化回退代码
         return CodeFormatter.format(fallbackCode);
     }
-    
+
     /**
      * 批量生成复杂Java文件并保存到指定目录（完全参考BatchGenerator的逻辑）
      * @param count 生成数量
@@ -403,7 +423,7 @@ public class JSmithCodeGenerator {
      */
     public java.util.List<String> generateComplexJavaFiles(int count, String outputDir, long baseSeed) {
         java.util.List<String> filePaths = new java.util.ArrayList<>();
-        
+
         try {
             // 创建输出目录
             Path outputPath = Paths.get(outputDir);
@@ -411,54 +431,54 @@ public class JSmithCodeGenerator {
                 Files.createDirectories(outputPath);
                 log.info("Created output directory: {}", outputPath.toAbsolutePath());
             }
-            
+
             int successCount = 0;
             int failCount = 0;
             long totalSize = 0;
-            
+
             log.info("Starting batch generation of {} complex Java files", count);
-            
+
             for (int i = 0; i < count; i++) {
                 try {
                     // 使用不同的种子生成不同的代码（参考BatchGenerator）
                     long currentSeed = baseSeed + i;
                     RandomJavaClass clazz = new RandomJavaClass(currentSeed);
                     String rawCode = clazz.src();
-                    
+
                     // 格式化代码（就像BatchGenerator一样）
                     String code = CodeFormatter.format(rawCode);
-                    
+
                     // 提取类名（使用BatchGenerator的逻辑）
                     String className = extractClassName(code);
                     if (className == null) {
                         className = "GeneratedClass" + (i + 1);
                     }
-                    
+
                     // 生成文件名（完全参考BatchGenerator的命名方式）
                     String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
                     String fileName = className + "_" + timestamp + "_" + String.format("%03d", i + 1) + ".java";
                     Path filePath = outputPath.resolve(fileName);
-                    
+
                     // 写入文件
                     Files.write(filePath, code.getBytes());
                     long fileSize = Files.size(filePath);
                     totalSize += fileSize;
-                    
+
                     filePaths.add(filePath.toString());
                     successCount++;
-                    
-                    System.out.printf("[%d/%d] Generated: %s (%d bytes)%n", 
-                        i + 1, count, fileName, fileSize);
-                    
+
+                    System.out.printf("[%d/%d] Generated: %s (%d bytes)%n",
+                            i + 1, count, fileName, fileSize);
+
                     // 短暂延迟以确保时间戳不同
                     Thread.sleep(10);
-                    
+
                 } catch (Exception e) {
                     log.error("[{}/{}] Failed to generate file: {}", i + 1, count, e.getMessage());
                     failCount++;
                 }
             }
-            
+
             // 输出统计信息（完全参考BatchGenerator）
             log.info("Generation Summary:");
             log.info("Total files requested: {}", count);
@@ -467,14 +487,14 @@ public class JSmithCodeGenerator {
             log.info("Total size: {} bytes", totalSize);
             log.info("Average size: {} bytes", successCount > 0 ? totalSize / successCount : 0);
             log.info("Output directory: {}", outputPath.toAbsolutePath());
-            
+
         } catch (Exception e) {
             log.error("Error during batch file generation: {}", e.getMessage(), e);
         }
-        
+
         return filePaths;
     }
-    
+
     /**
      * 生成单个复杂Java类（使用指定种子）
      * @param seed 种子值
@@ -488,7 +508,7 @@ public class JSmithCodeGenerator {
                 RandomJavaClass clazz = new RandomJavaClass(currentSeed);
                 String rawCode = clazz.src();
                 String formattedCode = CodeFormatter.format(rawCode);
-                
+
                 if (isJavaClass(formattedCode)) {
                     return formattedCode;
                 }
@@ -496,12 +516,12 @@ public class JSmithCodeGenerator {
                 log.debug("Attempt {} failed for seed {}: {}", attempt + 1, seed, e.getMessage());
             }
         }
-        
+
         // 如果所有尝试都失败，使用回退策略
         log.warn("All attempts failed for seed {}, using fallback", seed);
         return generateFallbackJavaClass();
     }
-    
+
     /**
      * 从生成的Java代码中提取类名（使用BatchGenerator的逻辑）
      * @param code Java代码

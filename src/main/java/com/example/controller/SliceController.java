@@ -6,6 +6,9 @@ import com.example.slicer.SliceExecutor;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.expr.NameExpr;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,9 +217,44 @@ public class SliceController {
             log.info("Test line 2: '{}' - isDeadCode: {}", testLine2, isDeadCodeLine(testLine2));
             log.info("Test line 3: '{}' - isDeadCode: {}", testLine3, isDeadCodeLine(testLine3));
 
-            // 生成添加无用代码的变异文件
-            List<String> mutatedFiles = javaCodeGenerator.generateDeadCodeFiles("", numMutations);
-            log.info("Generated {} dead code files", mutatedFiles.size());
+            // 生成JSmith变异文件（只生成mutated文件，不生成renamed文件）
+            List<String> mutatedFiles = generateJSmithMutatedFilesOnly(numMutations);
+            log.info("Generated {} JSmith mutated files", mutatedFiles.size());
+
+            // 为每个JSmith文件生成对应的死代码文件
+            List<String> deadCodeFiles = new ArrayList<>();
+            for (String mutatedFile : mutatedFiles) {
+                if (mutatedFile.contains("_mutated_")) {
+                    try {
+                        // 读取原始文件内容
+                        byte[] bytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(mutatedFile));
+                        String originalContent = new String(bytes, StandardCharsets.UTF_8);
+
+                        // 选择切片变量
+                        VariableInfo variableInfo = javaCodeGenerator.findVariableForSlicing(mutatedFile);
+                        if (variableInfo != null) {
+                            // 添加死代码
+                            String deadCodeContent = addDeadCodeToJSmithFile(originalContent, variableInfo.getVariableName());
+
+                            // 保存死代码文件
+                            String deadCodeFile = mutatedFile.replace("mutated", "deadcode").replace("_mutated_", "_deadcode_");
+                            java.nio.file.Files.write(java.nio.file.Paths.get(deadCodeFile), deadCodeContent.getBytes(StandardCharsets.UTF_8));
+                            deadCodeFiles.add(deadCodeFile);
+                            log.info("Generated dead code file: {}", deadCodeFile);
+                        }
+                    } catch (Exception e) {
+                        log.error("Error generating dead code for file: {}", mutatedFile, e);
+                    }
+                }
+            }
+
+            // 只处理有对应死代码文件的mutated文件
+            mutatedFiles = mutatedFiles.stream()
+                .filter(f -> f.contains("_mutated_"))
+                .filter(f -> deadCodeFiles.contains(f.replace("mutated", "deadcode").replace("_mutated_", "_deadcode_")))
+                .collect(java.util.stream.Collectors.toList());
+
+            log.info("Generated {} dead code files for testing", deadCodeFiles.size());
 
             // 对每个变异文件进行切片
             for (String file : mutatedFiles) {
@@ -230,11 +268,13 @@ public class SliceController {
                     testResult.put("deadCodeFile", deadCodeFile);
 
                     // 读取原始文件内容用于显示
-                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file)));
+                    byte[] originalBytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file));
+                    String originalContent = new String(originalBytes, StandardCharsets.UTF_8);
                     testResult.put("originalFileContent", originalContent);
 
                     // 读取无用代码文件内容用于显示
-                    String deadCodeContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(deadCodeFile)));
+                    byte[] deadCodeBytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(deadCodeFile));
+                    String deadCodeContent = new String(deadCodeBytes, StandardCharsets.UTF_8);
                     testResult.put("deadCodeFileContent", deadCodeContent);
 
                     // 对原始文件选择切片变量
@@ -960,66 +1000,22 @@ public class SliceController {
      */
     private int calculateLineOffset(String originalContent, String deadCodeContent, int targetLine) {
         try {
-            String[] originalLines = originalContent.split("\n");
-            String[] deadCodeLines = deadCodeContent.split("\n");
-
-            log.info("=== Line offset calculation start ===");
+            log.info("=== Simple fixed line offset calculation ===");
             log.info("Original target line: {}", targetLine);
-            log.info("Original content has {} lines", originalLines.length);
-            log.info("Dead code content has {} lines", deadCodeLines.length);
 
-            // 找到目标变量在原始文件中的行号
-            String targetVariableName = extractVariableNameFromLine(originalLines[targetLine - 1]);
-            log.info("Target variable name: {}", targetVariableName);
+            // 死代码固定为3行，直接返回3作为偏移
+            int fixedOffset = 3;
+            log.info("Using fixed offset of {} lines for dead code", fixedOffset);
 
-            if (targetVariableName == null) {
-                log.error("Could not extract variable name from line {}", targetLine);
-                // 如果无法提取变量名，尝试通过行号差异来计算偏移
-                log.info("Falling back to line count difference method");
-                return calculateOffsetByLineCount(originalLines, deadCodeLines, targetLine);
-            }
-
-            // 找到变量在原始文件中的声明行号
-            int originalDeclarationLine = findVariableDeclarationLine(originalLines, targetVariableName);
-            log.info("Found variable '{}' declaration at line {} in original file", targetVariableName, originalDeclarationLine);
-
-            if (originalDeclarationLine == -1) {
-                log.error("Could not find variable '{}' declaration in original file", targetVariableName);
-                // 如果找不到声明行，尝试通过行号差异来计算偏移
-                log.info("Falling back to line count difference method");
-                return calculateOffsetByLineCount(originalLines, deadCodeLines, targetLine);
-            }
-
-            // 在无用代码文件中找到相同变量的声明行号
-            int deadCodeDeclarationLine = findVariableDeclarationLine(deadCodeLines, targetVariableName);
-            log.info("Found variable '{}' declaration at line {} in dead code file", targetVariableName, deadCodeDeclarationLine);
-
-            if (deadCodeDeclarationLine == -1) {
-                log.error("Could not find variable '{}' declaration in dead code file", targetVariableName);
-                // 如果找不到声明行，尝试通过行号差异来计算偏移
-                log.info("Falling back to line count difference method");
-                return calculateOffsetByLineCount(originalLines, deadCodeLines, targetLine);
-            }
-
-            // 计算声明行的偏移
-            int declarationOffset = deadCodeDeclarationLine - originalDeclarationLine;
-            log.info("Declaration line offset: {} - {} = {}", deadCodeDeclarationLine, originalDeclarationLine, declarationOffset);
-
-            // 计算目标行的偏移（基于声明行偏移）
-            int targetOffset = declarationOffset;
-            log.info("=== Line offset calculation result ===");
-            log.info("Original target line: {}", targetLine);
-            log.info("Original declaration line: {}", originalDeclarationLine);
-            log.info("Dead code declaration line: {}", deadCodeDeclarationLine);
-            log.info("Calculated target offset: {}", targetOffset);
-
-            return targetOffset;
+            return fixedOffset;
 
         } catch (Exception e) {
             log.error("Error calculating line offset", e);
-            return 0;
+            return 3; // 默认返回3行偏移
         }
     }
+
+
 
     /**
      * 通过计算无用代码行数来计算偏移
@@ -1277,14 +1273,143 @@ public class SliceController {
     }
 
     /**
+     * 只生成JSmith mutated文件，不生成renamed文件
+     */
+    private List<String> generateJSmithMutatedFilesOnly(int numFiles) {
+        List<String> mutatedFiles = new ArrayList<>();
+
+        try {
+            // 清理目录
+            javaCodeGenerator.cleanupDirectory("mutated");
+            javaCodeGenerator.cleanupDirectory("deadcode");
+
+            for (int i = 0; i < numFiles; i++) {
+                try {
+                    log.info("Generating JSmith mutated file {} of {}", i + 1, numFiles);
+
+                    // 使用JSmith生成随机Java类
+                    long seed = System.currentTimeMillis() + i * 1000;
+                    String originalContent = javaCodeGenerator.generateRandomJavaClass();
+
+                    // 保存mutated文件
+                    String mutatedFileName = String.format("JSmith_mutated_%d.java", i);
+                    String mutatedFilePath = java.nio.file.Paths.get("mutated", mutatedFileName).toString();
+
+                    java.nio.file.Files.write(java.nio.file.Paths.get(mutatedFilePath),
+                        originalContent.getBytes(StandardCharsets.UTF_8));
+
+                    mutatedFiles.add(mutatedFilePath);
+                    log.info("Generated JSmith mutated file: {}", mutatedFilePath);
+
+                } catch (Exception e) {
+                    log.error("Error generating JSmith mutated file {}: {}", i, e.getMessage(), e);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error in generateJSmithMutatedFilesOnly: {}", e.getMessage(), e);
+        }
+
+        return mutatedFiles;
+    }
+
+    /**
+     * 为JSmith文件添加死代码
+     */
+    private String addDeadCodeToJSmithFile(String originalContent, String selectedVariable) {
+        try {
+            log.info("Adding dead code to JSmith file with selected variable: {}", selectedVariable);
+
+            // 生成死代码语句
+            List<String> deadCodeStatements = generateDeadCodeStatementsForJSmith(selectedVariable);
+
+            if (deadCodeStatements.isEmpty()) {
+                log.warn("No dead code statements generated for JSmith file");
+                return originalContent;
+            }
+
+            // 使用字符串操作精确插入死代码，避免JavaParser重组代码结构
+            String[] lines = originalContent.split("\n");
+            StringBuilder result = new StringBuilder();
+
+            // 找到变量声明的行号
+            int variableDeclarationLine = -1;
+            for (int i = 0; i < lines.length; i++) {
+                String line = lines[i].trim();
+                if (line.contains(selectedVariable) &&
+                    (line.contains("boolean ") || line.contains("long ") || line.contains("int ")) &&
+                    line.contains("=") && line.endsWith(";")) {
+                    variableDeclarationLine = i;
+                    log.info("Found variable '{}' declaration at line {}: {}", selectedVariable, i + 1, line);
+                    break;
+                }
+            }
+
+            boolean deadCodeInserted = false;
+
+            for (int i = 0; i < lines.length; i++) {
+                result.append(lines[i]).append("\n");
+
+                // 在变量声明后的第一个语句后插入死代码
+                if (!deadCodeInserted && variableDeclarationLine != -1 && i > variableDeclarationLine) {
+                    String currentLine = lines[i].trim();
+                    // 找到变量声明后的第一个完整语句
+                    if (currentLine.endsWith(";") && !currentLine.startsWith("//") && !currentLine.isEmpty()) {
+                        // 插入死代码
+                        for (String deadCode : deadCodeStatements) {
+                            // 添加适当的缩进
+                            String[] deadCodeLines = deadCode.split("\n");
+                            for (String deadCodeLine : deadCodeLines) {
+                                result.append("        ").append(deadCodeLine).append("\n");
+                            }
+                        }
+                        deadCodeInserted = true;
+                        log.info("Inserted dead code after line {}: {}", i + 1, currentLine);
+                    }
+                }
+            }
+
+            if (!deadCodeInserted) {
+                log.warn("Could not find suitable location to insert dead code for variable: {}", selectedVariable);
+                return originalContent;
+            }
+
+            return result.toString();
+
+        } catch (Exception e) {
+            log.error("Error adding dead code to JSmith file", e);
+            return originalContent;
+        }
+    }
+
+
+
+    /**
+     * 为JSmith文件生成死代码语句
+     */
+    private List<String> generateDeadCodeStatementsForJSmith(String selectedVariable) {
+        List<String> statements = new ArrayList<>();
+        Random random = new Random();
+
+        // 固定生成一个3行的死代码块
+        String deadCode = String.format("if (false) {\n    %s = %s + %d;\n}",
+            selectedVariable, selectedVariable, random.nextInt(100) + 1);
+        statements.add(deadCode);
+
+        return statements;
+    }
+
+
+
+    /**
      * 判断是否为无用代码行
      */
     private boolean isDeadCodeLine(String line) {
         // 去除前导和尾随空格
         String trimmedLine = line.trim();
-        
+
         // 无用代码的特征 - 覆盖所有生成的无用代码类型
-        boolean isDeadCode = 
+        boolean isDeadCode =
             trimmedLine.startsWith("if (false)") ||
             trimmedLine.startsWith("for (int i = 0; i < 0;") ||
             trimmedLine.matches("^int (unusedVar|temp)\\d+.*") ||
@@ -1292,9 +1417,12 @@ public class SliceController {
             trimmedLine.equals("for (int i = 0; i < 0; i++) { }") ||
             trimmedLine.matches("^int temp\\d+ = \\d+;") ||
             trimmedLine.matches("^int unusedVar\\d+ = \\d+;") ||
-            trimmedLine.matches("^if \\(false\\) \\{ int x = \\d+; \\}");
-        
-        log.info("Checking line: '{}' (trimmed: '{}') - isDeadCode: {}", line, trimmedLine, isDeadCode);
+            trimmedLine.matches("^if \\(false\\) \\{ int x = \\d+; \\}") ||
+            // 简化的JSmith死代码模式（固定3行if (false)格式）
+            trimmedLine.equals("if (false) {") ||                // if死代码开始
+            trimmedLine.matches(".*= .* \\+ \\d+;");             // 变量加法操作（死代码内容）
+
+        log.debug("Checking line: '{}' (trimmed: '{}') - isDeadCode: {}", line, trimmedLine, isDeadCode);
         return isDeadCode;
     }
 

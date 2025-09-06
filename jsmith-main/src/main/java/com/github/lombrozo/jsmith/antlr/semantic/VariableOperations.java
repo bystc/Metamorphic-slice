@@ -76,12 +76,13 @@ public final class VariableOperations implements Rule {
         String selectedVar = null;
         String varType = null;
 
-        // Strategy: Use ONLY main method variables with ULTRA-STRICT filtering for 100% success
+        // FIXED: Use round-robin variable selection for balanced distribution
         try {
             // Get ALL variables from scope (including parent scopes)
             final java.util.List<String> allVars = context.scope().allAssigned();
+            final java.util.List<String> suitableVars = new java.util.ArrayList<>();
 
-            // Find a suitable variable with ULTRA-STRICT filtering for 100% success
+            // Collect ALL suitable variables instead of just the first one
             for (final String candidate : allVars) {
                 final String candidateType = context.scope().type(candidate);
 
@@ -92,10 +93,16 @@ public final class VariableOperations implements Rule {
                     this.isValidVariableName(candidate) &&
                     !this.isConstructorParameter(candidate) &&
                     !this.isDefinitelyUnsafeVariable(candidate)) {
-                    selectedVar = candidate;
-                    varType = candidateType;
-                    break; // Use the first suitable variable
+                    suitableVars.add(candidate);
                 }
+            }
+
+            // FIXED: Use round-robin selection instead of always first
+            if (!suitableVars.isEmpty()) {
+                // Use a simple hash-based selection for pseudo-random distribution
+                final int index = Math.abs(context.hashCode()) % suitableVars.size();
+                selectedVar = suitableVars.get(index);
+                varType = context.scope().type(selectedVar);
             }
         } catch (Exception e) {
             // If there's any error in variable selection, selectedVar remains null
@@ -123,8 +130,8 @@ public final class VariableOperations implements Rule {
             throw new WrongPathException("Unsupported variable type for operations: " + varType);
         }
 
-        // Generate a random operation chain - MUCH LONGER for maximum complexity
-        final int chainLength = context.scope().rand().range(3, 8); // 3-7 operations for maximum complexity
+        // FIXED: Generate shorter operation chains for balanced distribution
+        final int chainLength = context.scope().rand().range(1, 4); // 1-3 operations for balanced distribution
         final List<String> operations = this.generator.generateOperationChain(
             selectedVar,
             varType,
