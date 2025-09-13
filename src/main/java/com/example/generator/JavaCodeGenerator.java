@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.nio.charset.StandardCharsets;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -48,6 +47,9 @@ public class JavaCodeGenerator {
     private static final String DATAFLOW_DIR = "dataflow";
     private static final String DEADCODE_DIR = "deadcode";
     private static final String REORDERED_DIR = "reordered";
+
+    // 用于跟踪控制流变换的累积行号偏移
+    private int cumulativeLineOffset = 0;
     private static final Random random = new Random();
     private final JavaParser javaParser;
 
@@ -214,10 +216,185 @@ public class JavaCodeGenerator {
     }
 
     /**
-     * 使用JSmith生成器生成用于变量重命名蜕变关系测试的文件对
+     * 使用JSmith生成器生成用于控制流变换蜕变关系测试的文件对
      * @param numPairs 生成的文件对数量
-     * @return 生成的文件路径列表（包含原始文件和重命名文件）
+     * @return 生成的文件路径列表（包含原始文件和控制流变换文件）
      */
+    public List<String> generateJSmithControlFlowTestFiles(int numPairs) {
+        List<String> generatedFiles = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get(CONTROLFLOW_DIR));
+            log.info("Created directories for JSmith control flow test: {}, {}", MUTATED_DIR, CONTROLFLOW_DIR);
+
+            for (int i = 0; i < numPairs; i++) {
+                try {
+                    log.info("Generating JSmith control flow file pair {} at {}", i + 1, new Date());
+
+                    // 1. 使用JSmith生成复杂的Java类
+                    long seed = generateHighEntropyRandomSeed(startTime, i);
+                    String originalContent = jsmithCodeGenerator.generateRandomJavaClassWithEnhancedRandomness(seed);
+
+                    // 2. 保存原始文件到mutated目录
+                    String mutatedFileName = String.format("JSmith_mutated_%d.java", i);
+                    String mutatedFilePath = Paths.get(MUTATED_DIR, mutatedFileName).toString();
+
+                    // 移除package声明并标准化原始文件格式
+                    String cleanedContent = removePackageDeclaration(originalContent);
+                    String standardizedContent = standardizeJavaFormat(cleanedContent);
+
+                    try (FileWriter writer = new FileWriter(mutatedFilePath)) {
+                        writer.write(standardizedContent);
+                    }
+                    generatedFiles.add(mutatedFilePath);
+                    log.info("Generated JSmith original file: {}", mutatedFilePath);
+
+                    // 3. 创建控制流变换版本（使用标准化的内容）
+                    String controlFlowFilePath = createJSmithControlFlowVersion(standardizedContent, i);
+                    if (controlFlowFilePath != null) {
+                        generatedFiles.add(controlFlowFilePath);
+                        log.info("Generated JSmith control flow file: {}", controlFlowFilePath);
+
+                        // 4. 验证控制流变换是否成功
+                        if (validateControlFlowFile(mutatedFilePath, controlFlowFilePath)) {
+                            log.info("Successfully validated JSmith control flow file pair: {} <-> {}", mutatedFilePath, controlFlowFilePath);
+                        } else {
+                            log.warn("Validation failed for JSmith control flow file pair: {} <-> {}", mutatedFilePath, controlFlowFilePath);
+                        }
+                    } else {
+                        log.warn("Failed to create control flow version for JSmith file: {}", mutatedFilePath);
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error generating JSmith control flow file pair {}: {}", i + 1, e.getMessage(), e);
+                }
+            }
+
+            long endTime = System.currentTimeMillis();
+            log.info("JSmith control flow test file generation completed. Generated {} files in {} ms",
+                    generatedFiles.size(), endTime - startTime);
+
+        } catch (IOException e) {
+            log.error("Failed to create directories for JSmith control flow test files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 为JSmith生成的代码创建控制流变换版本
+     * @param originalContent 原始代码内容
+     * @param index 文件索引
+     * @return 控制流变换文件的路径，如果失败返回null
+     */
+    private String createJSmithControlFlowVersion(String originalContent, int index) {
+        try {
+            String controlFlowFileName = String.format("JSmith_controlflow_%d.java", index);
+            String controlFlowFilePath = Paths.get(CONTROLFLOW_DIR, controlFlowFileName).toString();
+
+            // 对原始内容进行控制流变换
+            String transformedContent = transformControlFlow(originalContent);
+
+            // 验证变换后的代码
+            if (validateJSmithControlFlowCode(transformedContent)) {
+                try (FileWriter writer = new FileWriter(controlFlowFilePath)) {
+                    writer.write(transformedContent);
+                }
+                return controlFlowFilePath;
+            } else {
+                log.error("JSmith control flow code validation failed, copying original");
+                try (FileWriter writer = new FileWriter(controlFlowFilePath)) {
+                    writer.write(originalContent);
+                }
+                return controlFlowFilePath;
+            }
+
+        } catch (Exception e) {
+            log.error("Error creating JSmith control flow version: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 验证JSmith控制流变换后的代码
+     * @param transformedContent 变换后的代码
+     * @return 是否验证通过
+     */
+    private boolean validateJSmithControlFlowCode(String transformedContent) {
+        try {
+            // 尝试解析变换后的代码
+            CompilationUnit parsedCu = javaParser.parse(transformedContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse JSmith control flow transformed code"));
+
+            // 验证基本结构
+            if (parsedCu.getTypes().isEmpty()) {
+                log.error("JSmith control flow transformed code is missing class declarations");
+                return false;
+            }
+
+            // 验证main方法
+            Optional<MethodDeclaration> mainMethod = parsedCu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+            if (!mainMethod.isPresent()) {
+                log.error("JSmith control flow transformed code is missing main method");
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            log.error("JSmith control flow transformed code validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 验证控制流变换文件对
+     * @param originalFile 原始文件路径
+     * @param controlFlowFile 控制流变换文件路径
+     * @return 是否验证通过
+     */
+    private boolean validateControlFlowFile(String originalFile, String controlFlowFile) {
+        try {
+            String originalContent = Files.readString(Paths.get(originalFile), StandardCharsets.UTF_8);
+            String controlFlowContent = Files.readString(Paths.get(controlFlowFile), StandardCharsets.UTF_8);
+
+            // 基本检查：两个文件都应该能被解析
+            CompilationUnit originalCu = javaParser.parse(originalContent).getResult().orElse(null);
+            CompilationUnit controlFlowCu = javaParser.parse(controlFlowContent).getResult().orElse(null);
+
+            if (originalCu == null || controlFlowCu == null) {
+                log.error("Failed to parse one or both files: {} / {}", originalFile, controlFlowFile);
+                return false;
+            }
+
+            // 检查类的数量是否相同
+            if (originalCu.getTypes().size() != controlFlowCu.getTypes().size()) {
+                log.error("Different number of types in original vs control flow file");
+                return false;
+            }
+
+            // 检查main方法是否存在
+            boolean originalHasMain = originalCu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main")).isPresent();
+            boolean controlFlowHasMain = controlFlowCu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main")).isPresent();
+
+            if (originalHasMain != controlFlowHasMain) {
+                log.error("Main method existence mismatch between original and control flow file");
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error validating control flow file pair: {}", e.getMessage());
+            return false;
+        }
+    }
     public List<String> generateJSmithVariableRenameTestFiles(int numPairs) {
         List<String> generatedFiles = new ArrayList<>();
         long startTime = System.currentTimeMillis();
@@ -2049,24 +2226,37 @@ public class JavaCodeGenerator {
                 MethodDeclaration method = mainMethod.get();
                 BlockStmt body = method.getBody().orElse(null);
                 if (body != null) {
-                    // 分析切片相关变量和控制依赖关系
-                    Set<String> sliceVariables = findSliceRelatedVariables(body);
-                    Map<String, Set<String>> controlDependencies = analyzeControlDependencies(body, sliceVariables);
+                    // 重置累积行号偏移
+                    this.cumulativeLineOffset = 0;
 
-                    log.info("Found slice variables: {}", sliceVariables);
-                    log.info("Control dependencies: {}", controlDependencies);
-
-                    // 应用各种控制流变换，但确保不影响切片点
-                    changed |= transformIfStatements(body, sliceVariables, controlDependencies);
-                    changed |= transformLoopStatements(body, sliceVariables, controlDependencies);
-                    changed |= transformSwitchStatements(body, sliceVariables);
-
-                    // 如果没有任何变换，尝试对无关的控制流结构进行变换
-                    if (!changed) {
-                        changed |= transformUnrelatedControlFlow(body, sliceVariables);
+                    // 首先找到适合控制流蜕变的切片点信息（选择靠后的变量）
+                    VariableInfo slicePoint = findVariableForControlFlowTesting(originalContent);
+                    if (slicePoint == null) {
+                        log.warn("No suitable variable found for control flow transformation");
+                        return originalContent;
                     }
 
-                    return cu.toString();
+                    log.info("Found slice point: variable '{}' at line {}", slicePoint.getVariableName(), slicePoint.getLineNumber());
+
+                    // 基于切片点分析安全的控制流结构
+                    changed = transformSafeControlFlowStructures(body, slicePoint);
+
+                    if (changed) {
+                        String transformedContent = cu.toString();
+                        log.info("Applied control flow transformation");
+
+                        // 重新计算变量在变换后代码中的行号
+                        VariableInfo updatedSlicePoint = calculateUpdatedSlicePoint(transformedContent, slicePoint);
+                        if (updatedSlicePoint != null) {
+                            log.info("Updated slice point after transformation: variable '{}' now at line {} (was line {})",
+                                    updatedSlicePoint.getVariableName(), updatedSlicePoint.getLineNumber(), slicePoint.getLineNumber());
+                        }
+
+                        return transformedContent;
+                    } else {
+                        log.info("No safe control flow structures found for transformation");
+                        return originalContent;
+                    }
                 }
             }
             return originalContent;
@@ -2075,6 +2265,603 @@ public class JavaCodeGenerator {
             return originalContent;
         }
     }
+
+    /**
+     * 基于切片点信息，变换安全的控制流结构
+     * 变换多个不包含切片变量且在切片点之前的控制流结构
+     */
+    private boolean transformSafeControlFlowStructures(BlockStmt body, VariableInfo slicePoint) {
+        String sliceVariable = slicePoint.getVariableName();
+        int sliceLineNumber = slicePoint.getLineNumber();
+        boolean anyTransformed = false;
+        int totalLineOffset = 0;
+
+        log.info("=== Analyzing safe control flow structures for slice point: {} at line {} ===",
+                sliceVariable, sliceLineNumber);
+
+        // 收集所有安全的控制流结构并按行号排序（从前到后变换，避免行号混乱）
+        List<Node> safeStructures = new ArrayList<>();
+
+        // 收集switch语句
+        List<com.github.javaparser.ast.stmt.SwitchStmt> switchStatements = body.findAll(com.github.javaparser.ast.stmt.SwitchStmt.class);
+        for (com.github.javaparser.ast.stmt.SwitchStmt switchStmt : switchStatements) {
+            if (isSafeControlFlowStructure(switchStmt, sliceVariable, sliceLineNumber)) {
+                safeStructures.add(switchStmt);
+            }
+        }
+
+        // 收集while循环
+        List<WhileStmt> whileStatements = body.findAll(WhileStmt.class);
+        for (WhileStmt whileStmt : whileStatements) {
+            if (isSafeControlFlowStructure(whileStmt, sliceVariable, sliceLineNumber)) {
+                safeStructures.add(whileStmt);
+            }
+        }
+
+        // 收集for循环
+        List<ForStmt> forStatements = body.findAll(ForStmt.class);
+        for (ForStmt forStmt : forStatements) {
+            if (isSafeControlFlowStructure(forStmt, sliceVariable, sliceLineNumber)) {
+                safeStructures.add(forStmt);
+            }
+        }
+
+        // 按行号排序（从前到后变换）
+        safeStructures.sort((a, b) -> {
+            int lineA = a.getBegin().map(pos -> pos.line).orElse(0);
+            int lineB = b.getBegin().map(pos -> pos.line).orElse(0);
+            return Integer.compare(lineA, lineB);
+        });
+
+        // 变换前2-3个安全的控制流结构
+        int maxTransformations = Math.min(3, safeStructures.size());
+        for (int i = 0; i < maxTransformations; i++) {
+            Node structure = safeStructures.get(i);
+            int lineNumber = structure.getBegin().map(pos -> pos.line).orElse(0);
+
+            if (structure instanceof com.github.javaparser.ast.stmt.SwitchStmt) {
+                if (transformSwitchStatement((com.github.javaparser.ast.stmt.SwitchStmt) structure)) {
+                    log.info("Transformed switch statement at line {}", lineNumber);
+                    totalLineOffset += 2; // switch变换添加2行
+                    anyTransformed = true;
+                }
+            } else if (structure instanceof WhileStmt) {
+                if (transformWhileLoopToDoWhile((WhileStmt) structure)) {
+                    log.info("Transformed while loop to do-while loop at line {}", lineNumber);
+                    totalLineOffset += 2; // while变换添加2行
+                    anyTransformed = true;
+                }
+            } else if (structure instanceof ForStmt) {
+                if (transformForLoopToWhile((ForStmt) structure)) {
+                    log.info("Transformed for loop to while loop at line {}", lineNumber);
+                    totalLineOffset += 1; // for变换可能添加1行
+                    anyTransformed = true;
+                }
+            }
+        }
+
+        // 更新累积的行号偏移
+        this.cumulativeLineOffset = totalLineOffset;
+        log.info("Total transformations: {}, cumulative line offset: {}",
+                anyTransformed ? maxTransformations : 0, totalLineOffset);
+
+        if (!anyTransformed) {
+            log.info("No safe control flow structures found for transformation");
+        }
+
+        return anyTransformed;
+    }
+
+    /**
+     * 将for循环转换为等价的while循环
+     * for (int i = 0; i < 3; i++) { body }
+     * 转换为:
+     * int i = 0;
+     * while (i < 3) { body; i++; }
+     */
+    private boolean transformForLoopToWhile(ForStmt forStmt) {
+        try {
+            // 检查for循环是否有标准结构
+            if (forStmt.getInitialization().isEmpty() ||
+                !forStmt.getCompare().isPresent() ||
+                forStmt.getUpdate().isEmpty()) {
+                return false;
+            }
+
+            // 获取父级块
+            BlockStmt parentBlock = forStmt.findAncestor(BlockStmt.class).orElse(null);
+            if (parentBlock == null) {
+                return false;
+            }
+
+            int forIndex = parentBlock.getStatements().indexOf(forStmt);
+            if (forIndex < 0) {
+                return false;
+            }
+
+            // 提取for循环的组件
+            Expression initialization = forStmt.getInitialization().get(0);
+            Expression condition = forStmt.getCompare().get();
+            Expression update = forStmt.getUpdate().get(0);
+            com.github.javaparser.ast.stmt.Statement body = forStmt.getBody();
+
+            // 创建初始化语句
+            com.github.javaparser.ast.stmt.ExpressionStmt initStmt =
+                new com.github.javaparser.ast.stmt.ExpressionStmt(initialization);
+
+            // 创建while循环
+            WhileStmt whileStmt = new WhileStmt();
+            whileStmt.setCondition(condition);
+
+            // 创建while循环体
+            BlockStmt whileBody = new BlockStmt();
+            if (body instanceof BlockStmt) {
+                BlockStmt originalBody = (BlockStmt) body;
+                whileBody.getStatements().addAll(originalBody.getStatements());
+            } else {
+                whileBody.addStatement(body);
+            }
+
+            // 添加更新语句到while循环体的末尾
+            whileBody.addStatement(new com.github.javaparser.ast.stmt.ExpressionStmt(update));
+            whileStmt.setBody(whileBody);
+
+            // 替换for循环
+            parentBlock.getStatements().set(forIndex, initStmt);
+            parentBlock.getStatements().add(forIndex + 1, whileStmt);
+
+            log.debug("Successfully transformed for loop to while loop");
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error transforming for loop to while loop", e);
+            return false;
+        }
+    }
+
+    /**
+     * 计算控制流变换后的切片点位置
+     * 使用代码上下文匹配而不是简单的行号偏移
+     */
+    private VariableInfo calculateUpdatedSlicePoint(String transformedContent, VariableInfo originalSlicePoint) {
+        try {
+            String variableName = originalSlicePoint.getVariableName();
+            int originalLineNumber = originalSlicePoint.getLineNumber();
+
+            log.info("Finding equivalent slice point for variable '{}' originally at line {}",
+                    variableName, originalLineNumber);
+
+            // 解析变换后的文件
+            CompilationUnit transformedCu = javaParser.parse(transformedContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse transformed content"));
+
+            Optional<MethodDeclaration> mainMethod = transformedCu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                BlockStmt body = mainMethod.get().getBody().orElse(null);
+                if (body != null) {
+                    // 查找所有包含该变量的System.out.println语句
+                    List<Integer> printlnLines = new ArrayList<>();
+
+                    body.findAll(MethodCallExpr.class).forEach(methodCall -> {
+                        if (methodCall.getNameAsString().equals("println") &&
+                            methodCall.getScope().isPresent() &&
+                            methodCall.getScope().get().toString().equals("System.out")) {
+
+                            if (!methodCall.getArguments().isEmpty()) {
+                                Expression arg = methodCall.getArguments().get(0);
+                                if (arg instanceof NameExpr) {
+                                    NameExpr nameExpr = (NameExpr) arg;
+                                    if (nameExpr.getNameAsString().equals(variableName)) {
+                                        int lineNumber = nameExpr.getBegin().get().line;
+                                        printlnLines.add(lineNumber);
+                                        log.debug("Found println({}) at line {}", variableName, lineNumber);
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    if (printlnLines.isEmpty()) {
+                        log.warn("No println statements found for variable '{}' in transformed file", variableName);
+                        return null;
+                    }
+
+                    // 使用上下文匹配选择正确的println语句
+                    int bestMatch = findBestMatchingPrintln(originalSlicePoint, printlnLines, transformedContent);
+                    if (bestMatch > 0) {
+                        log.info("Found equivalent slice point at line {} for variable '{}'", bestMatch, variableName);
+                        return new VariableInfo(variableName, bestMatch);
+                    }
+                }
+            }
+
+            log.warn("Could not find equivalent slice point after transformation");
+            return null;
+        } catch (Exception e) {
+            log.error("Error calculating updated slice point", e);
+            return null;
+        }
+    }
+
+    /**
+     * 计算控制流变换导致的累积行号偏移
+     * 返回所有变换的累积偏移量
+     */
+    private int calculateLineOffset() {
+        return cumulativeLineOffset;
+    }
+
+    /**
+     * 通过上下文匹配找到最佳的println语句
+     * 比较原始位置前后的代码模式，选择最相似的位置
+     */
+    private int findBestMatchingPrintln(VariableInfo originalSlicePoint, List<Integer> candidateLines, String transformedContent) {
+        if (candidateLines.size() == 1) {
+            return candidateLines.get(0);
+        }
+
+        String variableName = originalSlicePoint.getVariableName();
+        int originalLine = originalSlicePoint.getLineNumber();
+
+        log.debug("Multiple println({}) statements found at lines: {}, using context matching",
+                variableName, candidateLines);
+
+        // 获取原始文件的上下文（前后各3行）
+        String originalContext = getOriginalFileContext(originalSlicePoint, 3);
+        if (originalContext == null) {
+            log.warn("Could not get original context, using line offset estimation");
+            // 回退到行号偏移估算
+            int estimatedLine = originalLine + calculateLineOffset();
+            return candidateLines.stream()
+                    .min((a, b) -> Integer.compare(Math.abs(a - estimatedLine), Math.abs(b - estimatedLine)))
+                    .orElse(candidateLines.get(candidateLines.size() - 1));
+        }
+
+        // 为每个候选行计算上下文相似度
+        int bestMatch = -1;
+        double bestSimilarity = -1;
+
+        String[] transformedLines = transformedContent.split("\n");
+
+        for (int candidateLine : candidateLines) {
+            String candidateContext = getContextAroundLine(transformedLines, candidateLine, 3);
+            double similarity = calculateContextSimilarity(originalContext, candidateContext);
+
+            log.debug("Line {} context similarity: {}", candidateLine, similarity);
+
+            if (similarity > bestSimilarity) {
+                bestSimilarity = similarity;
+                bestMatch = candidateLine;
+            }
+        }
+
+        log.info("Best matching println at line {} with similarity {}", bestMatch, bestSimilarity);
+        return bestMatch;
+    }
+
+    /**
+     * 获取原始文件中指定位置的上下文
+     */
+    private String getOriginalFileContext(VariableInfo slicePoint, int contextLines) {
+        // 这里需要访问原始文件内容，暂时返回null让系统回退到偏移估算
+        // 在实际实现中，可以缓存原始文件内容或通过其他方式获取
+        return null;
+    }
+
+    /**
+     * 获取指定行周围的上下文
+     */
+    private String getContextAroundLine(String[] lines, int lineNumber, int contextLines) {
+        StringBuilder context = new StringBuilder();
+        int start = Math.max(0, lineNumber - contextLines - 1);
+        int end = Math.min(lines.length, lineNumber + contextLines);
+
+        for (int i = start; i < end; i++) {
+            if (i < lines.length) {
+                context.append(lines[i].trim()).append("\n");
+            }
+        }
+
+        return context.toString();
+    }
+
+    /**
+     * 计算两个代码上下文的相似度
+     */
+    private double calculateContextSimilarity(String context1, String context2) {
+        if (context1 == null || context2 == null) {
+            return 0.0;
+        }
+
+        String[] lines1 = context1.split("\n");
+        String[] lines2 = context2.split("\n");
+
+        int matches = 0;
+        int total = Math.max(lines1.length, lines2.length);
+
+        for (int i = 0; i < Math.min(lines1.length, lines2.length); i++) {
+            if (lines1[i].equals(lines2[i])) {
+                matches++;
+            }
+        }
+
+        return total > 0 ? (double) matches / total : 0.0;
+    }
+
+    /**
+     * 验证变换后的切片点是否与原始切片点等价
+     * 比较两个位置的代码模式是否相同
+     */
+    private boolean verifySlicePointEquivalence(String transformedContent, VariableInfo originalSlicePoint, int newLineNumber) {
+        try {
+            // 获取原始文件的对应行
+            String originalLine = getOriginalSlicePointLine(originalSlicePoint);
+            if (originalLine == null) {
+                return false;
+            }
+
+            // 获取变换后文件的对应行
+            String[] lines = transformedContent.split("\n");
+            if (newLineNumber <= 0 || newLineNumber > lines.length) {
+                return false;
+            }
+            String newLine = lines[newLineNumber - 1].trim();
+
+            // 比较代码模式是否相同（忽略空格差异）
+            String originalPattern = originalLine.trim();
+            boolean isEquivalent = originalPattern.equals(newLine);
+
+            log.debug("Comparing slice points:");
+            log.debug("  Original line {}: {}", originalSlicePoint.getLineNumber(), originalPattern);
+            log.debug("  New line {}: {}", newLineNumber, newLine);
+            log.debug("  Equivalent: {}", isEquivalent);
+
+            return isEquivalent;
+        } catch (Exception e) {
+            log.debug("Error verifying slice point equivalence: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 获取原始切片点的代码行
+     */
+    private String getOriginalSlicePointLine(VariableInfo originalSlicePoint) {
+        try {
+            // 从当前存储的原始内容中获取对应行
+            // 这里需要访问原始文件内容
+            String originalContent = readFileContent("mutated/JSmith_mutated_0.java");
+            if (originalContent != null) {
+                String[] lines = originalContent.split("\n");
+                int lineIndex = originalSlicePoint.getLineNumber() - 1;
+                if (lineIndex >= 0 && lineIndex < lines.length) {
+                    return lines[lineIndex];
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            log.debug("Error getting original slice point line: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 读取文件内容
+     */
+    private String readFileContent(String filePath) {
+        try {
+            return new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(filePath)));
+        } catch (Exception e) {
+            log.debug("Error reading file {}: {}", filePath, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 变换switch语句 - 添加一个空的case分支
+     * 这是一个简单的等价变换，不会改变程序语义
+     */
+    private boolean transformSwitchStatement(com.github.javaparser.ast.stmt.SwitchStmt switchStmt) {
+        try {
+            // 获取所有现有的case条目
+            com.github.javaparser.ast.NodeList<com.github.javaparser.ast.stmt.SwitchEntry> entries = switchStmt.getEntries();
+
+            if (!entries.isEmpty()) {
+                // 找到一个未使用的case值
+                Set<Integer> usedValues = new HashSet<>();
+                for (com.github.javaparser.ast.stmt.SwitchEntry entry : entries) {
+                    if (!entry.getLabels().isEmpty()) {
+                        Expression label = entry.getLabels().get(0);
+                        if (label instanceof com.github.javaparser.ast.expr.IntegerLiteralExpr) {
+                            com.github.javaparser.ast.expr.IntegerLiteralExpr intLabel = (com.github.javaparser.ast.expr.IntegerLiteralExpr) label;
+                            try {
+                                usedValues.add(Integer.parseInt(intLabel.getValue()));
+                            } catch (NumberFormatException e) {
+                                // 忽略解析错误
+                            }
+                        }
+                    }
+                }
+
+                // 找到一个未使用的值（简单地选择一个大的数字）
+                int newCaseValue = 999;
+                while (usedValues.contains(newCaseValue)) {
+                    newCaseValue++;
+                }
+
+                // 创建新的空case分支
+                com.github.javaparser.ast.stmt.SwitchEntry newEntry = new com.github.javaparser.ast.stmt.SwitchEntry();
+                newEntry.getLabels().add(new com.github.javaparser.ast.expr.IntegerLiteralExpr(String.valueOf(newCaseValue)));
+                newEntry.getStatements().add(new com.github.javaparser.ast.stmt.BreakStmt());
+
+                // 在default分支之前插入新的case
+                boolean hasDefault = entries.stream().anyMatch(entry -> entry.getLabels().isEmpty());
+                if (hasDefault) {
+                    // 在default之前插入
+                    entries.add(entries.size() - 1, newEntry);
+                } else {
+                    // 直接添加到末尾
+                    entries.add(newEntry);
+                }
+
+                log.debug("Successfully added empty case {} to switch statement", newCaseValue);
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            log.error("Error transforming switch statement", e);
+            return false;
+        }
+    }
+
+    /**
+     * 将while循环转换为等价的do-while循环
+     * while (condition) { body }
+     * 转换为:
+     * if (condition) { do { body } while (condition); }
+     */
+    private boolean transformWhileLoopToDoWhile(WhileStmt whileStmt) {
+        try {
+            // 获取父级块
+            BlockStmt parentBlock = whileStmt.findAncestor(BlockStmt.class).orElse(null);
+            if (parentBlock == null) {
+                return false;
+            }
+
+            int whileIndex = parentBlock.getStatements().indexOf(whileStmt);
+            if (whileIndex < 0) {
+                return false;
+            }
+
+            // 提取while循环的组件
+            Expression condition = whileStmt.getCondition();
+            com.github.javaparser.ast.stmt.Statement body = whileStmt.getBody();
+
+            // 创建do-while循环
+            com.github.javaparser.ast.stmt.DoStmt doWhileStmt = new com.github.javaparser.ast.stmt.DoStmt();
+            doWhileStmt.setCondition(condition.clone());
+            doWhileStmt.setBody(body.clone());
+
+            // 创建if语句包装do-while循环
+            IfStmt ifStmt = new IfStmt();
+            ifStmt.setCondition(condition.clone());
+
+            BlockStmt ifBody = new BlockStmt();
+            ifBody.addStatement(doWhileStmt);
+            ifStmt.setThenStmt(ifBody);
+
+            // 替换while循环
+            parentBlock.getStatements().set(whileIndex, ifStmt);
+
+            log.debug("Successfully transformed while loop to do-while loop");
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error transforming while loop to do-while loop", e);
+            return false;
+        }
+    }
+
+    /**
+     * 判断控制流结构是否安全（不影响切片点）
+     * 安全条件：
+     * 1. 控制流结构在切片点之前
+     * 2. 控制流结构不包含切片变量
+     * 3. 控制流结构的条件不依赖于切片变量
+     */
+    private boolean isSafeControlFlowStructure(Node controlFlowNode, String sliceVariable, int sliceLineNumber) {
+        // 检查控制流结构的位置
+        if (!controlFlowNode.getBegin().isPresent()) {
+            return false;
+        }
+
+        int controlFlowLine = controlFlowNode.getBegin().get().line;
+
+        // 必须在切片点之前
+        if (controlFlowLine >= sliceLineNumber) {
+            log.debug("Control flow at line {} is not before slice point at line {}",
+                    controlFlowLine, sliceLineNumber);
+            return false;
+        }
+
+        // 检查控制流结构是否包含切片变量
+        List<NameExpr> nameExprs = controlFlowNode.findAll(NameExpr.class);
+        for (NameExpr nameExpr : nameExprs) {
+            if (nameExpr.getNameAsString().equals(sliceVariable)) {
+                log.debug("Control flow at line {} contains slice variable '{}'",
+                        controlFlowLine, sliceVariable);
+                return false;
+            }
+        }
+
+        // 检查控制流条件是否依赖于切片变量
+        if (controlFlowNode instanceof IfStmt) {
+            IfStmt ifStmt = (IfStmt) controlFlowNode;
+            if (expressionContainsVariable(ifStmt.getCondition(), sliceVariable)) {
+                log.debug("If condition at line {} depends on slice variable '{}'",
+                        controlFlowLine, sliceVariable);
+                return false;
+            }
+        } else if (controlFlowNode instanceof ForStmt) {
+            ForStmt forStmt = (ForStmt) controlFlowNode;
+            if (forStmt.getCompare().isPresent() &&
+                expressionContainsVariable(forStmt.getCompare().get(), sliceVariable)) {
+                log.debug("For condition at line {} depends on slice variable '{}'",
+                        controlFlowLine, sliceVariable);
+                return false;
+            }
+        } else if (controlFlowNode instanceof WhileStmt) {
+            WhileStmt whileStmt = (WhileStmt) controlFlowNode;
+            if (expressionContainsVariable(whileStmt.getCondition(), sliceVariable)) {
+                log.debug("While condition at line {} depends on slice variable '{}'",
+                        controlFlowLine, sliceVariable);
+                return false;
+            }
+        }
+
+        log.debug("Control flow at line {} is safe for transformation", controlFlowLine);
+        return true;
+    }
+
+    /**
+     * 检查表达式是否包含指定变量
+     */
+    private boolean expressionContainsVariable(Expression expr, String variableName) {
+        List<NameExpr> nameExprs = expr.findAll(NameExpr.class);
+        return nameExprs.stream().anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+    }
+
+    /**
+     * 从代码内容中查找适合切片的变量
+     */
+    private VariableInfo findVariableForSlicingFromContent(String content) {
+        try {
+            // 创建临时文件
+            String tempFileName = "temp_" + System.currentTimeMillis() + ".java";
+            Path tempFile = Paths.get(tempFileName);
+
+            try {
+                Files.write(tempFile, content.getBytes(StandardCharsets.UTF_8));
+                VariableInfo result = findVariableForSlicing(tempFile.toString());
+                return result;
+            } finally {
+                // 清理临时文件
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (Exception e) {
+                    log.warn("Failed to delete temp file: {}", tempFile, e);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error finding variable from content", e);
+            return null;
+        }
+    }
+
+
 
     /**
      * 查找切片相关变量
@@ -2099,6 +2886,364 @@ public class JavaCodeGenerator {
         });
 
         return sliceVariables;
+    }
+
+    /**
+     * 专门用于控制流蜕变测试的变量查找方法（公共接口）
+     * 优先选择靠后的变量，确保前面有可以安全变换的控制流结构
+     */
+    public VariableInfo findVariableForControlFlowTestingFromContent(String content) {
+        return findVariableForControlFlowTesting(content);
+    }
+
+    /**
+     * 计算控制流变换后的等价切片点（公共接口）
+     */
+    public VariableInfo calculateUpdatedSlicePointFromContent(String transformedContent, VariableInfo originalSlicePoint) {
+        return calculateUpdatedSlicePoint(transformedContent, originalSlicePoint);
+    }
+
+    /**
+     * 专门用于控制流蜕变测试的变量查找方法
+     * 优先选择靠后的变量，确保前面有可以安全变换的控制流结构
+     */
+    private VariableInfo findVariableForControlFlowTesting(String content) {
+        try {
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse content for control flow variable finding"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 专门查找System.out.println中的变量使用
+                    List<VariableUsage> allVariableUsages = new ArrayList<>();
+
+                    // 查找所有System.out.println语句中的变量
+                    body.findAll(MethodCallExpr.class).forEach(methodCall -> {
+                        if (methodCall.getNameAsString().equals("println") &&
+                            methodCall.getScope().isPresent() &&
+                            methodCall.getScope().get().toString().equals("System.out")) {
+
+                            if (!methodCall.getArguments().isEmpty()) {
+                                Expression arg = methodCall.getArguments().get(0);
+                                if (arg instanceof NameExpr) {
+                                    NameExpr nameExpr = (NameExpr) arg;
+                                    String varName = nameExpr.getNameAsString();
+                                    int lineNumber = nameExpr.getBegin().get().line;
+
+                                    // 过滤掉不是真正变量的名称
+                                    if (isRealVariable(varName)) {
+                                        allVariableUsages.add(new VariableUsage(varName, lineNumber));
+                                        log.debug("Found println variable: {} at line {}", varName, lineNumber);
+                                    } else {
+                                        log.debug("Filtered out non-variable in println: {} at line {}", varName, lineNumber);
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // 按行号排序，从最靠后的变量开始检查
+                    if (!allVariableUsages.isEmpty()) {
+                        allVariableUsages.sort((a, b) -> Integer.compare(b.lineNumber, a.lineNumber));
+
+                        // 统计每个变量的适用性得分（可用的控制流结构数量）
+                        Map<VariableUsage, Integer> suitabilityScores = new HashMap<>();
+
+                        for (VariableUsage usage : allVariableUsages) {
+                            int score = countEligibleControlFlowStructures(body, usage.variableName, usage.lineNumber);
+                            if (score > 0) {
+                                suitabilityScores.put(usage, score);
+                                log.debug("Variable {} at line {} has {} eligible control flow structures",
+                                        usage.variableName, usage.lineNumber, score);
+                            }
+                        }
+
+                        if (!suitabilityScores.isEmpty()) {
+                            // 选择得分最高的变量，如果得分相同则选择行号更靠后的
+                            VariableUsage bestChoice = suitabilityScores.entrySet().stream()
+                                    .max((e1, e2) -> {
+                                        int scoreCompare = Integer.compare(e1.getValue(), e2.getValue());
+                                        if (scoreCompare != 0) return scoreCompare;
+                                        return Integer.compare(e1.getKey().lineNumber, e2.getKey().lineNumber);
+                                    })
+                                    .map(Map.Entry::getKey)
+                                    .orElse(null);
+
+                            if (bestChoice != null) {
+                                log.info("Selected variable for control flow testing: {} at line {} (score: {} eligible structures)",
+                                        bestChoice.variableName, bestChoice.lineNumber, suitabilityScores.get(bestChoice));
+                                return new VariableInfo(bestChoice.variableName, bestChoice.lineNumber);
+                            }
+                        }
+                    }
+                }
+            }
+
+            log.warn("No suitable variable found for control flow testing");
+            return null;
+        } catch (Exception e) {
+            log.error("Error finding variable for control flow testing", e);
+            return null;
+        }
+    }
+
+    /**
+     * 检查变量是否适合控制流蜕变测试
+     * 条件：在该变量之前存在至少一个不包含该变量的控制流结构
+     *
+     * 重要：只要存在任何一个安全的控制流结构可以变换，该变量就适合测试
+     */
+    private boolean isVariableSuitableForControlFlowTesting(BlockStmt body, String variableName, int variableLineNumber) {
+        // 查找所有控制流语句
+        List<IfStmt> ifStatements = body.findAll(IfStmt.class);
+        List<ForStmt> forStatements = body.findAll(ForStmt.class);
+        List<WhileStmt> whileStatements = body.findAll(WhileStmt.class);
+        List<com.github.javaparser.ast.stmt.SwitchStmt> switchStatements = body.findAll(com.github.javaparser.ast.stmt.SwitchStmt.class);
+        List<com.github.javaparser.ast.stmt.DoStmt> doStatements = body.findAll(com.github.javaparser.ast.stmt.DoStmt.class);
+
+        log.debug("Checking variable {} at line {} for control flow testing eligibility", variableName, variableLineNumber);
+        log.debug("Found control flow structures: {} while, {} for, {} if, {} switch, {} do-while",
+                whileStatements.size(), forStatements.size(), ifStatements.size(), switchStatements.size(), doStatements.size());
+
+        int eligibleStructures = 0;
+
+        // 检查switch语句
+        for (com.github.javaparser.ast.stmt.SwitchStmt switchStmt : switchStatements) {
+            if (switchStmt.getBegin().isPresent()) {
+                int switchLineNumber = switchStmt.getBegin().get().line;
+                if (switchLineNumber < variableLineNumber) {
+                    // 检查switch语句是否包含该变量
+                    List<NameExpr> nameExprs = switchStmt.findAll(NameExpr.class);
+                    boolean containsVariable = nameExprs.stream()
+                            .anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+
+                    if (!containsVariable) {
+                        log.debug("Found eligible switch statement at line {} for variable {} at line {}",
+                                switchLineNumber, variableName, variableLineNumber);
+                        eligibleStructures++;
+                    } else {
+                        log.debug("Switch statement at line {} contains variable {}, skipping",
+                                switchLineNumber, variableName);
+                    }
+                }
+            }
+        }
+
+        // 检查while循环
+        for (WhileStmt whileStmt : whileStatements) {
+            if (whileStmt.getBegin().isPresent()) {
+                int whileLineNumber = whileStmt.getBegin().get().line;
+                if (whileLineNumber < variableLineNumber) {
+                    // 检查while循环是否包含该变量
+                    List<NameExpr> nameExprs = whileStmt.findAll(NameExpr.class);
+                    boolean containsVariable = nameExprs.stream()
+                            .anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+
+                    if (!containsVariable) {
+                        log.debug("Found eligible while loop at line {} for variable {} at line {}",
+                                whileLineNumber, variableName, variableLineNumber);
+                        eligibleStructures++;
+                    } else {
+                        log.debug("While loop at line {} contains variable {}, skipping",
+                                whileLineNumber, variableName);
+                    }
+                }
+            }
+        }
+
+        // 检查do-while循环
+        for (com.github.javaparser.ast.stmt.DoStmt doStmt : doStatements) {
+            if (doStmt.getBegin().isPresent()) {
+                int doLineNumber = doStmt.getBegin().get().line;
+                if (doLineNumber < variableLineNumber) {
+                    // 检查do-while循环是否包含该变量
+                    List<NameExpr> nameExprs = doStmt.findAll(NameExpr.class);
+                    boolean containsVariable = nameExprs.stream()
+                            .anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+
+                    if (!containsVariable) {
+                        log.debug("Found eligible do-while loop at line {} for variable {} at line {}",
+                                doLineNumber, variableName, variableLineNumber);
+                        eligibleStructures++;
+                    } else {
+                        log.debug("Do-while loop at line {} contains variable {}, skipping",
+                                doLineNumber, variableName);
+                    }
+                }
+            }
+        }
+
+        // 检查for循环
+        for (ForStmt forStmt : forStatements) {
+            if (forStmt.getBegin().isPresent()) {
+                int forLineNumber = forStmt.getBegin().get().line;
+                if (forLineNumber < variableLineNumber) {
+                    // 检查for循环是否包含该变量
+                    List<NameExpr> nameExprs = forStmt.findAll(NameExpr.class);
+                    boolean containsVariable = nameExprs.stream()
+                            .anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+
+                    if (!containsVariable) {
+                        log.debug("Found eligible for loop at line {} for variable {} at line {}",
+                                forLineNumber, variableName, variableLineNumber);
+                        eligibleStructures++;
+                    } else {
+                        log.debug("For loop at line {} contains variable {}, skipping",
+                                forLineNumber, variableName);
+                    }
+                }
+            }
+        }
+
+        // 检查if语句
+        for (IfStmt ifStmt : ifStatements) {
+            if (ifStmt.getBegin().isPresent()) {
+                int ifLineNumber = ifStmt.getBegin().get().line;
+                if (ifLineNumber < variableLineNumber) {
+                    // 检查if语句是否包含该变量
+                    List<NameExpr> nameExprs = ifStmt.findAll(NameExpr.class);
+                    boolean containsVariable = nameExprs.stream()
+                            .anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+
+                    if (!containsVariable) {
+                        log.debug("Found eligible if statement at line {} for variable {} at line {}",
+                                ifLineNumber, variableName, variableLineNumber);
+                        eligibleStructures++;
+                    } else {
+                        log.debug("If statement at line {} contains variable {}, skipping",
+                                ifLineNumber, variableName);
+                    }
+                }
+            }
+        }
+
+        boolean isSuitable = eligibleStructures > 0;
+        log.debug("Variable {} at line {} has {} eligible control flow structures - suitable: {}",
+                variableName, variableLineNumber, eligibleStructures, isSuitable);
+
+        return isSuitable;
+    }
+
+    /**
+     * 计算变量可用的控制流结构数量
+     * 返回在该变量之前且不包含该变量的控制流结构数量
+     */
+    private int countEligibleControlFlowStructures(BlockStmt body, String variableName, int variableLineNumber) {
+        // 查找所有控制流语句
+        List<IfStmt> ifStatements = body.findAll(IfStmt.class);
+        List<ForStmt> forStatements = body.findAll(ForStmt.class);
+        List<WhileStmt> whileStatements = body.findAll(WhileStmt.class);
+        List<com.github.javaparser.ast.stmt.SwitchStmt> switchStatements = body.findAll(com.github.javaparser.ast.stmt.SwitchStmt.class);
+        List<com.github.javaparser.ast.stmt.DoStmt> doStatements = body.findAll(com.github.javaparser.ast.stmt.DoStmt.class);
+
+        int eligibleCount = 0;
+
+        // 检查所有类型的控制流结构
+        List<Node> allControlFlowNodes = new ArrayList<>();
+        allControlFlowNodes.addAll(ifStatements);
+        allControlFlowNodes.addAll(forStatements);
+        allControlFlowNodes.addAll(whileStatements);
+        allControlFlowNodes.addAll(switchStatements);
+        allControlFlowNodes.addAll(doStatements);
+
+        for (Node node : allControlFlowNodes) {
+            if (node.getBegin().isPresent()) {
+                int nodeLineNumber = node.getBegin().get().line;
+                if (nodeLineNumber < variableLineNumber) {
+                    // 检查控制流结构是否包含该变量
+                    List<NameExpr> nameExprs = node.findAll(NameExpr.class);
+                    boolean containsVariable = nameExprs.stream()
+                            .anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
+
+                    if (!containsVariable) {
+                        eligibleCount++;
+                        log.debug("Eligible control flow structure at line {} for variable {} at line {}",
+                                nodeLineNumber, variableName, variableLineNumber);
+                    }
+                }
+            }
+        }
+
+        return eligibleCount;
+    }
+
+    /**
+     * 判断名称是否为真正的变量（排除类名、方法名、关键字、对象实例等）
+     * 专门用于控制流蜕变测试，只选择基本类型变量
+     */
+    private boolean isRealVariable(String name) {
+        // 排除Java关键字和常见的类名、方法名
+        Set<String> excludedNames = Set.of(
+            // Java关键字
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const",
+            "continue", "default", "do", "double", "else", "enum", "extends", "final", "finally", "float",
+            "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native",
+            "new", "package", "private", "protected", "public", "return", "short", "static", "strictfp",
+            "super", "switch", "synchronized", "this", "throw", "throws", "transient", "try", "void",
+            "volatile", "while",
+
+            // 常见的系统类名和方法名
+            "System", "out", "println", "print", "String", "Object", "Math", "Integer", "Double", "Long",
+            "Boolean", "Character", "Float", "Short", "Byte", "Class", "Thread", "Exception", "Error",
+            "RuntimeException", "IllegalArgumentException", "NullPointerException",
+
+            // 常见的方法名
+            "equals", "hashCode", "toString", "clone", "finalize", "notify", "notifyAll", "wait",
+            "getClass", "length", "size", "isEmpty", "contains", "add", "remove", "get", "set",
+            "abs", "max", "min", "sqrt", "pow", "sin", "cos", "tan", "log", "exp",
+
+            // 对象实例名（常见模式）
+            "instance", "obj", "object", "item", "element", "node", "list", "array", "map", "collection",
+
+            // 循环变量和临时变量模式
+            "i", "j", "k", "index", "count", "temp", "tmp"
+        );
+
+        // 排除明确的非变量名称
+        if (excludedNames.contains(name)) {
+            return false;
+        }
+
+        // 排除以特定前缀开头的临时变量和对象实例
+        if (name.startsWith("loop") || name.startsWith("outer") || name.startsWith("inner") ||
+            name.startsWith("temp") || name.startsWith("tmp") || name.startsWith("instance") ||
+            name.startsWith("obj") || name.startsWith("item")) {
+            return false;
+        }
+
+        // 排除明显的常量名（全大写且包含下划线或超过5个字符）
+        if (name.equals(name.toUpperCase()) && name.length() > 1) {
+            // 允许短的全大写变量名（如R660, BJV4等），这些通常是JSmith生成的变量
+            // 只排除明显的常量模式：包含下划线或很长的名称
+            if (name.contains("_") || name.length() > 6) {
+                return false;
+            }
+        }
+
+        // 排除单个字符的变量名（通常是循环变量）
+        if (name.length() == 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 内部类：变量使用信息
+     */
+    private static class VariableUsage {
+        final String variableName;
+        final int lineNumber;
+
+        VariableUsage(String variableName, int lineNumber) {
+            this.variableName = variableName;
+            this.lineNumber = lineNumber;
+        }
     }
 
     /**
@@ -2707,6 +3852,7 @@ public class JavaCodeGenerator {
 
     /**
      * 查找指定变量在文件中的最后一次赋值行号
+     * 对于控制流蜕变，优先查找变量的最后使用位置而不是赋值位置
      * @param sourceFile 源文件路径
      * @param targetVariable 目标变量名
      * @return 变量的最后一次赋值行号，如果找不到返回null
@@ -2719,6 +3865,15 @@ public class JavaCodeGenerator {
 
             log.info("=== Finding last assignment for variable '{}' in file: {} ===", targetVariable, sourceFile);
 
+            // 首先查找所有变量使用位置（包括System.out.println等）
+            final List<Integer> usageLines = new ArrayList<>();
+            cu.findAll(NameExpr.class).forEach(nameExpr -> {
+                if (nameExpr.getNameAsString().equals(targetVariable)) {
+                    usageLines.add(nameExpr.getBegin().get().line);
+                }
+            });
+
+            // 查找所有赋值表达式
             List<Integer> assignmentLinesRaw = new ArrayList<>();
 
             // 1. 查找所有赋值表达式（如 val1 = ...;）
@@ -2754,92 +3909,44 @@ public class JavaCodeGenerator {
 
             // 排序去重
             List<Integer> assignmentLines = assignmentLinesRaw.stream().distinct().sorted().collect(Collectors.toList());
+            List<Integer> sortedUsageLines = usageLines.stream().distinct().sorted().collect(Collectors.toList());
+
             log.info("All assignment lines for '{}': {}", targetVariable, assignmentLines);
+            log.info("All usage lines for '{}': {}", targetVariable, sortedUsageLines);
 
-            if (!assignmentLines.isEmpty()) {
-                // 优先选择有意义的赋值（非默认值）
-                // 跳过声明赋值（通常是初始化为0），选择第一个实际赋值
-                int selectedLine = assignmentLines.get(0); // 默认选择第一个
+            // 对于控制流蜕变，优先选择最后一次使用位置（如System.out.println）
+            if (!sortedUsageLines.isEmpty()) {
+                // 查找最后一次使用，通常是System.out.println
+                int lastUsageLine = sortedUsageLines.get(sortedUsageLines.size() - 1);
 
-                // 如果第一个是声明赋值，选择第二个
-                if (assignmentLines.size() > 1) {
-                    // 检查第一个赋值是否是声明赋值（通常在第20-25行）
-                    int firstLine = assignmentLines.get(0);
-                    if (firstLine <= 25) { // 假设声明赋值在前25行
-                        selectedLine = assignmentLines.get(1);
-                        log.info("Skipped declaration assignment at line {}, selected meaningful assignment at line {}",
-                                firstLine, selectedLine);
-                    }
+                // 检查这个使用是否是在System.out.println中
+                String lineContent = getLineContent(sourceFile, lastUsageLine);
+                if (lineContent.contains("System.out.println") || lineContent.contains("println")) {
+                    log.info("Found System.out.println usage of '{}' at line {}", targetVariable, lastUsageLine);
+                    return new VariableInfo(targetVariable, lastUsageLine);
                 }
 
-                log.info("Selected meaningful assignment of '{}' at line {}", targetVariable, selectedLine);
+                // 如果不是println，选择最后一次使用
+                log.info("Selected last usage of '{}' at line {}", targetVariable, lastUsageLine);
+                return new VariableInfo(targetVariable, lastUsageLine);
+            }
+
+            if (!assignmentLines.isEmpty()) {
+                // 如果没有使用，回退到赋值逻辑
+                int selectedLine = assignmentLines.get(assignmentLines.size() - 1); // 选择最后一次赋值
+
+                log.info("Selected last assignment of '{}' at line {}", targetVariable, selectedLine);
                 return new VariableInfo(targetVariable, selectedLine);
             }
 
-            log.warn("No assignments found for variable '{}' in file: {}", targetVariable, sourceFile);
-            // 如果没有赋值，返回最后一次使用
-            return findVariableLineNumber(sourceFile, targetVariable);
+            log.warn("No assignments or usages found for variable '{}' in file: {}", targetVariable, sourceFile);
+            return null;
         } catch (IOException e) {
             log.error("Error finding last assignment for variable '{}' in file: {}", targetVariable, sourceFile, e);
             return null;
         }
     }
-
-    /**
-     * 查找指定变量在文件中的声明行号
-     * @param sourceFile 源文件路径
-     * @param targetVariable 目标变量名
-     * @return 变量的声明行号信息，如果找不到返回null
-     */
-    public VariableInfo findVariableDeclaration(String sourceFile, String targetVariable) {
-        try {
-            String content = Files.readString(Paths.get(sourceFile), StandardCharsets.UTF_8);
-            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
-                    new RuntimeException("Failed to parse Java file"));
-
-            // 查找所有变量声明
-            List<VariableDeclarator> variables = cu.findAll(VariableDeclarator.class);
-
-            for (VariableDeclarator var : variables) {
-                if (var.getNameAsString().equals(targetVariable)) {
-                    // 获取变量声明的行号
-                    if (var.getBegin().isPresent()) {
-                        int lineNumber = var.getBegin().get().line;
-                        log.info("Found variable '{}' declaration at line {} in file: {}",
-                                targetVariable, lineNumber, sourceFile);
-                        return new VariableInfo(targetVariable, lineNumber);
-                    }
-                }
-            }
-
-            log.warn("Variable '{}' declaration not found in file: {}", targetVariable, sourceFile);
-            return null;
-
-        } catch (IOException e) {
-            log.error("Error finding variable declaration for '{}' in file: {}", targetVariable, sourceFile, e);
-            return null;
-        }
-    }
-
-    /**
-     * 生成切片命令字符串
-     * @param sourceFile 源文件路径
-     * @param targetVariable 目标变量名
-     * @return 完整的切片命令字符串
-     */
-    public String generateSliceCommand(String sourceFile, String targetVariable) {
-        VariableInfo varInfo = findVariableLastAssignment(sourceFile, targetVariable);
-        if (varInfo == null) {
-            log.error("Could not find variable '{}' in file: {}", targetVariable, sourceFile);
-            return null;
-        }
-
-        String command = String.format("java -jar src/main/java/sdg-cli-1.3.0-jar-with-dependencies.jar -c %s#%d:%s",
-                sourceFile, varInfo.getLineNumber(), varInfo.getVariableName());
-
-        log.info("Generated slice command: {}", command);
-        return command;
-    }
+    
 
     /**
      * 生成数据流等价变换的变异文件

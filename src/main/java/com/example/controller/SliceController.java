@@ -445,64 +445,69 @@ public class SliceController {
         List<Map<String, Object>> testResults = new ArrayList<>();
 
         try {
-            log.info("Starting control flow metamorphic test with {} mutations", numMutations);
+            log.info("Starting JSmith control flow metamorphic test with {} mutations", numMutations);
 
-            // 生成原始文件
-            List<String> originalFiles = javaCodeGenerator.generateMutatedFiles("", numMutations);
-            log.info("Generated {} original files", originalFiles.size());
+            // 清理之前的切片文件
+            cleanupSliceFiles();
 
-            // 对每个原始文件生成对应的控制流变换文件
-            for (int i = 0; i < originalFiles.size(); i++) {
-                String originalFile = originalFiles.get(i);
-                
-                // 读取原始文件内容
-                String originalFileContent = Files.readString(Paths.get(originalFile), StandardCharsets.UTF_8);
-                
-                // 对原始内容进行控制流变换
-                String transformedContent = javaCodeGenerator.transformControlFlow(originalFileContent);
-                
-                // 保存变换后的文件
-                String controlFlowFileName = String.format("Example_controlflow_%d.java", i);
-                String controlFlowFilePath = Paths.get("controlflow", controlFlowFileName).toString();
-                Files.write(Paths.get(controlFlowFilePath), transformedContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                
-                String controlFlowFile = controlFlowFilePath;
-                
-                log.info("Processing file pair: {} and {}", originalFile, controlFlowFile);
+            // 使用JSmith生成器生成控制流变换测试文件
+            List<String> generatedFiles = javaCodeGenerator.generateJSmithControlFlowTestFiles(numMutations);
+            log.info("Generated {} JSmith control flow test files", generatedFiles.size());
+            
+            // 过滤出原始文件（mutated目录中的文件）
+            List<String> mutatedFiles = generatedFiles.stream()
+                .filter(file -> file.contains("mutated") && file.contains("JSmith"))
+                .collect(java.util.stream.Collectors.toList());
+            log.info("Filtered to {} JSmith mutated files for control flow testing", mutatedFiles.size());
+
+            // 对每个变异文件进行切片
+            for (String file : mutatedFiles) {
+                log.info("Processing file: {}", file);
                 Map<String, Object> testResult = new HashMap<>();
-                testResult.put("originalFile", originalFile);
-                testResult.put("controlFlowFile", controlFlowFile);
+                testResult.put("originalFile", file);
 
                 try {
+                    // 获取对应的控制流变换文件
+                    String controlFlowFile = file.replace("mutated", "controlflow").replace("JSmith_mutated_", "JSmith_controlflow_");
+                    testResult.put("controlFlowFile", controlFlowFile);
 
                     // 读取原始文件内容用于显示
-                    testResult.put("originalFileContent", originalFileContent);
+                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file)));
+                    testResult.put("originalFileContent", originalContent);
 
                     // 读取控制流变换文件内容用于显示
                     String controlFlowContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(controlFlowFile)));
                     testResult.put("controlflowFileContent", controlFlowContent);
 
-                    // 对原始文件选择切片变量
-                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForSlicing(originalFile);
+                    // 对原始文件选择切片变量（使用专门的控制流测试变量选择方法）
+                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForControlFlowTestingFromContent(originalContent);
                     if (originalVariableInfo == null) {
-                        throw new RuntimeException("No suitable variable found for slicing in original file: " + originalFile);
+                        throw new RuntimeException("No suitable variable found for control flow testing in original file: " + file);
                     }
 
+                    String originalVarName = originalVariableInfo.getVariableName();
                     log.info("Selected variable for slicing: {} at line {}",
-                            originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                            originalVarName, originalVariableInfo.getLineNumber());
+
+                    // 对控制流变换后的文件，需要计算等价的切片点位置
+                    // 因为控制流变换可能改变了变量的行号
+                    VariableInfo controlFlowVariableInfo = javaCodeGenerator.calculateUpdatedSlicePointFromContent(
+                            controlFlowContent, originalVariableInfo);
+                    if (controlFlowVariableInfo == null) {
+                        throw new RuntimeException("No equivalent slice point found in control flow file: " + controlFlowFile);
+                    }
+
+                    log.info("Found corresponding variable in control flow file: {} at line {}",
+                            controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
 
                     // 对原始文件执行切片
-                    log.info("Executing slice for original file: {}", originalFile);
-                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(originalFile, originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                    log.info("Executing slice for original file: {} with variable: {} at line {}",
+                            file, originalVarName, originalVariableInfo.getLineNumber());
+                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(file, originalVarName, originalVariableInfo.getLineNumber());
                     log.info("Original slice content: {}", originalSliceContent);
                     testResult.put("originalSliceContent", originalSliceContent);
 
-                    // 对控制流变换文件重新查找变量最新行号
-                    VariableInfo controlFlowVariableInfo = javaCodeGenerator.findVariableLastAssignment(controlFlowFile, originalVariableInfo.getVariableName());
-                    if (controlFlowVariableInfo == null) {
-                        throw new RuntimeException("No suitable variable found for slicing in control flow file: " + controlFlowFile);
-                    }
-
+                    // 对控制流变换文件执行切片（使用重新查找的变量和行号）
                     log.info("Executing slice for control flow file: {} with variable: {} at line {}",
                             controlFlowFile, controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
                     String controlFlowSliceContent = sliceExecutor.executeSliceWithVariable(controlFlowFile, controlFlowVariableInfo.getVariableName(), controlFlowVariableInfo.getLineNumber());
@@ -517,7 +522,7 @@ public class SliceController {
                     testResult.put("success", true);
 
                 } catch (Exception e) {
-                    log.error("Error processing file: " + originalFile, e);
+                    log.error("Error processing file: " + file, e);
                     testResult.put("error", e.getMessage());
                     testResult.put("success", false);
                 }
