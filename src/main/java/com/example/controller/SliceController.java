@@ -551,56 +551,71 @@ public class SliceController {
         List<Map<String, Object>> testResults = new ArrayList<>();
 
         try {
-            log.info("Starting data flow metamorphic test with {} mutations", numMutations);
+            log.info("Starting JSmith data flow metamorphic test with {} mutations", numMutations);
 
-            // 生成数据流等价变换的变异文件
-            List<String> originalFiles = javaCodeGenerator.generateDataFlowFiles("", numMutations);
-            log.info("Generated {} data flow files", originalFiles.size());
+            // 清理之前的切片文件
+            cleanupSliceFiles();
 
-            // 对每个原始文件进行切片
-            for (String originalFile : originalFiles) {
-                log.info("Processing file: {}", originalFile);
+            // 使用JSmith生成器生成数据流变换测试文件
+            List<String> generatedFiles = javaCodeGenerator.generateJSmithDataFlowTestFiles(numMutations);
+            log.info("Generated {} JSmith data flow test files", generatedFiles.size());
+
+            // 过滤出原始文件（mutated目录中的文件）
+            List<String> mutatedFiles = generatedFiles.stream()
+                .filter(file -> file.contains("mutated") && file.contains("JSmith"))
+                .collect(java.util.stream.Collectors.toList());
+            log.info("Filtered to {} JSmith mutated files for data flow testing", mutatedFiles.size());
+
+            // 对每个变异文件进行切片
+            for (String file : mutatedFiles) {
+                log.info("Processing file: {}", file);
                 Map<String, Object> testResult = new HashMap<>();
-                testResult.put("originalFile", originalFile);
+                testResult.put("originalFile", file);
 
                 try {
                     // 获取对应的数据流变换文件
-                    String dataFlowFile = originalFile.replace("mutated", "dataflow").replace("_original_", "_dataflow_");
+                    String dataFlowFile = file.replace("mutated", "dataflow").replace("JSmith_mutated_", "JSmith_dataflow_");
                     testResult.put("dataflowFile", dataFlowFile);
 
                     // 读取原始文件内容用于显示
-                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(originalFile)));
+                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file)));
                     testResult.put("originalFileContent", originalContent);
 
                     // 读取数据流变换文件内容用于显示
                     String dataFlowContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(dataFlowFile)));
                     testResult.put("dataflowFileContent", dataFlowContent);
 
-                    // 对原始文件选择切片变量
-                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForSlicing(originalFile);
+                    // 对原始文件选择切片变量（使用专门的数据流测试变量选择方法）
+                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForDataFlowTestingFromContent(originalContent);
                     if (originalVariableInfo == null) {
-                        throw new RuntimeException("No suitable variable found for slicing in original file: " + originalFile);
+                        throw new RuntimeException("No suitable variable found for data flow testing in original file: " + file);
                     }
 
+                    String originalVarName = originalVariableInfo.getVariableName();
                     log.info("Selected variable for slicing: {} at line {}",
-                            originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                            originalVarName, originalVariableInfo.getLineNumber());
+
+                    // 对数据流变换后的文件，需要计算等价的切片点位置
+                    // 因为数据流变换可能改变了变量的行号
+                    VariableInfo dataFlowVariableInfo = javaCodeGenerator.calculateDataFlowSlicePointFromContent(
+                            dataFlowContent, originalVariableInfo);
+                    if (dataFlowVariableInfo == null) {
+                        throw new RuntimeException("No equivalent slice point found in data flow file: " + dataFlowFile);
+                    }
+
+                    log.info("Found corresponding variable in data flow file: {} at line {}",
+                            dataFlowVariableInfo.getVariableName(), dataFlowVariableInfo.getLineNumber());
 
                     // 对原始文件执行切片
-                    log.info("Executing slice for original file: {}", originalFile);
-                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(originalFile, originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
-                    log.info("Original slice content: {}", originalSliceContent);
+                    log.info("Starting slice execution for file: {} with variable: {} at line: {}",
+                            file, originalVarName, originalVariableInfo.getLineNumber());
+                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(file, originalVarName, originalVariableInfo.getLineNumber());
                     testResult.put("originalSliceContent", originalSliceContent);
 
-                    // 对数据流变换文件重新查找变量最新行号
-                    VariableInfo dataFlowVariableInfo = javaCodeGenerator.findVariableLastAssignment(dataFlowFile, originalVariableInfo.getVariableName());
-                    if (dataFlowVariableInfo == null) {
-                        throw new RuntimeException("No suitable variable found for slicing in data flow file: " + dataFlowFile);
-                    }
-
-                    log.info("Executing slice for data flow file: {} with variable: {} at line {}",
+                    // 对数据流变换文件执行切片
+                    log.info("Starting slice execution for file: {} with variable: {} at line: {}",
                             dataFlowFile, dataFlowVariableInfo.getVariableName(), dataFlowVariableInfo.getLineNumber());
                     String dataFlowSliceContent = sliceExecutor.executeSliceWithVariable(dataFlowFile, dataFlowVariableInfo.getVariableName(), dataFlowVariableInfo.getLineNumber());
-                    log.info("Data flow slice content: {}", dataFlowSliceContent);
                     testResult.put("dataflowSliceContent", dataFlowSliceContent);
 
                     // 比较切片是否等价
@@ -611,7 +626,7 @@ public class SliceController {
                     testResult.put("success", true);
 
                 } catch (Exception e) {
-                    log.error("Error processing file: " + originalFile, e);
+                    log.error("Error processing file: " + file, e);
                     testResult.put("error", e.getMessage());
                     testResult.put("success", false);
                 }

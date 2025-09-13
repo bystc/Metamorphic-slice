@@ -35,6 +35,9 @@ import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.BooleanLiteralExpr;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -279,6 +282,78 @@ public class JavaCodeGenerator {
 
         } catch (IOException e) {
             log.error("Failed to create directories for JSmith control flow test files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 生成JSmith数据流蜕变测试文件对
+     * 每对包含：原始文件(mutated目录) + 数据流变换文件(dataflow目录)
+     */
+    public List<String> generateJSmithDataFlowTestFiles(int numPairs) {
+        List<String> generatedFiles = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get(DATAFLOW_DIR));
+
+            for (int i = 0; i < numPairs; i++) {
+                try {
+                    log.info("Generating JSmith data flow file pair {} at {}", i + 1, new Date());
+
+                    // 1. 使用JSmith生成复杂的Java类
+                    long seed = generateHighEntropyRandomSeed(startTime, i);
+                    String originalContent = jsmithCodeGenerator.generateRandomJavaClassWithEnhancedRandomness(seed);
+
+                    // 2. 保存原始文件到mutated目录
+                    String mutatedFileName = String.format("JSmith_mutated_%d.java", i);
+                    String mutatedFilePath = Paths.get(MUTATED_DIR, mutatedFileName).toString();
+
+                    // 移除package声明并标准化原始文件格式
+                    String cleanedContent = removePackageDeclaration(originalContent);
+                    String standardizedContent = standardizeJavaFormat(cleanedContent);
+
+                    try (FileWriter writer = new FileWriter(mutatedFilePath)) {
+                        writer.write(standardizedContent);
+                    }
+
+                    generatedFiles.add(mutatedFilePath);
+                    log.info("Generated original file: {}", mutatedFilePath);
+
+                    // 3. 对原始文件进行数据流变换
+                    String dataFlowContent = transformJSmithDataFlow(standardizedContent);
+
+                    // 4. 保存数据流变换文件到dataflow目录
+                    String dataFlowFileName = String.format("JSmith_dataflow_%d.java", i);
+                    String dataFlowFilePath = Paths.get(DATAFLOW_DIR, dataFlowFileName).toString();
+
+                    try (FileWriter writer = new FileWriter(dataFlowFilePath)) {
+                        writer.write(dataFlowContent);
+                    }
+
+                    log.info("Generated data flow file: {}", dataFlowFilePath);
+
+                    // 5. 验证变换效果
+                    if (!dataFlowContent.equals(standardizedContent)) {
+                        log.info("Successfully applied data flow transformation for pair {}", i);
+                    } else {
+                        log.warn("Data flow transformation had no effect for pair {}", i);
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error generating JSmith data flow file pair {}", i, e);
+                }
+            }
+
+            long endTime = System.currentTimeMillis();
+            log.info("JSmith data flow test file generation completed. Generated {} files in {} ms",
+                    generatedFiles.size(), endTime - startTime);
+
+        } catch (IOException e) {
+            log.error("Failed to create directories for JSmith data flow test files", e);
         }
 
         return generatedFiles;
@@ -1422,6 +1497,58 @@ public class JavaCodeGenerator {
     }
 
     /**
+     * 为JSmith生成的代码创建数据流变换版本
+     * @param originalContent 原始代码内容
+     * @return 数据流变换后的代码内容
+     */
+    private String transformJSmithDataFlow(String originalContent) {
+        try {
+            log.info("=== Starting JSmith data flow transformation ===");
+
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse JSmith content for data flow transformation"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            boolean changed = false;
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 重置累积行号偏移
+                    this.cumulativeLineOffset = 0;
+
+                    // 首先找到适合数据流蜕变的切片点信息（选择靠后的变量）
+                    VariableInfo slicePoint = findVariableForDataFlowTesting(originalContent);
+                    if (slicePoint == null) {
+                        log.warn("No suitable variable found for data flow transformation");
+                        return originalContent;
+                    }
+
+                    log.info("Found slice point: variable '{}' at line {}", slicePoint.getVariableName(), slicePoint.getLineNumber());
+
+                    // 基于切片点分析安全的数据流结构
+                    changed = transformSafeDataFlowStructures(body, slicePoint);
+
+                    if (changed) {
+                        String transformedContent = cu.toString();
+                        log.info("Applied data flow transformation");
+                        return transformedContent;
+                    } else {
+                        log.info("No safe data flow structures found for transformation");
+                        return originalContent;
+                    }
+                }
+            }
+            return originalContent;
+        } catch (Exception e) {
+            log.error("Error in JSmith data flow transformation", e);
+            return originalContent;
+        }
+    }
+
+    /**
      * 生成高熵随机种子
      * 结合多种随机源以增加种子的随机性
      * @param baseTime 基础时间戳
@@ -2486,12 +2613,226 @@ public class JavaCodeGenerator {
     }
 
     /**
+     * 基于切片点信息，变换安全的数据流结构
+     * 只变换不影响切片变量的数据流操作
+     */
+    private boolean transformSafeDataFlowStructures(BlockStmt body, VariableInfo slicePoint) {
+        String sliceVariable = slicePoint.getVariableName();
+        int sliceLineNumber = slicePoint.getLineNumber();
+        boolean anyTransformed = false;
+        int totalLineOffset = 0;
+
+        log.info("=== Analyzing safe data flow structures for slice point: {} at line {} ===",
+                sliceVariable, sliceLineNumber);
+
+        // 收集所有安全的数据流结构并按行号排序（从前到后变换，避免行号混乱）
+        List<Node> safeDataFlowNodes = new ArrayList<>();
+
+        // 收集无关的赋值语句
+        List<AssignExpr> assignments = body.findAll(AssignExpr.class);
+        for (AssignExpr assign : assignments) {
+            if (isSafeDataFlowStructure(assign, sliceVariable, sliceLineNumber)) {
+                safeDataFlowNodes.add(assign);
+            }
+        }
+
+        // 收集无关的变量声明
+        List<VariableDeclarator> declarations = body.findAll(VariableDeclarator.class);
+        for (VariableDeclarator vd : declarations) {
+            if (isSafeDataFlowStructure(vd, sliceVariable, sliceLineNumber)) {
+                safeDataFlowNodes.add(vd);
+            }
+        }
+
+        // 按行号排序（从前到后变换）
+        safeDataFlowNodes.sort((a, b) -> {
+            int lineA = a.getBegin().map(pos -> pos.line).orElse(0);
+            int lineB = b.getBegin().map(pos -> pos.line).orElse(0);
+            return Integer.compare(lineA, lineB);
+        });
+
+        // 变换前3-5个安全的数据流结构
+        int maxTransformations = Math.min(5, safeDataFlowNodes.size());
+        for (int i = 0; i < maxTransformations; i++) {
+            Node structure = safeDataFlowNodes.get(i);
+            int lineNumber = structure.getBegin().map(pos -> pos.line).orElse(0);
+
+            if (structure instanceof AssignExpr) {
+                if (transformSafeAssignment((AssignExpr) structure, sliceVariable)) {
+                    log.info("Transformed assignment at line {}", lineNumber);
+                    anyTransformed = true;
+                }
+            } else if (structure instanceof VariableDeclarator) {
+                if (transformSafeVariableDeclaration((VariableDeclarator) structure, sliceVariable)) {
+                    log.info("Transformed variable declaration at line {}", lineNumber);
+                    anyTransformed = true;
+                }
+            }
+        }
+
+        // 更新累积的行号偏移
+        this.cumulativeLineOffset = totalLineOffset;
+        log.info("Total data flow transformations: {}, cumulative line offset: {}",
+                anyTransformed ? maxTransformations : 0, totalLineOffset);
+
+        if (!anyTransformed) {
+            log.info("No safe data flow structures found for transformation");
+        }
+
+        return anyTransformed;
+    }
+
+    /**
      * 计算控制流变换导致的累积行号偏移
      * 返回所有变换的累积偏移量
      */
     private int calculateLineOffset() {
         return cumulativeLineOffset;
     }
+
+    /**
+     * 检查数据流结构是否安全（不影响切片变量）
+     */
+    private boolean isSafeDataFlowStructure(Node node, String sliceVariable, int sliceLineNumber) {
+        if (node.getBegin().isEmpty()) {
+            return false;
+        }
+
+        int nodeLineNumber = node.getBegin().get().line;
+        if (nodeLineNumber >= sliceLineNumber) {
+            return false; // 只变换切片点之前的结构
+        }
+
+        if (node instanceof AssignExpr) {
+            AssignExpr assign = (AssignExpr) node;
+            Expression target = assign.getTarget();
+
+            // 检查赋值目标是否是切片变量
+            if (target instanceof NameExpr) {
+                String targetVar = ((NameExpr) target).getNameAsString();
+                if (targetVar.equals(sliceVariable)) {
+                    return false; // 不能变换切片变量的赋值
+                }
+            }
+
+            // 检查赋值右侧是否使用了切片变量
+            return !expressionUsesVariable(assign.getValue(), sliceVariable);
+
+        } else if (node instanceof VariableDeclarator) {
+            VariableDeclarator vd = (VariableDeclarator) node;
+            String declVar = vd.getNameAsString();
+
+            // 检查声明的变量是否是切片变量
+            if (declVar.equals(sliceVariable)) {
+                return false; // 不能变换切片变量的声明
+            }
+
+            // 检查初始化表达式是否使用了切片变量
+            if (vd.getInitializer().isPresent()) {
+                return !expressionUsesVariable(vd.getInitializer().get(), sliceVariable);
+            }
+
+            return true; // 没有初始化表达式的声明是安全的
+        }
+
+        return false;
+    }
+
+    /**
+     * 变换安全的赋值语句
+     */
+    private boolean transformSafeAssignment(AssignExpr assign, String sliceVariable) {
+        try {
+            Expression target = assign.getTarget();
+            Expression value = assign.getValue();
+
+            // 确保不是切片变量的赋值
+            if (target instanceof NameExpr) {
+                String targetVar = ((NameExpr) target).getNameAsString();
+                if (targetVar.equals(sliceVariable)) {
+                    return false; // 不能修改切片变量
+                }
+            }
+
+            // 对数值进行非等价变换（改变值但保持类型）
+            if (value instanceof IntegerLiteralExpr) {
+                IntegerLiteralExpr intLit = (IntegerLiteralExpr) value;
+                int originalValue = Integer.parseInt(intLit.getValue());
+
+                // 非等价变换：改变数值
+                int newValue = originalValue + 1; // 简单的+1变换
+                assign.setValue(new IntegerLiteralExpr(String.valueOf(newValue)));
+                log.info("Transformed assignment: {} = {} -> {} = {}",
+                        assign.getTarget(), originalValue, assign.getTarget(), newValue);
+                return true;
+
+            } else if (value instanceof BooleanLiteralExpr) {
+                BooleanLiteralExpr boolLit = (BooleanLiteralExpr) value;
+                boolean originalValue = boolLit.getValue();
+
+                // 非等价变换：翻转布尔值
+                boolean newValue = !originalValue;
+                assign.setValue(new BooleanLiteralExpr(newValue));
+                log.info("Transformed assignment: {} = {} -> {} = {}",
+                        assign.getTarget(), originalValue, assign.getTarget(), newValue);
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            log.error("Error transforming assignment", e);
+            return false;
+        }
+    }
+
+    /**
+     * 变换安全的变量声明
+     */
+    private boolean transformSafeVariableDeclaration(VariableDeclarator vd, String sliceVariable) {
+        try {
+            String declVar = vd.getNameAsString();
+
+            // 确保不是切片变量的声明
+            if (declVar.equals(sliceVariable)) {
+                return false; // 不能修改切片变量的声明
+            }
+
+            if (vd.getInitializer().isPresent()) {
+                Expression initializer = vd.getInitializer().get();
+
+                // 对初始化值进行非等价变换
+                if (initializer instanceof IntegerLiteralExpr) {
+                    IntegerLiteralExpr intLit = (IntegerLiteralExpr) initializer;
+                    int originalValue = Integer.parseInt(intLit.getValue());
+
+                    // 非等价变换：改变初始化值
+                    int newValue = originalValue + 1; // 简单的+1变换
+                    vd.setInitializer(new IntegerLiteralExpr(String.valueOf(newValue)));
+                    log.info("Transformed variable declaration: {} = {} -> {} = {}",
+                            vd.getName(), originalValue, vd.getName(), newValue);
+                    return true;
+
+                } else if (initializer instanceof BooleanLiteralExpr) {
+                    BooleanLiteralExpr boolLit = (BooleanLiteralExpr) initializer;
+                    boolean originalValue = boolLit.getValue();
+
+                    // 非等价变换：翻转布尔值
+                    boolean newValue = !originalValue;
+                    vd.setInitializer(new BooleanLiteralExpr(newValue));
+                    log.info("Transformed variable declaration: {} = {} -> {} = {}",
+                            vd.getName(), originalValue, vd.getName(), newValue);
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            log.error("Error transforming variable declaration", e);
+            return false;
+        }
+    }
+
+
 
     /**
      * 通过上下文匹配找到最佳的println语句
@@ -2904,6 +3245,108 @@ public class JavaCodeGenerator {
     }
 
     /**
+     * 专门用于数据流蜕变测试的变量查找方法（公共接口）
+     */
+    public VariableInfo findVariableForDataFlowTestingFromContent(String content) {
+        return findVariableForDataFlowTesting(content);
+    }
+
+    /**
+     * 计算数据流变换后的等价切片点（公共接口）
+     */
+    public VariableInfo calculateDataFlowSlicePointFromContent(String transformedContent, VariableInfo originalSlicePoint) {
+        return calculateUpdatedSlicePoint(transformedContent, originalSlicePoint);
+    }
+
+    /**
+     * 专门用于数据流蜕变测试的变量查找方法
+     * 优先选择靠后的变量，确保前面有可以安全变换的数据流结构
+     */
+    private VariableInfo findVariableForDataFlowTesting(String content) {
+        try {
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse content for data flow variable finding"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 专门查找System.out.println中的变量使用
+                    List<VariableUsage> allVariableUsages = new ArrayList<>();
+
+                    body.findAll(MethodCallExpr.class).forEach(methodCall -> {
+                        if (methodCall.getNameAsString().equals("println") &&
+                            methodCall.getScope().isPresent() &&
+                            methodCall.getScope().get().toString().equals("System.out")) {
+
+                            if (!methodCall.getArguments().isEmpty()) {
+                                Expression arg = methodCall.getArguments().get(0);
+                                if (arg instanceof NameExpr) {
+                                    NameExpr nameExpr = (NameExpr) arg;
+                                    String varName = nameExpr.getNameAsString();
+                                    int lineNumber = nameExpr.getBegin().get().line;
+
+                                    // 过滤掉非变量名称
+                                    if (isRealVariable(varName)) {
+                                        allVariableUsages.add(new VariableUsage(varName, lineNumber));
+                                        log.debug("Found variable usage in println: {} at line {}", varName, lineNumber);
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    if (allVariableUsages.isEmpty()) {
+                        log.warn("No suitable variables found in println statements for data flow testing");
+                        return null;
+                    }
+
+                    // 统计每个变量的数据流适用性得分
+                    Map<VariableUsage, Integer> suitabilityScores = new HashMap<>();
+                    for (VariableUsage usage : allVariableUsages) {
+                        int score = countEligibleDataFlowStructures(body, usage.variableName, usage.lineNumber);
+                        if (score > 0) {
+                            suitabilityScores.put(usage, score);
+                            log.debug("Variable {} at line {} has data flow suitability score: {}",
+                                    usage.variableName, usage.lineNumber, score);
+                        }
+                    }
+
+                    if (suitabilityScores.isEmpty()) {
+                        log.warn("No variables with eligible data flow structures found");
+                        return null;
+                    }
+
+                    // 选择得分最高的变量，如果得分相同则选择行号更靠后的
+                    VariableUsage bestChoice = suitabilityScores.entrySet().stream()
+                            .max((e1, e2) -> {
+                                int scoreCompare = Integer.compare(e1.getValue(), e2.getValue());
+                                if (scoreCompare != 0) return scoreCompare;
+                                return Integer.compare(e1.getKey().lineNumber, e2.getKey().lineNumber);
+                            })
+                            .map(Map.Entry::getKey)
+                            .orElse(null);
+
+                    if (bestChoice != null) {
+                        log.info("Selected variable for data flow testing: {} at line {} (score: {})",
+                                bestChoice.variableName, bestChoice.lineNumber, suitabilityScores.get(bestChoice));
+                        return new VariableInfo(bestChoice.variableName, bestChoice.lineNumber);
+                    }
+                }
+            }
+
+            log.warn("No suitable variable found for data flow testing");
+            return null;
+        } catch (Exception e) {
+            log.error("Error finding variable for data flow testing", e);
+            return null;
+        }
+    }
+
+    /**
      * 专门用于控制流蜕变测试的变量查找方法
      * 优先选择靠后的变量，确保前面有可以安全变换的控制流结构
      */
@@ -3170,6 +3613,86 @@ public class JavaCodeGenerator {
         }
 
         return eligibleCount;
+    }
+
+    /**
+     * 统计可用于数据流变换的结构数量
+     * 包括：无关的变量赋值、表达式计算、数据操作等
+     */
+    private int countEligibleDataFlowStructures(BlockStmt body, String variableName, int variableLineNumber) {
+        int eligibleStructures = 0;
+
+        log.debug("Counting eligible data flow structures for variable {} at line {}", variableName, variableLineNumber);
+
+        // 检查赋值语句
+        List<AssignExpr> assignments = body.findAll(AssignExpr.class);
+        for (AssignExpr assign : assignments) {
+            if (assign.getBegin().isPresent()) {
+                int assignLineNumber = assign.getBegin().get().line;
+                if (assignLineNumber < variableLineNumber) {
+                    Expression target = assign.getTarget();
+                    if (target instanceof NameExpr) {
+                        String targetVar = ((NameExpr) target).getNameAsString();
+
+                        // 检查这个赋值是否与切片变量无关
+                        if (!targetVar.equals(variableName) && !assignmentAffectsVariable(assign, variableName)) {
+                            log.debug("Found eligible assignment at line {} for variable {} at line {}",
+                                    assignLineNumber, variableName, variableLineNumber);
+                            eligibleStructures++;
+                        } else {
+                            log.debug("Assignment at line {} affects variable {}, skipping",
+                                    assignLineNumber, variableName);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 检查变量声明
+        List<VariableDeclarator> declarations = body.findAll(VariableDeclarator.class);
+        for (VariableDeclarator vd : declarations) {
+            if (vd.getBegin().isPresent()) {
+                int declLineNumber = vd.getBegin().get().line;
+                if (declLineNumber < variableLineNumber) {
+                    String declVar = vd.getNameAsString();
+
+                    // 检查这个声明是否与切片变量无关
+                    if (!declVar.equals(variableName) && vd.getInitializer().isPresent()) {
+                        Expression initializer = vd.getInitializer().get();
+                        if (!expressionUsesVariable(initializer, variableName)) {
+                            log.debug("Found eligible variable declaration at line {} for variable {} at line {}",
+                                    declLineNumber, variableName, variableLineNumber);
+                            eligibleStructures++;
+                        } else {
+                            log.debug("Variable declaration at line {} uses variable {}, skipping",
+                                    declLineNumber, variableName);
+                        }
+                    }
+                }
+            }
+        }
+
+        boolean isSuitable = eligibleStructures > 0;
+        log.debug("Variable {} at line {} has {} eligible data flow structures - suitable: {}",
+                variableName, variableLineNumber, eligibleStructures, isSuitable);
+
+        return eligibleStructures;
+    }
+
+    /**
+     * 检查赋值语句是否影响指定变量
+     */
+    private boolean assignmentAffectsVariable(AssignExpr assign, String variableName) {
+        // 检查赋值的右侧是否使用了该变量
+        return expressionUsesVariable(assign.getValue(), variableName);
+    }
+
+    /**
+     * 检查表达式是否使用了指定变量
+     */
+    private boolean expressionUsesVariable(Expression expr, String variableName) {
+        List<NameExpr> nameExprs = expr.findAll(NameExpr.class);
+        return nameExprs.stream().anyMatch(nameExpr -> nameExpr.getNameAsString().equals(variableName));
     }
 
     /**
