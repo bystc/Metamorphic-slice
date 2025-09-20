@@ -751,275 +751,17 @@ public class JavaCodeGenerator {
         }
     }
 
-    // 模板1：复杂的main方法，包含多个变量、条件语句和循环
-    private String generateComplexMainClass() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
-        code.append("    public static void main(String[] args) {\n");
 
-        // 生成多个不同类型的变量声明
-        int numVars = 6 + random.nextInt(6); // 6-11个变量
-        List<String> vars = new ArrayList<>();
 
-        // 添加一些临时变量和计算变量
-        for (int i = 0; i < numVars - 2; i++) {
-            String var = VARIABLE_NAMES[random.nextInt(VARIABLE_NAMES.length)] + i;
-            vars.add(var);
-            code.append("        int ").append(var).append(" = ").append(random.nextInt(100)).append(";\n");
-        }
 
-        // 添加一些条件判断和计算
-        code.append("        int temp = 0;\n");
-        code.append("        for (int i = 0; i < 5; i++) {\n");
-        code.append("            if (i % 2 == 0) {\n");
-        code.append("                temp += i * 2;\n");
-        code.append("            } else {\n");
-        code.append("                temp -= i;\n");
-        code.append("            }\n");
-        code.append("        }\n");
 
-        // 添加更多变量声明
-        for (int i = 0; i < 3; i++) {
-            String var = "calc" + i;
-            vars.add(var);
-            code.append("        int ").append(var).append(" = temp + ").append(random.nextInt(50)).append(";\n");
-        }
 
-        // 添加嵌套循环
-        code.append("        for (int i = 0; i < 10; i++) {\n");
-        code.append("            for (int j = 0; j < 3; j++) {\n");
-        for (String var : vars) {
-            code.append("                ").append(var).append(" += i * j;\n");
-        }
-        code.append("            }\n");
-        code.append("        }\n");
 
-        // 添加条件语句
-        code.append("        if (temp > 10) {\n");
-        for (String var : vars) {
-            code.append("            ").append(var).append(" *= 2;\n");
-        }
-        code.append("        } else {\n");
-        for (String var : vars) {
-            code.append("            ").append(var).append(" /= 2;\n");
-        }
-        code.append("        }\n");
 
-        // 最终输出
-        for (String var : vars) {
-            code.append("        System.out.println(").append(var).append(");\n");
-        }
-        code.append("    }\n}");
-        return code.toString();
-    }
 
-    // 模板2：有多个方法的复杂类
-    private String generateClassWithMultipleMethods() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
 
-        // 静态方法
-        code.append("    public static int add(int a, int b) { return a + b; }\n");
-        code.append("    public static int mul(int a, int b) { return a * b; }\n");
-        code.append("    public static int sub(int a, int b) { return a - b; }\n");
-        code.append("    public static int div(int a, int b) { return b != 0 ? a / b : 0; }\n");
 
-        // main方法
-        code.append("    public static void main(String[] args) {\n");
-        code.append("        int x = 1, y = 2, z = 3;\n");
-        code.append("        int temp1 = add(x, y);\n");
-        code.append("        int temp2 = mul(temp1, z);\n");
-        code.append("        int temp3 = sub(temp2, x);\n");
-        code.append("        int temp4 = div(temp3, y);\n");
-        code.append("        int temp5 = add(temp4, z);\n");
-        code.append("        int temp6 = mul(temp5, temp1);\n");
-        code.append("        System.out.println(temp1);\n");
-        code.append("        System.out.println(temp2);\n");
-        code.append("        System.out.println(temp3);\n");
-        code.append("        System.out.println(temp4);\n");
-        code.append("        System.out.println(temp5);\n");
-        code.append("        System.out.println(temp6);\n");
-        code.append("    }\n}");
-        return code.toString();
-    }
 
-    // 模板3：有数组和复杂逻辑的类
-    private String generateClassWithArraysAndComplexLogic() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
-        code.append("    public static void main(String[] args) {\n");
-        code.append("        int[] arr1 = new int[10];\n");
-        code.append("        int[] arr2 = new int[8];\n");
-        code.append("        int[] arr3 = new int[12];\n");
-
-        // 初始化数组
-        code.append("        for (int i = 0; i < arr1.length; i++) { arr1[i] = i * 2; }\n");
-        code.append("        for (int i = 0; i < arr2.length; i++) { arr2[i] = i * 3; }\n");
-        code.append("        for (int i = 0; i < arr3.length; i++) { arr3[i] = i * 4; }\n");
-
-        // 复杂计算
-        code.append("        int sum1 = 0, sum2 = 0, sum3 = 0;\n");
-        code.append("        for (int v : arr1) {\n");
-        code.append("            if (v % 3 == 0) sum1 += v; else sum1 -= v;\n");
-        code.append("        }\n");
-        code.append("        for (int v : arr2) {\n");
-        code.append("            if (v % 2 == 0) sum2 += v * 2; else sum2 += v;\n");
-        code.append("        }\n");
-        code.append("        for (int v : arr3) {\n");
-        code.append("            if (v % 5 == 0) sum3 += v / 2; else sum3 += v;\n");
-        code.append("        }\n");
-
-        // 最终计算
-        code.append("        int result1 = sum1 + sum2;\n");
-        code.append("        int result2 = sum2 + sum3;\n");
-        code.append("        int result3 = sum1 + sum3;\n");
-        code.append("        int finalResult = result1 + result2 + result3;\n");
-
-        code.append("        System.out.println(sum1);\n");
-        code.append("        System.out.println(sum2);\n");
-        code.append("        System.out.println(sum3);\n");
-        code.append("        System.out.println(result1);\n");
-        code.append("        System.out.println(result2);\n");
-        code.append("        System.out.println(result3);\n");
-        code.append("        System.out.println(finalResult);\n");
-        code.append("    }\n}");
-        return code.toString();
-    }
-
-    // 模板4：有静态成员和嵌套循环的复杂类
-    private String generateClassWithStaticMembersAndNestedLoops() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
-        code.append("    static int factor = ").append(2 + random.nextInt(8)).append(";\n");
-        code.append("    static int multiplier = ").append(3 + random.nextInt(5)).append(";\n");
-        code.append("    static int divisor = ").append(2 + random.nextInt(3)).append(";\n");
-
-        code.append("    public static void main(String[] args) {\n");
-        code.append("        int res1 = 1, res2 = 1, res3 = 1;\n");
-        code.append("        int temp1 = 0, temp2 = 0, temp3 = 0;\n");
-
-        // 复杂的嵌套循环
-        code.append("        for (int i = 1; i <= 5; i++) {\n");
-        code.append("            for (int j = 1; j <= 3; j++) {\n");
-        code.append("                for (int k = 1; k <= 2; k++) {\n");
-        code.append("                    res1 *= factor * i * j * k;\n");
-        code.append("                    res2 += multiplier * i + j - k;\n");
-        code.append("                    res3 = res3 / divisor + i * j * k;\n");
-        code.append("                    temp1 += i * j;\n");
-        code.append("                    temp2 += j * k;\n");
-        code.append("                    temp3 += i * k;\n");
-        code.append("                }\n");
-        code.append("            }\n");
-        code.append("        }\n");
-
-        // 条件判断
-        code.append("        if (res1 > 1000) {\n");
-        code.append("            res1 = res1 / 10;\n");
-        code.append("            res2 = res2 * 2;\n");
-        code.append("        }\n");
-        code.append("        if (res2 > 500) {\n");
-        code.append("            res2 = res2 / 5;\n");
-        code.append("            res3 = res3 * 3;\n");
-        code.append("        }\n");
-
-        code.append("        System.out.println(res1);\n");
-        code.append("        System.out.println(res2);\n");
-        code.append("        System.out.println(res3);\n");
-        code.append("        System.out.println(temp1);\n");
-        code.append("        System.out.println(temp2);\n");
-        code.append("        System.out.println(temp3);\n");
-        code.append("    }\n}");
-        return code.toString();
-    }
-
-    // 模板5：有内部类和方法的复杂类
-    private String generateClassWithInnerClassAndMethods() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
-        code.append("    static class Helper {\n");
-        code.append("        int square(int x) { return x * x; }\n");
-        code.append("        int cube(int x) { return x * x * x; }\n");
-        code.append("        int factorial(int x) { return x <= 1 ? 1 : x * factorial(x - 1); }\n");
-        code.append("    }\n");
-
-        code.append("    public static void main(String[] args) {\n");
-        code.append("        Helper h = new Helper();\n");
-        code.append("        int val1 = 0, val2 = 0, val3 = 0;\n");
-        code.append("        int temp1 = 0, temp2 = 0, temp3 = 0;\n");
-
-        code.append("        for (int i = 0; i < 5; i++) { \n");
-        code.append("            val1 += h.square(i); \n");
-        code.append("            val2 += h.cube(i); \n");
-        code.append("            val3 += h.factorial(i); \n");
-        code.append("            temp1 += i * 2; \n");
-        code.append("            temp2 += i * 3; \n");
-        code.append("            temp3 += i * 4; \n");
-        code.append("        }\n");
-
-        code.append("        int result1 = val1 + temp1;\n");
-        code.append("        int result2 = val2 + temp2;\n");
-        code.append("        int result3 = val3 + temp3;\n");
-
-        code.append("        System.out.println(val1);\n");
-        code.append("        System.out.println(val2);\n");
-        code.append("        System.out.println(val3);\n");
-        code.append("        System.out.println(result1);\n");
-        code.append("        System.out.println(result2);\n");
-        code.append("        System.out.println(result3);\n");
-        code.append("    }\n}");
-        return code.toString();
-    }
-
-    // 模板6：有异常处理的复杂类
-    private String generateClassWithExceptionHandling() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
-        code.append("    public static void main(String[] args) {\n");
-        code.append("        int[] arr = new int[10];\n");
-        code.append("        int sum = 0, count = 0, avg = 0;\n");
-        code.append("        int temp1 = 0, temp2 = 0, temp3 = 0;\n");
-
-        // 初始化数组
-        code.append("        for (int i = 0; i < arr.length; i++) {\n");
-        code.append("            arr[i] = i * 2 + 1;\n");
-        code.append("        }\n");
-
-        // 异常处理
-        code.append("        try {\n");
-        code.append("            for (int i = 0; i < arr.length; i++) {\n");
-        code.append("                sum += arr[i];\n");
-        code.append("                count++;\n");
-        code.append("                temp1 += i * 2;\n");
-        code.append("                temp2 += i * 3;\n");
-        code.append("                temp3 += i * 4;\n");
-        code.append("            }\n");
-        code.append("            avg = sum / count;\n");
-        code.append("        } catch (Exception e) {\n");
-        code.append("            avg = 0;\n");
-        code.append("            temp1 = 0;\n");
-        code.append("            temp2 = 0;\n");
-        code.append("            temp3 = 0;\n");
-        code.append("        }\n");
-
-        code.append("        int result1 = sum + temp1;\n");
-        code.append("        int result2 = avg + temp2;\n");
-        code.append("        int result3 = count + temp3;\n");
-
-        code.append("        System.out.println(sum);\n");
-        code.append("        System.out.println(avg);\n");
-        code.append("        System.out.println(count);\n");
-        code.append("        System.out.println(result1);\n");
-        code.append("        System.out.println(result2);\n");
-        code.append("        System.out.println(result3);\n");
-        code.append("    }\n}");
-        return code.toString();
-    }
 
     // 模板7：有switch语句的复杂类
     private String generateClassWithSwitchStatements() {
@@ -1106,73 +848,9 @@ public class JavaCodeGenerator {
         return code.toString();
     }
 
-    // 模板8：有复杂计算的类
-    private String generateClassWithComplexCalculations() {
-        StringBuilder code = new StringBuilder();
-        String className = "Example" + random.nextInt(1000);
-        code.append("public class ").append(className).append(" {\n");
-        code.append("    public static void main(String[] args) {\n");
-        code.append("        int a = ").append(random.nextInt(20) + 1).append(";\n");
-        code.append("        int b = ").append(random.nextInt(20) + 1).append(";\n");
-        code.append("        int c = ").append(random.nextInt(20) + 1).append(";\n");
-        code.append("        int d = ").append(random.nextInt(20) + 1).append(";\n");
-        code.append("        int e = ").append(random.nextInt(20) + 1).append(";\n");
-        code.append("        int f = ").append(random.nextInt(20) + 1).append(";\n");
 
-        // 复杂计算
-        code.append("        int temp1 = a * b + c;\n");
-        code.append("        int temp2 = d * e - f;\n");
-        code.append("        int temp3 = (a + b) * (c + d);\n");
-        code.append("        int temp4 = (e + f) / (a + 1);\n");
-        code.append("        int temp5 = a * b * c / d;\n");
-        code.append("        int temp6 = e * f + a * b;\n");
 
-        // 更多计算
-        code.append("        int result1 = temp1 + temp2;\n");
-        code.append("        int result2 = temp3 - temp4;\n");
-        code.append("        int result3 = temp5 * temp6;\n");
-        code.append("        int result4 = result1 + result2;\n");
-        code.append("        int result5 = result2 + result3;\n");
-        code.append("        int result6 = result1 + result3;\n");
 
-        code.append("        System.out.println(temp1);\n");
-        code.append("        System.out.println(temp2);\n");
-        code.append("        System.out.println(temp3);\n");
-        code.append("        System.out.println(result1);\n");
-        code.append("        System.out.println(result2);\n");
-        code.append("        System.out.println(result3);\n");
-        code.append("        System.out.println(result4);\n");
-        code.append("        System.out.println(result5);\n");
-        code.append("        System.out.println(result6);\n");
-        code.append("    }\n}");
-        return code.toString();
-    }
-
-    /**
-     * 获取随机数据类型
-     */
-    private String getRandomType() {
-        String[] types = {"int", "long", "double", "float"};
-        return types[random.nextInt(types.length)];
-    }
-
-    /**
-     * 根据类型获取随机初始值
-     */
-    private String getRandomInitialValue(String type) {
-        switch (type) {
-            case "int":
-                return String.valueOf(random.nextInt(100));
-            case "long":
-                return String.valueOf(random.nextLong() % 1000);
-            case "double":
-                return String.valueOf(random.nextDouble() * 100);
-            case "float":
-                return String.valueOf(random.nextFloat() * 100) + "f";
-            default:
-                return "0";
-        }
-    }
 
     public String renameVariables(String sourceFile) {
         try {
@@ -2060,81 +1738,9 @@ public class JavaCodeGenerator {
         }
     }
 
-    /**
-     * 重排序语句，调整不影响切片变量的语句顺序
-     */
-    private String reorderStatements(String originalContent) {
-        try {
-            // 使用AST解析来重排序，更准确地识别语句
-            return reorderStatementsWithAST(originalContent);
-        } catch (Exception e) {
-            log.error("Error reordering statements", e);
-            return originalContent;
-        }
-    }
 
-    /**
-     * 使用AST解析重排序main方法内的语句（分组shuffle：连续可重排序语句分组，组内shuffle，其他保持原位）
-     */
-    private String reorderStatementsWithAST(String originalContent) {
-        try {
-            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
-                    new RuntimeException("Failed to parse content for reordering"));
 
-            // 找到main方法
-            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
-                    md.getNameAsString().equals("main"));
 
-            if (mainMethod.isPresent()) {
-                MethodDeclaration method = mainMethod.get();
-                BlockStmt body = method.getBody().orElse(null);
-                if (body != null) {
-                    List<Statement> statements = new ArrayList<>(body.getStatements());
-                    List<List<Statement>> groups = new ArrayList<>();
-                    List<Statement> currentGroup = new ArrayList<>();
-                    boolean lastReorderable = false;
-                    for (Statement stmt : statements) {
-                        boolean reorderable = isReorderableStatement(stmt);
-                        if (reorderable) {
-                            currentGroup.add(stmt);
-                            lastReorderable = true;
-                        } else {
-                            if (!currentGroup.isEmpty()) {
-                                groups.add(new ArrayList<>(currentGroup));
-                                currentGroup.clear();
-                            }
-                            // 非可重排序语句单独成组
-                            List<Statement> single = new ArrayList<>();
-                            single.add(stmt);
-                            groups.add(single);
-                            lastReorderable = false;
-                        }
-                    }
-                    if (!currentGroup.isEmpty()) {
-                        groups.add(new ArrayList<>(currentGroup));
-                    }
-                    // shuffle每个可重排序组
-                    List<Statement> newStatements = new ArrayList<>();
-                    for (List<Statement> group : groups) {
-                        if (group.size() > 1 && isReorderableStatement(group.get(0))) {
-                            Collections.shuffle(group);
-                        }
-                        newStatements.addAll(group);
-                    }
-                    // 重建方法体
-                    body.getStatements().clear();
-                    for (Statement stmt : newStatements) {
-                        body.addStatement(stmt);
-                    }
-                    return cu.toString();
-                }
-            }
-            return originalContent;
-        } catch (Exception e) {
-            log.error("Error in AST-based reordering", e);
-            return originalContent;
-        }
-    }
 
     /**
      * 判断语句是否可重排序（与切片变量无关的声明/赋值/输出/循环等）
@@ -2226,65 +1832,7 @@ public class JavaCodeGenerator {
                 line.matches("^if \\(false\\) \\{ int x = \\d+; \\}");
     }
 
-    /**
-     * 生成语句重排序的变异文件
-     * @param baseDir 基础目录
-     * @param numFiles 要生成的文件数量
-     * @return 生成的原始文件路径列表
-     */
-    public List<String> generateStatementReorderFiles(String baseDir, int numFiles) {
-        List<String> generatedFiles = new ArrayList<>();
 
-        try {
-            // 确保目录存在
-            Files.createDirectories(Paths.get(MUTATED_DIR));
-            Files.createDirectories(Paths.get("reordered"));
-
-            for (int i = 0; i < numFiles; i++) {
-                try {
-                    // 生成原始代码
-                    String originalContent = generateRandomJavaClass();
-
-                    // 创建原始文件
-                    String originalFileName = String.format("Example_original_%d.java", i);
-                    String originalFilePath = Paths.get(MUTATED_DIR, originalFileName).toString();
-                    Files.write(Paths.get(originalFilePath), originalContent.getBytes(StandardCharsets.UTF_8));
-                    generatedFiles.add(originalFilePath);
-
-                    // 创建语句重排序文件
-                    String reorderedContent = reorderStatements(originalContent);
-
-                    // 检查重排序是否实际上改变了内容
-                    if (reorderedContent.equals(originalContent)) {
-                        log.warn("重排序后内容与原始内容相同，将尝试再次重排序");
-                        // 再次尝试重排序，但加入随机性以尝试产生不同结果
-                        reorderedContent = reorderStatements(originalContent);
-                    }
-
-                    String reorderedFileName = String.format("Example_reordered_%d.java", i);
-                    String reorderedFilePath = Paths.get("reordered", reorderedFileName).toString();
-                    Files.write(Paths.get(reorderedFilePath), reorderedContent.getBytes(StandardCharsets.UTF_8));
-
-                    log.info("Generated statement reorder file pair: {} -> {}", originalFilePath, reorderedFilePath);
-
-                    // 确认两个文件的差异
-                    if (!reorderedContent.equals(originalContent)) {
-                        log.info("成功重排序，两个文件内容不同");
-                    } else {
-                        log.warn("警告：重排序后的文件与原始文件相同!");
-                    }
-
-                } catch (Exception e) {
-                    log.error("Error generating statement reorder file {}", i, e);
-                }
-            }
-
-        } catch (IOException e) {
-            log.error("Error creating directories for statement reorder files", e);
-        }
-
-        return generatedFiles;
-    }
 
     /**
      * 判断变量名是否为切片相关变量
@@ -3251,11 +2799,818 @@ public class JavaCodeGenerator {
         return findVariableForDataFlowTesting(content);
     }
 
-    /**
-     * 计算数据流变换后的等价切片点（公共接口）
-     */
     public VariableInfo calculateDataFlowSlicePointFromContent(String transformedContent, VariableInfo originalSlicePoint) {
         return calculateUpdatedSlicePoint(transformedContent, originalSlicePoint);
+    }
+
+    /**
+     * 生成JSmith语句重排序测试文件对
+     * @param numPairs 要生成的文件对数量
+     * @return 生成的文件路径列表
+     */
+    public List<String> generateJSmithStatementReorderTestFiles(int numPairs) {
+        List<String> generatedFiles = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+
+        try {
+            // 确保目录存在
+            Files.createDirectories(Paths.get(MUTATED_DIR));
+            Files.createDirectories(Paths.get(REORDERED_DIR));
+            log.info("Created directories for JSmith statement reorder test: {}, {}", MUTATED_DIR, REORDERED_DIR);
+
+            for (int i = 0; i < numPairs; i++) {
+                try {
+                    log.info("Generating JSmith statement reorder file pair {} at {}", i + 1, new Date());
+
+                    // 1. 使用JSmith生成复杂的Java类
+                    long seed = generateHighEntropyRandomSeed(startTime, i);
+                    String originalContent = jsmithCodeGenerator.generateRandomJavaClassWithEnhancedRandomness(seed);
+
+                    // 2. 保存原始文件到mutated目录
+                    String mutatedFileName = String.format("JSmith_mutated_%d.java", i);
+                    String mutatedFilePath = Paths.get(MUTATED_DIR, mutatedFileName).toString();
+
+                    // 移除package声明并标准化原始文件格式
+                    String cleanedContent = removePackageDeclaration(originalContent);
+                    String standardizedContent = standardizeJavaFormat(cleanedContent);
+
+                    try (FileWriter writer = new FileWriter(mutatedFilePath)) {
+                        writer.write(standardizedContent);
+                    }
+                    generatedFiles.add(mutatedFilePath);
+                    log.info("Generated JSmith original file: {}", mutatedFilePath);
+
+                    // 3. 创建语句重排序版本（使用标准化的内容）
+                    String reorderedFilePath = createJSmithStatementReorderVersion(standardizedContent, i);
+                    if (reorderedFilePath != null) {
+                        generatedFiles.add(reorderedFilePath);
+                        log.info("Generated JSmith statement reorder file: {}", reorderedFilePath);
+
+                        // 4. 验证语句重排序是否成功
+                        if (validateStatementReorderFile(mutatedFilePath, reorderedFilePath)) {
+                            log.info("Successfully validated JSmith statement reorder file pair: {} <-> {}", mutatedFilePath, reorderedFilePath);
+                        } else {
+                            log.warn("Validation failed for JSmith statement reorder file pair: {} <-> {}", mutatedFilePath, reorderedFilePath);
+                        }
+                    } else {
+                        log.warn("Failed to create statement reorder version for JSmith file: {}", mutatedFilePath);
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error generating JSmith statement reorder file pair {}: {}", i + 1, e.getMessage(), e);
+                }
+            }
+
+            long endTime = System.currentTimeMillis();
+            log.info("JSmith statement reorder test file generation completed. Generated {} files in {} ms",
+                    generatedFiles.size(), endTime - startTime);
+
+        } catch (IOException e) {
+            log.error("Failed to create directories for JSmith statement reorder test files", e);
+        }
+
+        return generatedFiles;
+    }
+
+    /**
+     * 为JSmith生成的代码创建语句重排序版本
+     * @param originalContent 原始代码内容
+     * @param index 文件索引
+     * @return 重排序文件的路径，如果失败返回null
+     */
+    private String createJSmithStatementReorderVersion(String originalContent, int index) {
+        try {
+            String reorderedFileName = String.format("JSmith_reordered_%d.java", index);
+            String reorderedFilePath = Paths.get(REORDERED_DIR, reorderedFileName).toString();
+
+            // 对原始内容进行语句重排序变换
+            String reorderedContent = transformJSmithStatementReorder(originalContent);
+            
+            // 保存重排序后的内容
+            try (FileWriter writer = new FileWriter(reorderedFilePath)) {
+                writer.write(reorderedContent);
+            }
+            
+            return reorderedFilePath;
+            
+        } catch (Exception e) {
+            log.error("Error creating JSmith statement reorder version: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 为JSmith生成的代码进行语句重排序变换
+     * @param originalContent 原始代码内容
+     * @return 重排序后的代码内容
+     */
+    private String transformJSmithStatementReorder(String originalContent) {
+        try {
+            log.info("=== Starting JSmith statement reorder transformation ===");
+
+            CompilationUnit cu = javaParser.parse(originalContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse JSmith content for statement reorder transformation"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 首先找到适合语句重排序蜕变的切片点信息（选择靠后的变量）
+                    VariableInfo slicePoint = findVariableForStatementReorderTesting(originalContent);
+                    if (slicePoint == null) {
+                        log.warn("No suitable variable found for statement reorder transformation");
+                        return originalContent;
+                    }
+
+                    log.info("Found slice point: variable '{}' at line {}", slicePoint.getVariableName(), slicePoint.getLineNumber());
+
+                    // 基于切片点进行安全的语句重排序
+                    boolean changed = performSafeStatementReordering(body, slicePoint);
+
+                    if (changed) {
+                        String transformedContent = cu.toString();
+                        log.info("Applied statement reorder transformation");
+                        return transformedContent;
+                    } else {
+                        log.info("No safe statements found for reordering");
+                        return originalContent;
+                    }
+                }
+            }
+            return originalContent;
+        } catch (Exception e) {
+            log.error("Error in JSmith statement reorder transformation", e);
+            return originalContent;
+        }
+    }
+
+    /**
+     * 执行安全的语句重排序
+     * @param body 方法体
+     * @param slicePoint 切片点信息
+     * @return 是否成功进行了重排序
+     */
+    private boolean performSafeStatementReordering(BlockStmt body, VariableInfo slicePoint) {
+        String sliceVariable = slicePoint.getVariableName();
+        int sliceLineNumber = slicePoint.getLineNumber();
+        
+        log.info("=== Performing safe statement reordering for slice point: {} at line {} ===",
+                sliceVariable, sliceLineNumber);
+
+        List<Statement> statements = new ArrayList<>(body.getStatements());
+        if (statements.size() < 3) {
+            log.info("Not enough statements for reordering (need at least 3)");
+            return false;
+        }
+
+        // 构建变量依赖关系图
+        Map<String, Integer> variableDeclarationLines = buildVariableDeclarationMap(statements);
+        
+        // 根据可重排序性和依赖关系分组连续的语句
+        List<List<Statement>> groups = groupStatementsWithDependencies(statements, sliceVariable, sliceLineNumber, variableDeclarationLines);
+
+        // 对每个可重排序组进行shuffle（保持依赖关系）
+        boolean anyReordered = false;
+        for (List<Statement> group : groups) {
+            if (group.size() > 1) {
+                List<Statement> reorderedGroup = reorderGroupWithDependencies(group, variableDeclarationLines);
+                if (!reorderedGroup.equals(group)) {
+                    // 替换原组
+                    group.clear();
+                    group.addAll(reorderedGroup);
+                    anyReordered = true;
+                    log.info("Reordered group of {} statements while maintaining dependencies", reorderedGroup.size());
+                }
+            }
+        }
+
+        if (anyReordered) {
+            // 重建方法体
+            body.getStatements().clear();
+            for (List<Statement> group : groups) {
+                for (Statement stmt : group) {
+                    body.addStatement(stmt);
+                }
+            }
+            log.info("Successfully reordered statements while maintaining dependencies");
+        }
+
+        return anyReordered;
+    }
+
+    /**
+     * 构建变量声明行号映射
+     */
+    private Map<String, Integer> buildVariableDeclarationMap(List<Statement> statements) {
+        Map<String, Integer> declarationLines = new HashMap<>();
+        
+        for (Statement stmt : statements) {
+            List<VariableDeclarator> declarations = stmt.findAll(VariableDeclarator.class);
+            for (VariableDeclarator vd : declarations) {
+                String varName = vd.getNameAsString();
+                int lineNumber = stmt.getBegin().map(pos -> pos.line).orElse(0);
+                declarationLines.put(varName, lineNumber);
+                log.debug("Found variable declaration: {} at line {}", varName, lineNumber);
+            }
+        }
+        
+        return declarationLines;
+    }
+
+    /**
+     * 根据依赖关系分组语句
+     */
+    private List<List<Statement>> groupStatementsWithDependencies(List<Statement> statements, String sliceVariable, 
+                                                                  int sliceLineNumber, Map<String, Integer> declarationLines) {
+        List<List<Statement>> groups = new ArrayList<>();
+        List<Statement> currentGroup = new ArrayList<>();
+        
+        for (Statement stmt : statements) {
+            int stmtLineNumber = stmt.getBegin().map(pos -> pos.line).orElse(0);
+            boolean reorderable = isStatementSafeForReordering(stmt, sliceVariable, sliceLineNumber);
+            boolean isDeclaration = isVariableDeclaration(stmt);
+            
+            if (reorderable && !isDeclaration) {
+                // 只有非声明语句才能重排序
+                currentGroup.add(stmt);
+            } else {
+                // 处理当前组
+                if (!currentGroup.isEmpty()) {
+                    groups.add(new ArrayList<>(currentGroup));
+                    currentGroup.clear();
+                }
+                // 非可重排序语句或声明语句单独成组
+                List<Statement> single = new ArrayList<>();
+                single.add(stmt);
+                groups.add(single);
+            }
+        }
+        
+        if (!currentGroup.isEmpty()) {
+            groups.add(new ArrayList<>(currentGroup));
+        }
+        
+        return groups;
+    }
+
+    /**
+     * 检查语句是否为变量声明
+     */
+    private boolean isVariableDeclaration(Statement stmt) {
+        if (stmt instanceof ExpressionStmt) {
+            ExpressionStmt exprStmt = (ExpressionStmt) stmt;
+            Expression expr = exprStmt.getExpression();
+            return expr instanceof VariableDeclarationExpr;
+        }
+        return false;
+    }
+
+    /**
+     * 在保持依赖关系的前提下重排序组内语句
+     */
+    private List<Statement> reorderGroupWithDependencies(List<Statement> group, Map<String, Integer> declarationLines) {
+        if (group.size() <= 1) {
+            return new ArrayList<>(group);
+        }
+
+        // 分析组内语句的变量依赖
+        List<Statement> result = new ArrayList<>(group);
+
+        // 更积极的重排序策略：确保有实际的重排序发生
+        boolean hasSwapped = false;
+
+        // 尝试多次交换以确保重排序效果
+        for (int attempt = 0; attempt < 3 && !hasSwapped; attempt++) {
+            for (int i = 0; i < result.size() - 1; i++) {
+                for (int j = i + 1; j < result.size(); j++) {
+                    if (canSwapStatements(result.get(i), result.get(j), declarationLines)) {
+                        // 提高交换概率，确保有重排序发生
+                        if (Math.random() < 0.7) { // 70%的概率交换
+                            Collections.swap(result, i, j);
+                            log.info("Swapped statements at positions {} and {} (attempt {})", i, j, attempt + 1);
+                            hasSwapped = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 如果还没有交换，强制进行一次简单的交换
+        if (!hasSwapped && result.size() >= 2) {
+            // 找到两个可以安全交换的语句
+            for (int i = 0; i < result.size() - 1; i++) {
+                if (canSwapStatements(result.get(i), result.get(i + 1), declarationLines)) {
+                    Collections.swap(result, i, i + 1);
+                    log.info("Forced swap of adjacent statements at positions {} and {}", i, i + 1);
+                    hasSwapped = true;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 检查两个语句是否可以安全交换
+     */
+    private boolean canSwapStatements(Statement stmt1, Statement stmt2, Map<String, Integer> declarationLines) {
+        // 获取两个语句使用和定义的变量
+        Set<String> vars1Used = getVariablesUsed(stmt1);
+        Set<String> vars2Used = getVariablesUsed(stmt2);
+        Set<String> vars1Defined = getVariablesDefined(stmt1);
+        Set<String> vars2Defined = getVariablesDefined(stmt2);
+
+        // 检查数据依赖：stmt1定义的变量是否被stmt2使用
+        Set<String> dependsOn1 = new HashSet<>(vars1Defined);
+        dependsOn1.retainAll(vars2Used);
+        if (!dependsOn1.isEmpty()) {
+            log.debug("Cannot swap: stmt2 depends on variables defined by stmt1: {}", dependsOn1);
+            return false;
+        }
+
+        // 检查数据依赖：stmt2定义的变量是否被stmt1使用
+        Set<String> dependsOn2 = new HashSet<>(vars2Defined);
+        dependsOn2.retainAll(vars1Used);
+        if (!dependsOn2.isEmpty()) {
+            log.debug("Cannot swap: stmt1 depends on variables defined by stmt2: {}", dependsOn2);
+            return false;
+        }
+
+        // 如果两个语句都只是使用变量（不定义），可以安全交换
+        // 如果两个语句定义不同的变量，也可以安全交换
+        Set<String> commonDefined = new HashSet<>(vars1Defined);
+        commonDefined.retainAll(vars2Defined);
+        if (!commonDefined.isEmpty()) {
+            log.debug("Cannot swap: both statements define the same variables: {}", commonDefined);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 获取语句使用的所有变量
+     */
+    private Set<String> getVariablesUsed(Statement stmt) {
+        Set<String> variables = new HashSet<>();
+
+        stmt.findAll(NameExpr.class).forEach(nameExpr -> {
+            variables.add(nameExpr.getNameAsString());
+        });
+
+        return variables;
+    }
+
+    /**
+     * 获取语句定义的所有变量
+     */
+    private Set<String> getVariablesDefined(Statement stmt) {
+        Set<String> variables = new HashSet<>();
+
+        // 检查变量声明
+        stmt.findAll(VariableDeclarator.class).forEach(vd -> {
+            variables.add(vd.getNameAsString());
+        });
+
+        // 检查赋值语句的左侧
+        stmt.findAll(AssignExpr.class).forEach(assign -> {
+            if (assign.getTarget() instanceof NameExpr) {
+                variables.add(((NameExpr) assign.getTarget()).getNameAsString());
+            }
+        });
+
+        return variables;
+    }
+
+    /**
+     * 在重排序后的文件中找到相同变量的新位置
+     * @param reorderedContent 重排序后的文件内容
+     * @param originalVariableInfo 原始变量信息
+     * @return 重排序后的变量信息，如果找不到返回null
+     */
+    public VariableInfo findSameVariableInReorderedContent(String reorderedContent, VariableInfo originalVariableInfo) {
+        try {
+            CompilationUnit cu = javaParser.parse(reorderedContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse reordered content"));
+
+            // 找到main方法
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                BlockStmt body = mainMethod.get().getBody().orElse(null);
+                if (body != null) {
+                    String targetVariable = originalVariableInfo.getVariableName();
+
+                    // 查找所有包含该变量的System.out.println语句
+                    List<VariableInfo> candidateVariables = new ArrayList<>();
+
+                    body.findAll(MethodCallExpr.class).forEach(methodCall -> {
+                        if (methodCall.getNameAsString().equals("println") &&
+                            methodCall.getScope().isPresent() &&
+                            methodCall.getScope().get().toString().equals("System.out")) {
+
+                            methodCall.getArguments().forEach(arg -> {
+                                if (arg instanceof NameExpr) {
+                                    NameExpr nameExpr = (NameExpr) arg;
+                                    if (nameExpr.getNameAsString().equals(targetVariable)) {
+                                        int lineNumber = methodCall.getBegin().map(pos -> pos.line).orElse(0);
+                                        candidateVariables.add(new VariableInfo(targetVariable, lineNumber));
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    if (!candidateVariables.isEmpty()) {
+                        // 如果有多个候选，选择行号最接近原始行号的
+                        int originalLine = originalVariableInfo.getLineNumber();
+                        VariableInfo bestMatch = candidateVariables.stream()
+                                .min((a, b) -> Integer.compare(
+                                        Math.abs(a.getLineNumber() - originalLine),
+                                        Math.abs(b.getLineNumber() - originalLine)))
+                                .orElse(candidateVariables.get(0));
+
+                        log.info("Found variable '{}' in reordered file at line {} (original was at line {})",
+                                targetVariable, bestMatch.getLineNumber(), originalLine);
+                        return bestMatch;
+                    }
+                }
+            }
+
+            log.warn("Could not find variable '{}' in reordered content", originalVariableInfo.getVariableName());
+            return null;
+
+        } catch (Exception e) {
+            log.error("Error finding variable in reordered content", e);
+            return null;
+        }
+    }
+
+    /**
+     * 检查语句是否可以安全地重排序（不影响切片点）
+     * @param stmt 要检查的语句
+     * @param sliceVariable 切片变量名
+     * @param sliceLineNumber 切片点行号
+     * @return 是否可以安全重排序
+     */
+    private boolean isStatementSafeForReordering(Statement stmt, String sliceVariable, int sliceLineNumber) {
+        // 获取语句的行号
+        int stmtLineNumber = stmt.getBegin().map(pos -> pos.line).orElse(0);
+        
+        // 如果语句在切片点之后，则不能重排序（可能影响切片结果）
+        if (stmtLineNumber >= sliceLineNumber) {
+            return false;
+        }
+        
+        // 检查语句是否包含切片变量
+        if (statementContainsVariable(stmt, sliceVariable)) {
+            return false;
+        }
+        
+        // 检查是否为可重排序的语句类型
+        return isReorderableStatement(stmt);
+    }
+
+    /**
+     * 检查语句是否包含指定的变量
+     * @param stmt 语句
+     * @param variableName 变量名
+     * @return 是否包含该变量
+     */
+    private boolean statementContainsVariable(Statement stmt, String variableName) {
+        // 查找所有名称表达式
+        List<NameExpr> nameExprs = stmt.findAll(NameExpr.class);
+        for (NameExpr nameExpr : nameExprs) {
+            if (nameExpr.getNameAsString().equals(variableName)) {
+                return true;
+            }
+        }
+        
+        // 查找所有变量声明
+        List<VariableDeclarator> varDeclarators = stmt.findAll(VariableDeclarator.class);
+        for (VariableDeclarator vd : varDeclarators) {
+            if (vd.getNameAsString().equals(variableName)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 验证语句重排序文件对
+     * @param originalFile 原始文件路径
+     * @param reorderedFile 重排序文件路径
+     * @return 是否验证通过
+     */
+    private boolean validateStatementReorderFile(String originalFile, String reorderedFile) {
+        try {
+            String originalContent = Files.readString(Paths.get(originalFile), StandardCharsets.UTF_8);
+            String reorderedContent = Files.readString(Paths.get(reorderedFile), StandardCharsets.UTF_8);
+
+            // 基本检查：两个文件都应该能被解析
+            CompilationUnit originalCu = javaParser.parse(originalContent).getResult().orElse(null);
+            CompilationUnit reorderedCu = javaParser.parse(reorderedContent).getResult().orElse(null);
+
+            if (originalCu == null || reorderedCu == null) {
+                log.error("Failed to parse statement reorder file pair");
+                return false;
+            }
+
+            // 检查是否实际发生了重排序
+            if (originalContent.equals(reorderedContent)) {
+                log.warn("Statement reorder file appears to be identical to original");
+                return false;
+            }
+
+            // 检查重排序文件的Java语法正确性
+            if (!validateJavaSyntax(reorderedContent)) {
+                log.error("Reordered file has Java syntax violations");
+                return false;
+            }
+
+            log.info("Statement reorder file validation passed");
+            return true;
+
+        } catch (Exception e) {
+            log.error("Statement reorder file validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 验证Java代码的语法正确性
+     * @param javaCode Java代码
+     * @return 是否语法正确
+     */
+    private boolean validateJavaSyntax(String javaCode) {
+        try {
+            CompilationUnit cu = javaParser.parse(javaCode).getResult().orElse(null);
+            if (cu == null) {
+                log.error("Failed to parse Java code");
+                return false;
+            }
+
+            // 检查变量使用前是否已声明
+            return validateVariableUsage(cu);
+            
+        } catch (Exception e) {
+            log.error("Java syntax validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 验证变量使用是否在声明之后
+     * @param cu 编译单元
+     * @return 是否通过验证
+     */
+    private boolean validateVariableUsage(CompilationUnit cu) {
+        try {
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                BlockStmt body = mainMethod.get().getBody().orElse(null);
+                if (body != null) {
+                    // 收集所有变量声明和使用
+                    Map<String, Integer> declarations = new HashMap<>();
+                    Map<String, List<Integer>> usages = new HashMap<>();
+
+                    // 收集声明
+                    List<Statement> statements = body.getStatements();
+                    for (int i = 0; i < statements.size(); i++) {
+                        Statement stmt = statements.get(i);
+                        List<VariableDeclarator> vars = stmt.findAll(VariableDeclarator.class);
+                        for (VariableDeclarator vd : vars) {
+                            String varName = vd.getNameAsString();
+                            declarations.put(varName, i);
+                            log.debug("Found declaration: {} at statement {}", varName, i);
+                        }
+                    }
+
+                    // 收集使用
+                    for (int i = 0; i < statements.size(); i++) {
+                        Statement stmt = statements.get(i);
+                        List<NameExpr> nameExprs = stmt.findAll(NameExpr.class);
+                        for (NameExpr nameExpr : nameExprs) {
+                            String varName = nameExpr.getNameAsString();
+                            // 排除非变量名称（如System、out等）
+                            if (isRealVariable(varName)) {
+                                usages.computeIfAbsent(varName, k -> new ArrayList<>()).add(i);
+                                log.debug("Found usage: {} at statement {}", varName, i);
+                            }
+                        }
+                    }
+
+                    // 检查每个变量的使用是否在声明之后
+                    for (Map.Entry<String, List<Integer>> entry : usages.entrySet()) {
+                        String varName = entry.getKey();
+                        List<Integer> usePositions = entry.getValue();
+                        Integer declPosition = declarations.get(varName);
+
+                        if (declPosition == null) {
+                            // 可能是参数或全局变量，跳过
+                            continue;
+                        }
+
+                        for (Integer usePos : usePositions) {
+                            if (usePos < declPosition) {
+                                log.error("Variable '{}' used at statement {} before declaration at statement {}", 
+                                         varName, usePos, declPosition);
+                                return false;
+                            }
+                        }
+                    }
+
+                    log.debug("Variable usage validation passed");
+                    return true;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            log.error("Variable usage validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 专门用于语句重排序蜕变测试的变量查找方法（公共接口）
+     * 优先选择靠后的变量，确保前面有可以安全重排序的语句
+     */
+    public VariableInfo findVariableForStatementReorderTestingFromContent(String content) {
+        return findVariableForStatementReorderTesting(content);
+    }
+
+    /**
+     * 计算语句重排序后的等价切片点（公共接口）
+     */
+    public VariableInfo calculateReorderedSlicePointFromContent(String reorderedContent, VariableInfo originalSlicePoint) {
+        return calculateReorderedSlicePoint(reorderedContent, originalSlicePoint);
+    }
+
+    /**
+     * 专门用于语句重排序蜕变测试的变量查找方法
+     * 优先选择靠后的变量，确保前面有可以安全重排序的语句
+     */
+    private VariableInfo findVariableForStatementReorderTesting(String content) {
+        try {
+            CompilationUnit cu = javaParser.parse(content).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse content for statement reorder variable finding"));
+
+            Optional<MethodDeclaration> mainMethod = cu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                MethodDeclaration method = mainMethod.get();
+                BlockStmt body = method.getBody().orElse(null);
+                if (body != null) {
+                    // 收集所有包含变量的System.out.println语句
+                    Map<VariableInfo, Integer> suitabilityScores = new HashMap<>();
+                    
+                    List<MethodCallExpr> printlnCalls = body.findAll(MethodCallExpr.class).stream()
+                            .filter(call -> call.getNameAsString().equals("println") &&
+                                    call.getScope().isPresent() &&
+                                    call.getScope().get().toString().equals("System.out"))
+                            .collect(Collectors.toList());
+
+                    for (MethodCallExpr printlnCall : printlnCalls) {
+                        int lineNumber = printlnCall.getBegin().map(pos -> pos.line).orElse(0);
+                        
+                        // 从println参数中提取变量名
+                        if (!printlnCall.getArguments().isEmpty()) {
+                            Expression arg = printlnCall.getArguments().get(0);
+                            Set<String> variables = extractVariablesFromExpression(arg);
+                            
+                            for (String variableName : variables) {
+                                VariableInfo varInfo = new VariableInfo(variableName, lineNumber);
+                                
+                                // 计算适合语句重排序测试的评分
+                                int score = calculateStatementReorderSuitabilityScore(body, varInfo);
+                                if (score > 0) {
+                                    suitabilityScores.put(varInfo, score);
+                                    log.debug("Variable {} at line {} suitable for statement reorder testing (score: {})",
+                                            variableName, lineNumber, score);
+                                }
+                            }
+                        }
+                    }
+
+                    if (!suitabilityScores.isEmpty()) {
+                        // 选择评分最高的变量，如果评分相同，选择行号较大的
+                        VariableInfo bestChoice = suitabilityScores.entrySet().stream()
+                                .max((e1, e2) -> {
+                                    int scoreCompare = Integer.compare(e1.getValue(), e2.getValue());
+                                    if (scoreCompare != 0) return scoreCompare;
+                                    return Integer.compare(e1.getKey().lineNumber, e2.getKey().lineNumber);
+                                })
+                                .map(Map.Entry::getKey)
+                                .orElse(null);
+
+                        if (bestChoice != null) {
+                            log.info("Selected variable for statement reorder testing: {} at line {} (score: {} reorderable statements)",
+                                    bestChoice.variableName, bestChoice.lineNumber, suitabilityScores.get(bestChoice));
+                            return new VariableInfo(bestChoice.variableName, bestChoice.lineNumber);
+                        }
+                    }
+                }
+            }
+
+            log.warn("No suitable variable found for statement reorder testing");
+            return null;
+        } catch (Exception e) {
+            log.error("Error finding variable for statement reorder testing", e);
+            return null;
+        }
+    }
+
+    /**
+     * 计算变量适合语句重排序测试的评分
+     * @param body 方法体
+     * @param varInfo 变量信息
+     * @return 适合性评分（可重排序语句的数量）
+     */
+    private int calculateStatementReorderSuitabilityScore(BlockStmt body, VariableInfo varInfo) {
+        String variableName = varInfo.getVariableName();
+        int variableLineNumber = varInfo.getLineNumber();
+        
+        // 计算在该变量之前有多少个可以安全重排序的语句
+        List<Statement> statements = body.getStatements();
+        int reorderableCount = 0;
+        
+        for (Statement stmt : statements) {
+            int stmtLineNumber = stmt.getBegin().map(pos -> pos.line).orElse(0);
+            
+            // 只考虑在切片点之前的语句
+            if (stmtLineNumber < variableLineNumber) {
+                if (isStatementSafeForReordering(stmt, variableName, variableLineNumber)) {
+                    reorderableCount++;
+                }
+            }
+        }
+        
+        log.debug("Variable {} at line {} has {} reorderable statements before it",
+                variableName, variableLineNumber, reorderableCount);
+        
+        // 至少需要2个可重排序语句才有意义
+        return reorderableCount >= 2 ? reorderableCount : 0;
+    }
+
+    /**
+     * 计算语句重排序后的等价切片点位置
+     * 由于语句重排序不改变变量名，只需要重新定位相同变量在重排序代码中的位置
+     */
+    private VariableInfo calculateReorderedSlicePoint(String reorderedContent, VariableInfo originalSlicePoint) {
+        try {
+            String variableName = originalSlicePoint.getVariableName();
+            
+            log.info("Finding equivalent slice point for variable '{}' in reordered content",
+                    variableName);
+
+            // 解析重排序后的文件
+            CompilationUnit reorderedCu = javaParser.parse(reorderedContent).getResult().orElseThrow(() ->
+                    new RuntimeException("Failed to parse reordered content"));
+
+            Optional<MethodDeclaration> mainMethod = reorderedCu.findFirst(MethodDeclaration.class, md ->
+                    md.getNameAsString().equals("main"));
+
+            if (mainMethod.isPresent()) {
+                BlockStmt body = mainMethod.get().getBody().orElse(null);
+                if (body != null) {
+                    // 查找所有包含该变量的System.out.println语句
+                    List<MethodCallExpr> printlnCalls = body.findAll(MethodCallExpr.class).stream()
+                            .filter(call -> call.getNameAsString().equals("println") &&
+                                    call.getScope().isPresent() &&
+                                    call.getScope().get().toString().equals("System.out"))
+                            .collect(Collectors.toList());
+
+                    for (MethodCallExpr printlnCall : printlnCalls) {
+                        if (!printlnCall.getArguments().isEmpty()) {
+                            Expression arg = printlnCall.getArguments().get(0);
+                            Set<String> variables = extractVariablesFromExpression(arg);
+                            
+                            if (variables.contains(variableName)) {
+                                int newLineNumber = printlnCall.getBegin().map(pos -> pos.line).orElse(0);
+                                log.info("Found equivalent slice point at line {} for variable '{}'", newLineNumber, variableName);
+                                return new VariableInfo(variableName, newLineNumber);
+                            }
+                        }
+                    }
+                }
+            }
+
+            log.warn("Could not find equivalent slice point after statement reordering");
+            return null;
+        } catch (Exception e) {
+            log.error("Error calculating reordered slice point", e);
+            return null;
+        }
     }
 
     /**

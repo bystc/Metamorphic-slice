@@ -347,61 +347,73 @@ public class SliceController {
     @PostMapping("/test-reorder")
     @ResponseBody
     public Map<String, Object> runStatementReorderTest(@RequestParam int numMutations) {
-
         Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> testResults = new ArrayList<>();
 
         try {
-            log.info("Starting statement reorder metamorphic test with {} mutations", numMutations);
+            log.info("Starting JSmith statement reorder metamorphic test with {} mutations", numMutations);
 
-            // 生成语句重排序的变异文件
-            List<String> originalFiles = javaCodeGenerator.generateStatementReorderFiles("", numMutations);
-            log.info("Generated {} statement reorder files", originalFiles.size());
+            // 清理之前的切片文件
+            cleanupSliceFiles();
 
-            // 对每个原始文件进行切片
-            for (String originalFile : originalFiles) {
-                log.info("Processing file: {}", originalFile);
+            // 使用JSmith生成器生成语句重排序测试文件
+            List<String> generatedFiles = javaCodeGenerator.generateJSmithStatementReorderTestFiles(numMutations);
+            log.info("Generated {} JSmith statement reorder test files", generatedFiles.size());
+
+            // 过滤出原始文件（mutated目录中的文件）
+            List<String> mutatedFiles = generatedFiles.stream()
+                .filter(file -> file.contains("mutated") && file.contains("JSmith"))
+                .collect(java.util.stream.Collectors.toList());
+            log.info("Filtered to {} JSmith mutated files for statement reorder testing", mutatedFiles.size());
+
+            // 对每个变异文件进行切片
+            for (String file : mutatedFiles) {
+                log.info("Processing file: {}", file);
                 Map<String, Object> testResult = new HashMap<>();
-                testResult.put("originalFile", originalFile);
+                testResult.put("originalFile", file);
 
                 try {
-                    // 获取对应的重排序文件
-                    String reorderedFile = originalFile.replace("mutated", "reordered").replace("_original_", "_reordered_");
+                    // 获取对应的语句重排序文件
+                    String reorderedFile = file.replace("mutated", "reordered").replace("JSmith_mutated_", "JSmith_reordered_");
                     testResult.put("reorderedFile", reorderedFile);
 
                     // 读取原始文件内容用于显示
-                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(originalFile)));
+                    String originalContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file)));
                     testResult.put("originalFileContent", originalContent);
 
                     // 读取重排序文件内容用于显示
                     String reorderedContent = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(reorderedFile)));
                     testResult.put("reorderedFileContent", reorderedContent);
 
-                    // 对原始文件选择切片变量
-                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForSlicing(originalFile);
+                    // 对原始文件选择切片变量（使用专门的语句重排序测试变量选择方法）
+                    VariableInfo originalVariableInfo = javaCodeGenerator.findVariableForStatementReorderTestingFromContent(originalContent);
                     if (originalVariableInfo == null) {
-                        throw new RuntimeException("No suitable variable found for slicing in original file: " + originalFile);
+                        throw new RuntimeException("No suitable variable found for statement reorder testing in original file: " + file);
                     }
 
-                    log.info("Selected variable for slicing in original file: {} at line {}",
-                            originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                    String originalVarName = originalVariableInfo.getVariableName();
+                    log.info("Selected variable for slicing: {} at line {}",
+                            originalVarName, originalVariableInfo.getLineNumber());
 
-                    // 对重排序文件选择切片变量
-                    VariableInfo reorderedVariableInfo = javaCodeGenerator.findVariableForSlicing(reorderedFile);
+                    // 对语句重排序后的文件，需要找到相同变量的新位置
+                    // 语句重排序不应该改变变量名，只是改变语句的顺序
+                    VariableInfo reorderedVariableInfo = javaCodeGenerator.findSameVariableInReorderedContent(
+                            reorderedContent, originalVariableInfo);
                     if (reorderedVariableInfo == null) {
-                        throw new RuntimeException("No suitable variable found for slicing in reordered file: " + reorderedFile);
+                        throw new RuntimeException("No equivalent slice point found in reordered file: " + reorderedFile);
                     }
 
-                    log.info("Selected variable for slicing in reordered file: {} at line {}",
+                    log.info("Found corresponding variable in reordered file: {} at line {}",
                             reorderedVariableInfo.getVariableName(), reorderedVariableInfo.getLineNumber());
 
                     // 对原始文件执行切片
-                    log.info("Executing slice for original file: {}", originalFile);
-                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(originalFile, originalVariableInfo.getVariableName(), originalVariableInfo.getLineNumber());
+                    log.info("Executing slice for original file: {} with variable: {} at line {}",
+                            file, originalVarName, originalVariableInfo.getLineNumber());
+                    String originalSliceContent = sliceExecutor.executeSliceWithVariable(file, originalVarName, originalVariableInfo.getLineNumber());
                     log.info("Original slice content: {}", originalSliceContent);
                     testResult.put("originalSliceContent", originalSliceContent);
 
-                    // 对重排序文件执行切片（使用重排序文件中的变量和行号）
+                    // 对重排序文件执行切片（使用重新定位的变量和行号）
                     log.info("Executing slice for reordered file: {} with variable: {} at line {}",
                             reorderedFile, reorderedVariableInfo.getVariableName(), reorderedVariableInfo.getLineNumber());
                     String reorderedSliceContent = sliceExecutor.executeSliceWithVariable(reorderedFile, reorderedVariableInfo.getVariableName(), reorderedVariableInfo.getLineNumber());
@@ -416,7 +428,7 @@ public class SliceController {
                     testResult.put("success", true);
 
                 } catch (Exception e) {
-                    log.error("Error processing file: " + originalFile, e);
+                    log.error("Error processing file: " + file, e);
                     testResult.put("error", e.getMessage());
                     testResult.put("success", false);
                 }
