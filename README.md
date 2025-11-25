@@ -1,4 +1,4 @@
-# Metamorphic Slice - Java代码生成与切片测试平台
+# SliceGuard - Java代码生成与切片测试平台
 
 ## 项目概述
 
